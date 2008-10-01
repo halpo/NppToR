@@ -1,0 +1,31 @@
+NppToR Installation instructions
+(c) Andrew Redd
+
+	0. You should already have unzipped the folder containing follwing files.
+		a. Readme.txt
+		b. License.txt
+		f. Install.txt
+		c. ScripToR.exe
+		d. UserDefinLang.xml
+		e. ScripToR.exe
+		f. R.xml
+		
+	1. copy userDefineLang.xml to %APPDATA%/Notepad++/userDefineLang.xml.  
+		If userDefineLang.xml already exists you will have to copy the <UserLang name="R" ext="R"> ... </UserLang>
+		portion to the same level as the other UserLang tags so that proper XML syntax is preserved, 
+		and your other languages are not removed.
+	2. Copy R.xml to %PROGRAMFILES%\Notepad++\plugins\APIs or the appropriate folder on your system.
+		This setp requires administrator privilages.  If you cannot get these you cannot do this setp
+		and you will not have code completion.
+	3. Copy ScriptToR.exe to a permanant location on your computer if you would like.
+	4. Restart notepad++. congratulations you now have a batch file editor that includes
+		* syntax highlighting
+		* function recognition and tracking
+	5. start ScriptToR.exe
+	
+	O1. (OPTIONAL) Open notepad++ and under the start menu goto Plugins>Function List>User Rules (1)
+		1. From the dropdown box choose R
+		2. Click `Edit rule'
+		3. Enter the following into the section rules (without quotes)
+			function begin = '[a-zA-Z]+[a-zA-Z0-9_\.]*<\-[ \t]*function[ \t]*'
+	O2. Place a shortcut to ScripToR.exe in the startup folder of your start/windows menu.
