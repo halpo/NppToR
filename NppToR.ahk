@@ -1,25 +1,35 @@
 ; NppToR: R in Notepad++
 ; by Andrew Redd 2008 <aredd@stat.tamu.edu>
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
+#NOENV
+#SINGLEINSTANCE
 
 #IfWinActive ahk_class Notepad++
 F8:: ;run line or selection
 oldclipboard = %clipboard%
 clipboard = ""
-send ^c
+sendplay ^c
 if clipboard = ""
 {
-	send {home}+{down}^c{right}
+	sendplay {home}+{down}^c{right}
 }
 if clipboard<>""
 {
 	WinGet nppID, ID, A          ; save current window ID to return here later
-	if getOrStartR()=""
+	getOrStartR()
+	if ErrorLevel
 	{
-		msgbox ,16, Could nor start R, A running R console could not be found, nor could R be started.
+		IfWinExist , RGui
+			msgbox , 16 ,R in MDI Mode, R in running in MDI mode. Please switch to SDI mode for this utility to work.
+		else
+			msgbox , 16 ,Could not find R, Could nor start or find R. Please check you installation or start R manually.
 		return
 	}
-	send ^v
+	;; this ias an alternative way of doing it but seems to be slightly slower than the implimented version
+	; code = %clipboard% ;RegExReplace(, "\r\n", "`n")
+	; stringreplace, code, code, `r`n,`r, All
+	; sendinput %code% ;^v
+	sendplay ^v
 	WinActivate ahk_id %nppID%    ; go back to the original window
 }
 clipboard = %oldclipboard%
@@ -32,9 +42,14 @@ send ^a^c{end}
 if clipboard<>""
 {
 	WinGet nppID, ID, A          ; save current window ID to return here later
-	if getOrStartR()=""
+	getOrStartR()
+	if ErrorLevel
 	{
-		msgbox ,16, Could nor start R, A running R console could not be found, nor could R be started.
+		msgbox errorlevel
+		IfWinExist , Rgui
+			msgbox ,16,R in running in MDI mode. Please switch to SDI mode for this utility to work.
+		else
+			msgbox ,16, Could nor start or find R.
 		return
 	}
 	send ^v
@@ -57,8 +72,7 @@ getOrStartR()
 		setworkingdir %dir%
 		RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
 		run %Rdir%\bin\Rgui.exe -q,dir,,RprocID
-		sleep 60
-		return RprocID=""
+		winwait ,R Console,,1
 	}
 }
  

@@ -17,11 +17,11 @@ NppToR Installation instructions
 	2. Copy R.xml to %PROGRAMFILES%\Notepad++\plugins\APIs or the appropriate folder on your system.
 		This setp requires administrator privilages.  If you cannot get these you cannot do this setp
 		and you will not have code completion.
-	3. Copy ScriptToR.exe to a permanant location on your computer if you would like.
+	3. Copy NppToR.exe to a permanant location on your computer if you would like.
 	4. Restart notepad++. congratulations you now have a batch file editor that includes
 		* syntax highlighting
 		* function recognition and tracking
-	5. start ScriptToR.exe
+	5. start NppToR.exe
 	
 	O1. (OPTIONAL) Open notepad++ and under the start menu goto Plugins>Function List>User Rules (1)
 		1. From the dropdown box choose R
