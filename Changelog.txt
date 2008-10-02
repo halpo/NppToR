@@ -7,3 +7,4 @@ Thursday, October 02, 2008
 Fixed a bug for Waiting for R to load before passing code.
 Added a Dialog Warning for if R is Running in MDI mode.
 Completes Version 1.1
+Prevents Multiple Instances Silently.

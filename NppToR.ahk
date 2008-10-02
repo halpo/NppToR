@@ -2,7 +2,7 @@
 ; by Andrew Redd 2008 <aredd@stat.tamu.edu>
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
 #NOENV
-#SINGLEINSTANCE
+#SINGLEINSTANCE ignore
 
 #IfWinActive ahk_class Notepad++
 F8:: ;run line or selection
