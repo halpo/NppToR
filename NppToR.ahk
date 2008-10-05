@@ -3,15 +3,19 @@
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
 #NOENV
 #SINGLEINSTANCE ignore
+AUTOTRIM OFF
+sendmode event
 
 #IfWinActive ahk_class Notepad++
 F8:: ;run line or selection
 oldclipboard = %clipboard%
 clipboard = ""
-sendplay ^c
+sendevent ^c
 if clipboard = ""
 {
-	sendplay {home}+{down}^c{right}
+	sendevent {home}+{down}^c{right}
+	if clipboard<>"" 
+		clipboard := CheckForNewLine( clipboard )
 }
 if clipboard<>""
 {
@@ -29,7 +33,7 @@ if clipboard<>""
 	; code = %clipboard% ;RegExReplace(, "\r\n", "`n")
 	; stringreplace, code, code, `r`n,`r, All
 	; sendinput %code% ;^v
-	sendplay ^v
+	sendevent ^v
 	WinActivate ahk_id %nppID%    ; go back to the original window
 }
 clipboard = %oldclipboard%
@@ -38,7 +42,7 @@ return
 #IfWinActive ahk_class Notepad++
 ^F8:: ; Run All
 oldclipboard = %clipboard%
-send ^a^c{end}
+sendevent ^a^c^{end}
 if clipboard<>""
 {
 	WinGet nppID, ID, A          ; save current window ID to return here later
@@ -52,7 +56,8 @@ if clipboard<>""
 			msgbox ,16, Could nor start or find R.
 		return
 	}
-	send ^v
+	clipboard := CheckForNewLine( clipboard )
+	sendevent ^v
 	WinActivate ahk_id %nppID%    ; go back to the original window
 }
 clipboard = %oldclipboard%
@@ -86,4 +91,11 @@ currdir = substr(outdir,2)
 else 
 currdir=%outdir%
 return currdir
+}
+CheckForNewLine(var)
+{
+found := regexmatch( var, "m`a)`n$")
+if found=0
+	var = %var% `r`n
+return %var%
 }
