@@ -77,7 +77,7 @@ getOrStartR()
 		setworkingdir %dir%
 		RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
 		run %Rdir%\bin\Rgui.exe -q,dir,,RprocID
-		winwait ,R Console,,1
+		winwait ,R Console,,5
 	}
 }
  
