@@ -6,8 +6,9 @@
 AUTOTRIM OFF
 sendmode event
 
+;run line or selection ;;;;;;;;;;;;;;;;;;;;;;;;
 #IfWinActive ahk_class Notepad++
-F8:: ;run line or selection
+F8:: 
 oldclipboard = %clipboard%
 clipboard = ""
 sendevent ^c
@@ -39,8 +40,9 @@ if clipboard<>""
 clipboard = %oldclipboard%
 return
 
+; Run All ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 #IfWinActive ahk_class Notepad++
-^F8:: ; Run All
+^F8:: 
 oldclipboard = %clipboard%
 sendevent ^a^c^{end}
 if clipboard<>""
@@ -63,6 +65,20 @@ if clipboard<>""
 clipboard = %oldclipboard%
 return
 
+; Run in R CMD BATCH ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#IfWinActive ahk_class Notepad++
+^!F8::
+	sendevent ^s
+	getCurrNppFileDir(file, dir, ext, Name)
+	SetWorkingDir %dir%
+	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+	;msgbox %Rdir%\bin\Rcmd.exe BATCH -q "%dir%\%file%"
+	runwait %Rdir%\bin\Rcmd.exe BATCH -q "%dir%\%file%" ,dir,min,RprocID
+	RegRead, Nppdir, HKEY_LOCAL_MACHINE, SOFTWARE\notepad++
+	run %NppDir%\Notepad++.exe "%dir%\%Name%.Rout"
+return
+
+
 getOrStartR()
 {
 	IfWinExist ,R Console
@@ -73,7 +89,7 @@ getOrStartR()
 	} 
 	else
 	{
-		dir := getCurrFileDir()
+		getCurrNppFileDir(File,dir)
 		setworkingdir %dir%
 		RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
 		run %Rdir%\bin\Rgui.exe -q,dir,,RprocID
@@ -81,16 +97,15 @@ getOrStartR()
 	}
 }
  
-getCurrFileDir()
+getCurrNppFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="", ByRef Drive="")
 {
 WinGetActiveTitle, title
-splitpath, title,,outdir
-stringleft firstchar, outdir, 1
+stringleft firstchar, title, 1
 if firstchar = "*" 
-currdir = substr(outdir,2) 
-else 
-currdir=%outdir%
-return currdir
+	StringTrimLeft title, title, 1
+StringTrimRight title, title, 12
+splitpath, title,file,dir, ext, NameNoExt, Drive
+return dir
 }
 CheckForNewLine(var)
 {

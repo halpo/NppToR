@@ -1,5 +1,10 @@
 NppToR CHANGELOG
 ----------------
+10/9/2008 2:18 PM
+Fixed line by line bug on tabbed script.
+added ^!F8 for BATCH+Open in Notepad++
+changed the function on GetCurrNppFileDir.  It now retreives all pertinant file portions like and through Split path, but obtains it from the Notepad++ window title.
+
 Wednesday, October 01, 2008
 Initial Release Version 1.0
 
