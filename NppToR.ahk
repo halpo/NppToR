@@ -13,7 +13,7 @@ clipboard = ""
 sendevent ^c
 if clipboard = ""
 {
-	sendevent {home}+{down}^c{right}
+	sendevent {end}{home 2}+{down}^c{right}
 	if clipboard<>"" 
 		clipboard := CheckForNewLine( clipboard )
 }
