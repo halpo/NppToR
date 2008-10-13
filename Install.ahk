@@ -7,50 +7,60 @@ SetWorkingDir %A_ScriptDir%
 msgbox , 4, Install NppToR?,This will install NppToR onto your system.  This will install to the default notepad++ directories.  Some modifications require administrator provilages. If you do not have administrator privilages or are not doing a standard install do not proceed. Is it ok to continue?
 ifMsgBox Yes
 {
-RegRead, AppData, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders, AppData
-nppData = %AppData%\Notepad++
-IfNotExist %nppData%
-	fileSelectFolder , nppData,,,"Please select the Notepad++ data directory"
 
 RegRead, Notepadpath, HKEY_LOCAL_MACHINE, SOFTWARE\Notepad++
+if ErrorLevel
+{
+	msgbox ,16, Notepad++ not found, A Notepad++ instalation was not found on your machine.  Please install Notepad++ by downloading from from http://http://notepad-plus.sourceforge.net or else follow the manual install instructions found in install.txt.
+	exit
+}
 apiFolder = %Notepadpath%\Plugins\APIs
-IfNotExist %apiFolder%
-	fileSelectFolder , apiFolder,,,"Please select the Notepad++ api directory"
+RegRead, AppData, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders, AppData
+nppData = %AppData%\Notepad++
+NppToRDir = %AppData%\NppToR
+backup = %NppToRDir%\Backup
 
+ifNotExist %NppToRDir%
+	FileCreateDir , %NppToRDir%
+ifNotExist %backup%
+	FileCreateDir , %backup%
+
+
+;copy to NppToR install Directory
+FileCopy %A_ScriptDir%\Readme.txt , %NppToRDir%\Readme.txt , 1
+FileCopy %A_ScriptDir%\License.txt , %NppToRDir%\License.txt , 1
+FileCopy %A_ScriptDir%\Install.txt , %NppToRDir%\Install.txt , 1
+FileCopy %A_ScriptDir%\Changelog.txt , %NppToRDir%\Changelog.txt , 1
+FileCopy %A_ScriptDir%\NppToR.ahk , %NppToRDir%\NppToR.ahk , 1
+FileCopy %A_ScriptDir%\NppToR.exe , %NppToRDir%\NppToR.exe , 1
+
+msgbox 4,Add To Startup?,  Would you like NppToR to run at startup?
+ifMsgbox Yes
+{
+	FileCreateShortCut , %NppToRDir%\NppToR.exe , %A_UserProfile%\Start Menu\Programs\Startup\NppToR.lnk
+	msgBox %errorlevel%
+}
+	
 FileCopy %A_ScriptDir%\R.xml, %apiFolder%\R.xml, 1
 if ErrorLevel
-	msgbox , 64, No Code Completion, R.api could not be copied into the Notepad++ api folder. Code Completion will not be available
+	msgbox , 64, No Code Completion, R.api could not be copied into the Notepad++ api folder. Code Completion will not be available.
 
 IfNotExist %nppData%\userDefineLang.xml
-{
 	FileCopy %A_ScriprDir%\userDefineLang.xml, %nppData%\userDefineLang.xml
-	ifNotExist %nppData%\userDefineLang.xml
-		msgbox , 64, No Syntax Highlighting, Could not copy syntax highlighting file (userDefineLang.xml) to the Notepad++ data directory. Syntax Highlighting will not be available.
-} 
 else 
 {
-	ifNotExist %nppData%\Backup
-		FileCreateDir, %AppData%\Notepad++\Backup
-	Filecopy , %AppData%\Notepad++\userDefineLang.xml, %AppData%\Notepad++\Backup\userDefineLang-%A_YYYY%-%A_MM%-%A_DD%.xml
+	Filecopy , %AppData%\Notepad++\userDefineLang.xml, %backup%\userDefineLang-%A_YYYY%-%A_MM%-%A_DD%.xml
 	FileRead , UDL, %AppData%\Notepad++\userDefineLang.xml
-	msgstr:=substr(UDL, 1, 100)
-	msgbox %msgstr%
 	FileRead , R_lang, %A_ScriptDir%\userDefineLang.xml
-	foundpos := RegExMatch(UDL, "<UserLang name=""R"".*>")
-	msgbox ,,, %foundpos%
-	if foundpos<>""
+	RegExMatch(R_lang, "s)<UserLang name=""R"".*?</UserLang>", NewLang)
+	foundR := RegExMatch(UDL, "s)<UserLang name=""R"".*?</UserLang>")
+	if foundR
 	{
-		posstart := RegExMatch (R_lang, "<UserLang name=""R"".*>")
-		posend := InStr(R_Lang, "</UserLang>",, posstart)
-		posend += 11
-		R_LangPart
-		msgstr:=substr( %R_lang_Part%, 1, 100)
-		msgbox ,,%pos%,%msgStr%
-		;RegExReplace UDL
+		RegExReplace(UDL, "s)<UserLang name=""R"".*?</UserLang>", %NewLang%`r`n</NotepadPlus>,count,1)
+	} else {
+		RegExReplace(UDL, "</NotepadPlus>", %NewLang%`r`n</NotepadPlus>,count,1)
 	}
-	else
-	{
-	}
+	filedelete %nppData%\userDefineLang.xml
+	fileappend , %UDL%, %nppData%\userDefineLang.xml
 }
-
 }

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="Windows-1252" ?>
+<!--Part of NppToR -->
 <NotepadPlus>
 	<AutoComplete>
 		<Environment ignoreCase="no" startFunc="(" stopFunc=")" paramSeparator="," terminal=";" />
@@ -64,26 +65,6 @@
 		<KeyWord name=".Traceback" />
 		<KeyWord name=".unit" />
 		<KeyWord name=".untracedFunction" />
-		<KeyWord name="[.cox.zph" />
-		<KeyWord name="[.coxph.penalty" />
-		<KeyWord name="[.date" />
-		<KeyWord name="[.fractions" />
-		<KeyWord name="[.groupedData" />
-		<KeyWord name="[.pdBlocked" />
-		<KeyWord name="[.pdMat" />
-		<KeyWord name="[.ratetable" />
-		<KeyWord name="[.ratetable2" />
-		<KeyWord name="[.reStruct" />
-		<KeyWord name="[.shingle" />
-		<KeyWord name="[.Surv" />
-		<KeyWord name="[.survfit" />
-		<KeyWord name="[.tcut" />
-		<KeyWord name="[.tskernel" />
-		<KeyWord name="[.unit" />
-		<KeyWord name="[[.date" />
-		<KeyWord name="__ClassMetaData" />
-		<KeyWord name="{-class" />
-		<KeyWord name="<--class" />
 		<KeyWord name="abbey" />
 		<KeyWord name="abbreviate" />
 		<KeyWord name="abc.ci" />

@@ -1,5 +1,5 @@
 <NotepadPlus>
-    <UserLang name="R" ext="R">
+    <UserLang name="R" ext="R">	<!--Added as part of NppToR-->
         <Settings>
             <Global caseIgnored="no" />
             <TreatAsSymbol comment="no" commentLine="yes" />
