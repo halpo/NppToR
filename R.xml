@@ -2504,6 +2504,7 @@
 		<KeyWord name="repeat-class" />
 		<KeyWord name="replace" />
 		<KeyWord name="replayPlot" />
+		<KeyWord name="replicate" />
 		<KeyWord name="replications" />
 		<KeyWord name="representation" />
 		<KeyWord name="require" />
