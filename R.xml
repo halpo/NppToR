@@ -689,6 +689,7 @@
 		<KeyWord name="deriv3" />
 		<KeyWord name="det" />
 		<KeyWord name="detach" />
+		<KeyWord name="determinant" />
 		<KeyWord name="dev.control" />
 		<KeyWord name="dev.copy" />
 		<KeyWord name="dev.copy2eps" />
