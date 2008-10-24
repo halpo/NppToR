@@ -5,9 +5,9 @@ NppToR Installation instructions
 		a. Readme.txt
 		b. License.txt
 		f. Install.txt
-		c. ScripToR.exe
+		c. NppToR.exe
 		d. UserDefinLang.xml
-		e. ScripToR.exe
+		e. NppToR.exe
 		f. R.xml
 		
 	1. copy userDefineLang.xml to %APPDATA%/Notepad++/userDefineLang.xml.  
@@ -28,4 +28,4 @@ NppToR Installation instructions
 		2. Click `Edit rule'
 		3. Enter the following into the section rules (without quotes)
 			function begin = '[a-zA-Z]+[a-zA-Z0-9_\.]*<\-[ \t]*function[ \t]*'
-	O2. Place a shortcut to ScripToR.exe in the startup folder of your start/windows menu.
+	O2. Place a shortcut to NppToR.exe in the startup folder of your start/windows menu. Include the -startup option on the command line
