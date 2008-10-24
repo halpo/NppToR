@@ -1,5 +1,10 @@
 NppToR CHANGELOG
 ----------------
+10/24/2008 11:16 AM
+added start Notepad++ on start NppToR, unless -startup parameter is passed in.
+Fixed bug with starting R from modified files.
+
+
 10/9/2008 2:18 PM
 Fixed line by line bug on tabbed script.
 added ^!F8 for BATCH+Open in Notepad++

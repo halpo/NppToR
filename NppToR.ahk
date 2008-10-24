@@ -1,10 +1,8 @@
 ; NppToR: R in Notepad++
 ; by Andrew Redd 2008 <aredd@stat.tamu.edu>
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
-#NOENV
-#SINGLEINSTANCE ignore
-AUTOTRIM OFF
-sendmode event
+
+#include startup.ahk
 
 ;run line or selection ;;;;;;;;;;;;;;;;;;;;;;;;
 #IfWinActive ahk_class Notepad++
@@ -74,7 +72,6 @@ return
 	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
 	;msgbox %Rdir%\bin\Rcmd.exe BATCH -q "%dir%\%file%"
 	runwait %Rdir%\bin\Rcmd.exe BATCH -q "%dir%\%file%" ,dir,min,RprocID
-	RegRead, Nppdir, HKEY_LOCAL_MACHINE, SOFTWARE\notepad++
 	run %NppDir%\Notepad++.exe "%dir%\%Name%.Rout"
 return
 
@@ -96,21 +93,13 @@ getOrStartR()
 		winwait ,R Console,,5
 	}
 }
- 
 getCurrNppFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="", ByRef Drive="")
 {
 WinGetActiveTitle, title
 stringleft firstchar, title, 1
-if firstchar = "*" 
+if firstchar = *
 	StringTrimLeft title, title, 1
 StringTrimRight title, title, 12
 splitpath, title,file,dir, ext, NameNoExt, Drive
 return dir
-}
-CheckForNewLine(var)
-{
-found := regexmatch( var, "m`a)`n$")
-if found=0
-	var = %var% `r`n
-return %var%
 }
