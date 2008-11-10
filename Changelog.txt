@@ -1,5 +1,9 @@
 NppToR CHANGELOG
 ----------------
+11/10/08
+Version 1.3 Released
+Added Version numbering.
+
 10/24/2008 11:16 AM
 added start Notepad++ on start NppToR, unless -startup parameter is passed in.
 Fixed bug with starting R from modified files.
