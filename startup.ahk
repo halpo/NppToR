@@ -11,6 +11,7 @@
 AUTOTRIM OFF
 sendmode event
 
+version = 1.3
 
 Loop, %0%  ; For each parameter:
 {
@@ -39,6 +40,7 @@ Gui, Add, Text,,
 NppToR
 by Andrew Redd
 (c)2008
+version %version%
 use of this program or source files are governed by the MIT lisence. See License.txt.
 )
 Gui, Add, Text,, 
