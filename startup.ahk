@@ -31,9 +31,6 @@ IniRead ,Rguiexe, %inifile%, executables, R,""
 IniRead ,Rcmdparms, %inifile%, executables, Rcmdparms,""
 IniRead ,Nppexe, %inifile%, executables, Npp,""
 
-msgbox %Rguiexe%
-msgbox %RcmdParms%
-
 if nppexe=""
 {
 	regread, nppdir, hkey_local_machine, software\notepad++
