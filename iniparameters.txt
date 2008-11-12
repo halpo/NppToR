@@ -1,0 +1,6 @@
+About the INI parameters
+------------------------
+SECTION executables
+R			Tells the location of the R executable to be used
+Npp			Tells the location of the Notepad++ executable to be used
+RcmdParms	Command line parameters for the Rgui

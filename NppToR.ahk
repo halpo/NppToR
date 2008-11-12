@@ -19,7 +19,7 @@ if clipboard = ""
 if clipboard<>""
 {
 	WinGet nppID, ID, A          ; save current window ID to return here later
-	getOrStartR()
+	RprocID:=getOrStartR()
 	if ErrorLevel
 	{
 		IfWinExist , RGui
@@ -32,9 +32,11 @@ if clipboard<>""
 	; code = %clipboard% ;RegExReplace(, "\r\n", "`n")
 	; stringreplace, code, code, `r`n,`r, All
 	; sendinput %code% ;^v
-	sendevent ^v
-	WinActivate ahk_id %nppID%    ; go back to the original window
+	;sendevent ^v
+	WinMenuSelectItem ,ahk_pid %RprocID%,,Edit,paste
+	WinActivate ahk_id %nppID%    ; go back to the original window if moved
 }
+sleep 50
 clipboard = %oldclipboard%
 return
 
@@ -46,7 +48,7 @@ sendevent ^a^c^{end}
 if clipboard<>""
 {
 	WinGet nppID, ID, A          ; save current window ID to return here later
-	getOrStartR()
+	RprocID:=getOrStartR()
 	if ErrorLevel
 	{
 		msgbox errorlevel
@@ -56,10 +58,12 @@ if clipboard<>""
 			msgbox ,16, Could nor start or find R.
 		return
 	}
-	clipboard := CheckForNewLine( clipboard )
-	sendevent ^v
+	; clipboard := CheckForNewLine( clipboard )
+	; sendevent ^v
+	WinMenuSelectItem ,ahk_pid %RprocID%,,Edit,paste
 	WinActivate ahk_id %nppID%    ; go back to the original window
 }
+sleep 50
 clipboard = %oldclipboard%
 return
 
@@ -80,26 +84,34 @@ getOrStartR()
 {
 	IfWinExist ,R Console
 	{
-		WinActivate ; ahk_class RGui
-		WinGet RprocID, ID, A
+		;WinActivate ; ahk_class RGui
+		WinGet RprocID, PID ;,A
 		return RprocID
 	} 
 	else
 	{
+		global Rguiexe
+		global Rcmdparms
 		getCurrNppFileDir(File,dir)
 		setworkingdir %dir%
-		RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-		run %Rdir%\bin\Rgui.exe -q,dir,,RprocID
-		winwait ,R Console,,5
+		if Rguiexe=""
+		{	
+			RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+			Rguiexe = %Rdir%\bin\Rgui.exe
+		}
+		run %Rguiexe% %RcmdParms%,dir,,RprocID
+		winwait ,R Console,,10
+		WinGet RprocID, PID ;,A
+		return RprocID
 	}
 }
 getCurrNppFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="", ByRef Drive="")
 {
-WinGetActiveTitle, title
-stringleft firstchar, title, 1
-if firstchar = *
-	StringTrimLeft title, title, 1
-StringTrimRight title, title, 12
-splitpath, title,file,dir, ext, NameNoExt, Drive
-return dir
+	WinGetActiveTitle, title
+	stringleft firstchar, title, 1
+	if firstchar = *
+		StringTrimLeft title, title, 1
+	StringTrimRight title, title, 12
+	splitpath, title,file,dir, ext, NameNoExt, Drive
+	return dir
 }

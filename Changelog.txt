@@ -1,5 +1,12 @@
 NppToR CHANGELOG
 ----------------
+11/12/2008 4:21 PM
+Changed the passing of code to use WinMenuSelectItem
+The window is no longer activated when passing code.  
+This improves performance dramatically.
+Added npptor.ini for storing preferences
+
+
 11/10/08
 Version 1.3 Released
 Added Version numbering.

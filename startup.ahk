@@ -11,8 +11,10 @@
 AUTOTRIM OFF
 sendmode event
 
-version = 1.3
+version = 1.4
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;CMD line Parameters
 Loop, %0%  ; For each parameter:
 {
     param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
@@ -21,10 +23,25 @@ Loop, %0%  ; For each parameter:
 	if param = -startup
 		startup = true
 }
-regread, nppdir, hkey_local_machine, software\notepad++
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;INI file paramters
+inifile = %A_ScriptDir%\npptor.ini
+IniRead ,Rguiexe, %inifile%, executables, R,""
+IniRead ,Rcmdparms, %inifile%, executables, Rcmdparms,""
+IniRead ,Nppexe, %inifile%, executables, Npp,""
+
+msgbox %Rguiexe%
+msgbox %RcmdParms%
+
+if nppexe=""
+{
+	regread, nppdir, hkey_local_machine, software\notepad++
+	nppexe = %nppdir%\notepad++.exe
+}
 if NOT startup
 {
-	run %nppdir%\notepad++.exe
+	run %nppexe%
 }
 
 menu, tray, add ; separator
