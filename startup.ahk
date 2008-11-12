@@ -17,7 +17,7 @@ Loop, %0%  ; For each parameter:
 {
     param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
 	startup = false
-    MsgBox, 0,, Parameter number %A_Index% is %param%.
+    ;MsgBox, 0,, Parameter number %A_Index% is %param%.
 	if param = -startup
 		startup = true
 }
