@@ -4,3 +4,17 @@ SECTION executables
 R			Tells the location of the R executable to be used
 Npp			Tells the location of the Notepad++ executable to be used
 RcmdParms	Command line parameters for the Rgui
+
+SECTION hotkeys
+passline	Key for pass by line command
+passfile	Key for pass entire file command
+batchrun	Key for Run in Batch and Open in Notepad++
+
+SECTION Putty
+activateputty	Should putty commands be activated or not?
+puttyline	Key for pass line to putty
+puttyfile	Key for pass file to putty
+
+SECTION controls (tuned for each machine)
+Rpastewait	time in miliseconds for script to wait before restoring the clipboard.
+Rrunwait	time in seconds to wait for the Rgui to open before considering failure.

@@ -10,11 +10,12 @@ The package consists of three parts.
 	
 See Install.txt for installation instructions.
 
-Upon running the utility,it sets two keyboard shortcuts to pass code into R:
+Upon running the utility,it sets keyboard shortcuts to pass code into R.  These are the defaults:
 	F8: Run line or Selection
 	Ctrl+F8: Run entire file.
 	Ctrl+Alt+F8: Run entire file in R CMD BATCH + open in Notepad++
-	
+
+the defaults can be changed in the npptor.ini file.  Please read iniparameters for reference on changing these settings.	
 To close the utility down right click the system tray icon and select exit.
 This version runs only for the Rgui running in single document interface (SDI).
 

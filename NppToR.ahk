@@ -2,11 +2,78 @@
 ; by Andrew Redd 2008 <aredd@stat.tamu.edu>
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
 
-#include startup.ahk
+#NOENV
+#SINGLEINSTANCE ignore
+AUTOTRIM OFF
+sendmode event
+
+version = 1.4
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Begin Initial execution code
+
+;;;;;;;;;;;;;;;;;;;;
+;CMD line Parameters
+Loop, %0%  ; For each parameter:
+{
+    param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
+	startup = false
+    ;MsgBox, 0,, Parameter number %A_Index% is %param%.
+	if param = -startup
+		startup = true
+}
+
+;;;;;;;;;;;;;;;;;;;
+;INI file paramters
+inifile = %A_ScriptDir%\npptor.ini
+;executables
+IniRead ,Rguiexe, %inifile%, executables, R,""
+IniRead ,Rcmdparms, %inifile%, executables, Rcmdparms,""
+IniRead ,Nppexe, %inifile%, executables, Npp,""
+;hotkeys
+IniRead ,passlinekey, %inifile%, hotkeys, passline,F8
+IniRead ,passfilekey, %inifile%, hotkeys, passfile,^F8
+IniRead ,batchrunkey, %inifile%, hotkeys, batchrun,^!F8
+;putty
+IniRead ,activateputty, %inifile%, putty, activateputty, false
+IniRead ,puttylinekey, %inifile%, putty, puttyline, F9
+IniRead ,puttyfilekey, %inifile%, putty, puttyfile, ^F9
+;controls
+IniRead ,Rpastewait, %inifile%, controls, Rpastewait, 50
+IniRead ,Rrunwait, %inifile%, controls, Rrunwait, 10
+
+if nppexe=""
+{
+	regread, nppdir, hkey_local_machine, software\notepad++
+	nppexe = %nppdir%\notepad++.exe
+}
+if NOT startup
+{
+	run %nppexe%
+}
+
+menu, tray, add ; separator
+Menu, tray, add, About, MakeAboutDialog  ; Creates a new menu item.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;assign hotkeys dynamically
+hotkey , IfWinActive, ahk_class Notepad++
+hotkey ,%passlinekey%,runline
+hotkey ,%passfilekey%,runall
+hotkey ,%batchrunkey%,runbatch
+if activateputty=true
+{
+	hotkey , %puttylinekey% , puttyLineOrSelection
+	hotkey , %puttyfilekey% , puttyRunAll
+}
+return
+;End Executable potion
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Begin function declarations
 
 ;run line or selection ;;;;;;;;;;;;;;;;;;;;;;;;
-#IfWinActive ahk_class Notepad++
-F8:: 
+runline:
+{
 oldclipboard = %clipboard%
 clipboard = ""
 sendevent ^c
@@ -16,6 +83,31 @@ if clipboard = ""
 	if clipboard<>"" 
 		clipboard := CheckForNewLine( clipboard )
 }
+gosub Rpaste
+return
+}
+; Run All ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+runall:
+{
+oldclipboard = %clipboard%
+sendevent ^a^c^{end}
+gosub Rpaste
+return
+}
+; Run in R CMD BATCH ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+runbatch:
+{
+	sendevent ^s
+	getCurrNppFileDir(file, dir, ext, Name)
+	SetWorkingDir %dir%
+	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+	;msgbox %Rdir%\bin\Rcmd.exe BATCH -q "%dir%\%file%"
+	runwait %Rdir%\bin\Rcmd.exe BATCH -q "%dir%\%file%" ,dir,min,RprocID
+	run %NppDir%\Notepad++.exe "%dir%\%Name%.Rout"
+return
+}
+Rpaste:
+{
 if clipboard<>""
 {
 	WinGet nppID, ID, A          ; save current window ID to return here later
@@ -28,58 +120,13 @@ if clipboard<>""
 			msgbox , 16 ,Could not find R, Could nor start or find R. Please check you installation or start R manually.
 		return
 	}
-	;; this ias an alternative way of doing it but seems to be slightly slower than the implimented version
-	; code = %clipboard% ;RegExReplace(, "\r\n", "`n")
-	; stringreplace, code, code, `r`n,`r, All
-	; sendinput %code% ;^v
-	;sendevent ^v
 	WinMenuSelectItem ,ahk_pid %RprocID%,,Edit,paste
 	WinActivate ahk_id %nppID%    ; go back to the original window if moved
 }
-sleep 50
+sleep %Rpastewait%
 clipboard = %oldclipboard%
 return
-
-; Run All ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-#IfWinActive ahk_class Notepad++
-^F8:: 
-oldclipboard = %clipboard%
-sendevent ^a^c^{end}
-if clipboard<>""
-{
-	WinGet nppID, ID, A          ; save current window ID to return here later
-	RprocID:=getOrStartR()
-	if ErrorLevel
-	{
-		msgbox errorlevel
-		IfWinExist , Rgui
-			msgbox ,16,R in running in MDI mode. Please switch to SDI mode for this utility to work.
-		else
-			msgbox ,16, Could nor start or find R.
-		return
-	}
-	; clipboard := CheckForNewLine( clipboard )
-	; sendevent ^v
-	WinMenuSelectItem ,ahk_pid %RprocID%,,Edit,paste
-	WinActivate ahk_id %nppID%    ; go back to the original window
 }
-sleep 50
-clipboard = %oldclipboard%
-return
-
-; Run in R CMD BATCH ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-#IfWinActive ahk_class Notepad++
-^!F8::
-	sendevent ^s
-	getCurrNppFileDir(file, dir, ext, Name)
-	SetWorkingDir %dir%
-	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-	;msgbox %Rdir%\bin\Rcmd.exe BATCH -q "%dir%\%file%"
-	runwait %Rdir%\bin\Rcmd.exe BATCH -q "%dir%\%file%" ,dir,min,RprocID
-	run %NppDir%\Notepad++.exe "%dir%\%Name%.Rout"
-return
-
-
 getOrStartR()
 {
 	IfWinExist ,R Console
@@ -100,7 +147,7 @@ getOrStartR()
 			Rguiexe = %Rdir%\bin\Rgui.exe
 		}
 		run %Rguiexe% %RcmdParms%,dir,,RprocID
-		winwait ,R Console,,10
+		winwait ,R Console,,%Rrunwait%
 		WinGet RprocID, PID ;,A
 		return RprocID
 	}
@@ -114,4 +161,88 @@ getCurrNppFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="",
 	StringTrimRight title, title, 12
 	splitpath, title,file,dir, ext, NameNoExt, Drive
 	return dir
+}
+puttypaste:
+{	IfWinExist , ahk_class PuTTY
+	{
+		winactivate
+		mousegetpos ,x,y
+		mouseclick right, 4, 30
+		mousemove ,x,y
+	}
+return
+}
+puttyLineOrSelection:
+{
+	oldclipboard = %clipboard%
+	clipboard = ""
+	sendevent ^c
+	if clipboard = ""
+	{
+		sendevent {end}{home 2}+{down}^c{right}
+		if clipboard<>"" 
+			clipboard := CheckForNewLine( clipboard )
+	}
+	if clipboard<>""
+	{
+		WinGet nppID, ID, A          ; save current window ID to return here later
+		gosub puttypaste
+		WinActivate ahk_id %nppID%    ; go back to the original window
+	}
+	clipboard = %oldclipboard%
+	return
+}
+puttyRunAll:
+{
+oldclipboard = %clipboard%
+sendevent ^a^c^{end}
+if clipboard<>""
+{
+	WinGet nppID, ID, A          ; save current window ID to return here later
+	gosub puttypaste
+	WinActivate ahk_id %nppID%    ; go back to the original window
+}
+clipboard = %oldclipboard%
+return
+}
+MakeAboutDialog:
+{
+;Gui, -AlwaysOnTop -SysMenu +Owner ; +Owner avoids a taskbar button.
+Gui, Add, Picture,,NppToR.png
+Gui, Add, Text,, 
+(
+NppToR
+by Andrew Redd
+(c)2008
+version %version%
+use of this program or source files are governed by the MIT lisence. See License.txt.
+)
+Gui, Add, Text,, 
+(
+This package enable syntax highlighting, code folding and autocompletion in notepad++.  This specific utility enables passing code from Notepad++ to the RGui.  
+
+The following are the keyboard shortcuts (can be modified in the npptor.ini file).
+
+	%passlinekey%: Passes a line or a selection to R.
+	%passfilekey%: Passes the entire file to R.
+	%batchrunkey%: Saves then evaluates the current script in batch mode then opens the results in notepad++.
+
+(#=Win,!=Alt,^=Control,+=Shift)
+)
+Gui, Add, Button, Default, OK
+Gui, Show, , NppToR by Andrew Redd  ; NoActivate avoids deactivating the currently active window.
+}
+return
+ButtonOK:
+GuiClose:
+GuiEscape:
+Gui destroy
+return
+
+CheckForNewLine(var)
+{
+found := regexmatch( var, "m`a)`n$")
+if found=0
+	var = %var% `r`n
+return %var%
 }
