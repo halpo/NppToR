@@ -27,9 +27,22 @@ Loop, %0%  ; For each parameter:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;INI file paramters
 inifile = %A_ScriptDir%\npptor.ini
+;executables
 IniRead ,Rguiexe, %inifile%, executables, R,""
 IniRead ,Rcmdparms, %inifile%, executables, Rcmdparms,""
 IniRead ,Nppexe, %inifile%, executables, Npp,""
+;hotkeys
+IniRead ,passlinekey, %inifile%, hotkeys, passline,F8
+IniRead ,passfilekey, %inifile%, hotkeys, passfile,^F8
+IniRead ,batchrunkey, %inifile%, hotkeys, batchrun,^!F8
+;putty
+IniRead ,activateputty, %inifile%, putty, activateputty, false
+IniRead ,puttylinekey, %inifile%, putty, puttyline, F9
+IniRead ,puttyfilekey, %inifile%, putty, puttyfile, ^F9
+;controls
+IniRead ,Rpastewait, %inifile%, controls, Rpastewait, 50
+IniRead ,Rrunwait, %inifile%, controls, Rrunwait, 10
+
 
 if nppexe=""
 {
@@ -61,12 +74,13 @@ Gui, Add, Text,,
 (
 This package enable syntax highlighting, code folding and autocompletion in notepad++.  This specific utility enables passing code from Notepad++ to the RGui.  
 
-The following are the keyboard shortcuts.
+The following are the keyboard shortcuts (can be modified in the npptor.ini file).
 
-	F8: Passes a line or a selection to R.
-	Ctrl+F8: Passes the entire file to R.
-	Ctrl+Alt+F8: Saves then evaluates the current script in batch mode then opens the results in notepad++.
+	%passlinekey%: Passes a line or a selection to R.
+	%passfilekey%: Passes the entire file to R.
+	%batchrunkey%: Saves then evaluates the current script in batch mode then opens the results in notepad++.
 
+(#=Win,!=Alt,^=Control,+=Shift)
 )
 Gui, Add, Button, Default, OK
 Gui, Show, , NppToR by Andrew Redd  ; NoActivate avoids deactivating the currently active window.
