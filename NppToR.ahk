@@ -74,30 +74,22 @@ return
 ;run line or selection ;;;;;;;;;;;;;;;;;;;;;;;;
 runline:
 {
-oldclipboard = %clipboard%
-clipboard = ""
-sendevent ^c
-if clipboard = ""
-{
-	sendevent {end}{home 2}+{down}^c{right}
-	if clipboard<>"" 
-		clipboard := CheckForNewLine( clipboard )
-}
+gosub NppGetLineOrSelection
 gosub Rpaste
 return
 }
 ; Run All ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 runall:
 {
-oldclipboard = %clipboard%
-sendevent ^a^c^{end}
+gosub NppGetAll
 gosub Rpaste
 return
 }
 ; Run in R CMD BATCH ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 runbatch:
 {
-	sendevent ^s
+	WinMenuSelectItem ,A,,File,Save
 	getCurrNppFileDir(file, dir, ext, Name)
 	SetWorkingDir %dir%
 	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
@@ -107,27 +99,27 @@ return
 }
 Rpaste:
 {
-if clipboard<>""
-{
-	WinGet nppID, ID, A          ; save current window ID to return here later
-	RprocID:=getOrStartR()
-	if ErrorLevel
+	if clipboard<>""
 	{
-		IfWinExist , RGui
-			msgbox , 16 ,R in MDI Mode, R in running in MDI mode. Please switch to SDI mode for this utility to work.
-		else
-			msgbox , 16 ,Could not find R, Could nor start or find R. Please check you installation or start R manually.
-		return
+		WinGet nppID, ID, A          ; save current window ID to return here later
+		RprocID:=getOrStartR()
+		if ErrorLevel
+		{
+			IfWinExist , RGui
+				msgbox , 16 ,R in MDI Mode, R in running in MDI mode. Please switch to SDI mode for this utility to work.
+			else
+				msgbox , 16 ,Could not find R, Could nor start or find R. Please check you installation or start R manually.
+			return
+		}
+		WinMenuSelectItem ,ahk_pid %RprocID%,,Edit,paste
+		WinActivate ahk_id %nppID%    ; go back to the original window if moved
 	}
-	WinMenuSelectItem ,ahk_pid %RprocID%,,Edit,paste
-	WinActivate ahk_id %nppID%    ; go back to the original window if moved
-}
-sleep %Rpastewait%
-if restoreclipboard=true
-{
-	clipboard = %oldclipboard%
-}
-return
+	sleep %Rpastewait%
+	if restoreclipboard=true
+	{
+		clipboard = %oldclipboard%
+	}
+	return
 }
 getOrStartR()
 {
@@ -156,55 +148,66 @@ getOrStartR()
 }
 getCurrNppFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="", ByRef Drive="")
 {
-	WinGetActiveTitle, title
-	stringleft firstchar, title, 1
-	if firstchar = *
-		StringTrimLeft title, title, 1
-	StringTrimRight title, title, 12
-	splitpath, title,file,dir, ext, NameNoExt, Drive
+	; WinGetActiveTitle, title
+	; stringleft firstchar, title, 1
+	; if firstchar = *
+		; StringTrimLeft title, title, 1
+	; StringTrimRight title, title, 12
+	ocb = %clipboard%
+	WinMenuSelectItem ,A,,Edit,Copy Current full file path to Clipboard
+	splitpath, clipboard,file,dir, ext, NameNoExt, Drive
+	clipboard = %ocb%
 	return dir
 }
 puttypaste:
-{	IfWinExist , ahk_class PuTTY
+{	
+	WinGet nppID, ID, A          ; save current window ID to return here later
+	IfWinExist , ahk_class PuTTY
+	if clipboard<>""
 	{
-		winactivate
-		mousegetpos ,x,y
-		mouseclick right, 4, 30
-		mousemove ,x,y
+		ControlClick , x4 y30,,, right
 	}
-return
+	WinActivate ahk_id %nppID%    ; go back to the original window
+	if restoreclipboard=true
+	{
+		clipboard = %oldclipboard%
+	}
+	return
 }
 puttyLineOrSelection:
 {
-	oldclipboard = %clipboard%
-	clipboard = ""
-	sendevent ^c
-	if clipboard = ""
-	{
-		sendevent {end}{home 2}+{down}^c{right}
-		if clipboard<>"" 
-			clipboard := CheckForNewLine( clipboard )
-	}
-	if clipboard<>""
-	{
-		WinGet nppID, ID, A          ; save current window ID to return here later
-		gosub puttypaste
-		WinActivate ahk_id %nppID%    ; go back to the original window
-	}
-	clipboard = %oldclipboard%
+	gosub NppGetLineOrSelection
+	gosub puttypaste
 	return
 }
 puttyRunAll:
 {
-oldclipboard = %clipboard%
-sendevent ^a^c^{end}
-if clipboard<>""
-{
-	WinGet nppID, ID, A          ; save current window ID to return here later
+	gosub NppGetAll
 	gosub puttypaste
-	WinActivate ahk_id %nppID%    ; go back to the original window
+	return
 }
-clipboard = %oldclipboard%
+NppGetLineOrSelection:
+{
+	oldclipboard = %clipboard%
+	clipboard = ""
+	WinMenuSelectItem ,A,,Edit,Copy
+	sendevent {right}
+	if clipboard = ""
+	{
+		sendevent {end}{home 2}+{down}
+		WinMenuSelectItem ,A,,Edit,Copy
+		sendevent {right}
+		if clipboard<>"" 
+			clipboard := CheckForNewLine( clipboard )
+	}
+	return
+}
+NppGetAll:
+{
+oldclipboard = %clipboard%
+WinMenuSelectItem ,A,,Edit,Select All
+WinMenuSelectItem ,A,,Edit,Copy
+sendevent {right}
 return
 }
 MakeAboutDialog:
@@ -243,8 +246,8 @@ return
 
 CheckForNewLine(var)
 {
-found := regexmatch( var, "m`a)`n$")
-if found=0
-	var = %var% `r`n
-return %var%
+	found := regexmatch( var, "m`a)`n$")
+	if found=0
+		var = %var% `r`n
+	return %var%
 }
