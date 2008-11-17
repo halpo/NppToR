@@ -18,7 +18,6 @@ Loop, %0%  ; For each parameter:
 {
     param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
 	startup = false
-    ;MsgBox, 0,, Parameter number %A_Index% is %param%.
 	if param = -startup
 		startup = true
 }
@@ -41,6 +40,7 @@ IniRead ,puttyfilekey, %inifile%, putty, puttyfile, ^F9
 ;controls
 IniRead ,Rpastewait, %inifile%, controls, Rpastewait, 50
 IniRead ,Rrunwait, %inifile%, controls, Rrunwait, 10
+IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, true
 
 if nppexe=""
 {
@@ -101,7 +101,6 @@ runbatch:
 	getCurrNppFileDir(file, dir, ext, Name)
 	SetWorkingDir %dir%
 	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-	;msgbox %Rdir%\bin\Rcmd.exe BATCH -q "%dir%\%file%"
 	runwait %Rdir%\bin\Rcmd.exe BATCH -q "%dir%\%file%" ,dir,min,RprocID
 	run %NppDir%\Notepad++.exe "%dir%\%Name%.Rout"
 return
@@ -124,7 +123,10 @@ if clipboard<>""
 	WinActivate ahk_id %nppID%    ; go back to the original window if moved
 }
 sleep %Rpastewait%
-clipboard = %oldclipboard%
+if restoreclipboard=true
+{
+	clipboard = %oldclipboard%
+}
 return
 }
 getOrStartR()
