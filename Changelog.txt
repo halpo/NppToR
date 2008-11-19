@@ -1,7 +1,7 @@
 NppToR CHANGELOG
 ----------------
 11/17/2008 12:06 PM
-Now uses WinMenuSelectItem to pass commands to Notepad++ whenever possible (since hotkays can be reassigned in Notepad++ this is the safeest route)
+Now uses WinMenuSelectItem to pass commands to Notepad++ whenever possible (since hotkeys can be reassigned in Notepad++ this is the safeest route)
 Clears selection after run selection. Too dangerous otherwise.
 putty no longer activated when passing code.  Uses ControlClick to acomplish this.
 

@@ -111,7 +111,8 @@ Rpaste:
 				msgbox , 16 ,Could not find R, Could nor start or find R. Please check you installation or start R manually.
 			return
 		}
-		WinMenuSelectItem ,ahk_pid %RprocID%,,Edit,paste
+		WinMenuSelectItem ,ahk_id %RprocID%,,Edit,paste
+		;WinMenuSelectItem ,ahk_id %RprocID%,,file,Print...
 		WinActivate ahk_id %nppID%    ; go back to the original window if moved
 	}
 	sleep %Rpastewait%
@@ -126,7 +127,7 @@ getOrStartR()
 	IfWinExist ,R Console
 	{
 		;WinActivate ; ahk_class RGui
-		WinGet RprocID, PID ;,A
+		WinGet RprocID, ID ;,A
 		return RprocID
 	} 
 	else
@@ -142,7 +143,7 @@ getOrStartR()
 		}
 		run %Rguiexe% %RcmdParms%,dir,,RprocID
 		winwait ,R Console,,%Rrunwait%
-		WinGet RprocID, PID ;,A
+		WinGet RprocID, ID ;,A
 		return RprocID
 	}
 }
@@ -154,7 +155,9 @@ getCurrNppFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="",
 		; StringTrimLeft title, title, 1
 	; StringTrimRight title, title, 12
 	ocb = %clipboard%
+	clipboard =
 	WinMenuSelectItem ,A,,Edit,Copy Current full file path to Clipboard
+	clipwait
 	splitpath, clipboard,file,dir, ext, NameNoExt, Drive
 	clipboard = %ocb%
 	return dir
