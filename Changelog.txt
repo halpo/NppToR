@@ -1,5 +1,9 @@
 NppToR CHANGELOG
 ----------------
+12/2/2008 3:40 PM - Added installer that installs to $APPDATA\NppToR or optional other directory specified by user.
+12/2/2008 3:44 PM - Fixed bug with passing at end of line.  Caused by right command to cancel selection.
+
+
 11/17/2008 12:06 PM
 Now uses WinMenuSelectItem to pass commands to Notepad++ whenever possible (since hotkeys can be reassigned in Notepad++ this is the safeest route)
 Clears selection after run selection. Too dangerous otherwise.

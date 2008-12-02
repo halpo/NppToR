@@ -7,7 +7,7 @@
 AUTOTRIM OFF
 sendmode event
 
-version = 1.4
+version = 1.5
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin Initial execution code
@@ -194,7 +194,6 @@ NppGetLineOrSelection:
 	oldclipboard = %clipboard%
 	clipboard = ""
 	WinMenuSelectItem ,A,,Edit,Copy
-	sendevent {right}
 	if clipboard = ""
 	{
 		sendevent {end}{home 2}+{down}
@@ -202,7 +201,8 @@ NppGetLineOrSelection:
 		sendevent {right}
 		if clipboard<>"" 
 			clipboard := CheckForNewLine( clipboard )
-	}
+	} 
+	else sendevent {right}
 	return
 }
 NppGetAll:
