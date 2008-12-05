@@ -14,10 +14,10 @@ version = 1.5
 
 ;;;;;;;;;;;;;;;;;;;;
 ;CMD line Parameters
+startup = false
 Loop, %0%  ; For each parameter:
 {
     param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
-	startup = false
 	if param = -startup
 		startup = true
 }
@@ -54,6 +54,8 @@ if NOT startup
 
 menu, tray, add ; separator
 Menu, tray, add, About, MakeAboutDialog  ; Creates a new menu item.
+
+gosub makeCounter
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;assign hotkeys dynamically
@@ -93,8 +95,12 @@ runbatch:
 	getCurrNppFileDir(file, dir, ext, Name)
 	SetWorkingDir %dir%
 	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-	runwait %Rdir%\bin\Rcmd.exe BATCH -q "%dir%\%file%" ,dir,min,RprocID
+	addProc(RprocID,File, "Local")
+	command = CMD /C "%Rdir%\bin\Rcmd.exe BATCH -q '%file%' "
+	runwait %command%, %dir%,min,RprocID
+	msgbox %RprocID%
 	run %NppDir%\Notepad++.exe "%dir%\%Name%.Rout"
+	removeProc(RprocID)
 return
 }
 Rpaste:
@@ -239,8 +245,8 @@ The following are the keyboard shortcuts (can be modified in the npptor.ini file
 )
 Gui, Add, Button, Default, OK
 Gui, Show, , NppToR by Andrew Redd  ; NoActivate avoids deactivating the currently active window.
-}
 return
+}
 ButtonOK:
 GuiClose:
 GuiEscape:
@@ -254,3 +260,8 @@ CheckForNewLine(var)
 		var = %var% `r`n
 	return %var%
 }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Includes
+#include %A_ScriptDir%\poc-counter\counter.ahk
+
