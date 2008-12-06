@@ -1,5 +1,11 @@
 NppToR CHANGELOG
 ----------------
+12/6/2008 8:50 AM - Finished integration of running simulations dialog.
+	with this it may be necessary to look at the about dialog again and specify it as 2 permanantly and create
+	it with script initialization.
+	Also in it's current implimentation the dialog only allows for one running simulation for some reason.
+	I'll need to read the AHK online docs to figure out why.
+
 12/2/2008 3:40 PM - Added installer that installs to $APPDATA\NppToR or optional other directory specified by user.
 12/2/2008 3:44 PM - Fixed bug with passing at end of line.  Caused by right command to cancel selection
 

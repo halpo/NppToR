@@ -21,10 +21,15 @@ GUI, Font, norm s8
 GUI, Add, Button, x+10 ys vBtnKill c%CustomColor%, Kill Simulation
 Gui, Add, Button, Default x ys, Hide
 GUI, Add, ListView, section xs r5 w330 vProcList gListViewClick, PID|LongTime|Start|Where|File
-WinSet, TransColor, %CustomColor% 200
+;WinSet, TransColor, %CustomColor% 200
+WinSet, Transparent, 200
 return
 }
-
+showCounter:
+{
+	GUI Show
+	return
+}
 ListViewClick:
 {
 if A_GuiEvent = DoubleClick
@@ -56,8 +61,8 @@ LongTime = %A_NOW%
 FormatTime, TimeString,%Now%,Time
 rtn := LV_Add("", PID,LongTime,TimeString,Where,FileName)
 lv_modifyCol()
-lv_modifyCol(1,"N 0") ; hide PID column
-lv_modifyCol(2,"N 0") ; hide long time column
+lv_modifyCol(1,"N 0") 	; hide PID column
+lv_modifyCol(2,"N 0") 	; hide long time column
 GUI , show,NoActivate
 return
 }
@@ -79,7 +84,8 @@ return
 ProcKill(row, PID)
 {
 winkill ahk_pid %PID%
-lv_delete(row)
+;lv_delete(row)
+RemoveProc(PID)
 return
 }
 
@@ -87,9 +93,14 @@ RemoveProc(PID)
 {
 Loop % LV_GetCount() ;%
 {
-    LV_GetText(rowPID, A_Index)
-    if rowPID = PID
-        LV_Delete(A_Index)  ; Select each row whose first field contains the filter-text.
+    LV_GetText(rowPID, A_Index, 1)
+    if(rowPID = PID)
+    {
+		lv_delete( A_Index )  ; Select each row whose first field contains the filter-text.
+		if not LV_GetCount()
+			GUI hide
+		break
+	}
 }
 return
 }

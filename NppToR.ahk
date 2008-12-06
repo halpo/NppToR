@@ -6,6 +6,7 @@
 #SINGLEINSTANCE ignore
 AUTOTRIM OFF
 sendmode event
+DetectHiddenWindows On
 
 version = 1.5
 
@@ -53,6 +54,7 @@ if NOT startup
 }
 
 menu, tray, add ; separator
+menu, tray, add, Show Simulations, showCounter
 Menu, tray, add, About, MakeAboutDialog  ; Creates a new menu item.
 
 gosub makeCounter
@@ -95,10 +97,11 @@ runbatch:
 	getCurrNppFileDir(file, dir, ext, Name)
 	SetWorkingDir %dir%
 	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+	command = CMD /C %Rdir%\bin\Rcmd.exe BATCH -q "%file%"
+	run %command%, %dir%, hide, RprocID
+	WinWait ahk_pid %RprocID%
 	addProc(RprocID,File, "Local")
-	command = CMD /C "%Rdir%\bin\Rcmd.exe BATCH -q '%file%' "
-	runwait %command%, %dir%,min,RprocID
-	msgbox %RprocID%
+	WinWaitClose ahk_pid %RprocID%
 	run %NppDir%\Notepad++.exe "%dir%\%Name%.Rout"
 	removeProc(RprocID)
 return
@@ -263,5 +266,5 @@ CheckForNewLine(var)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Includes
-#include %A_ScriptDir%\poc-counter\counter.ahk
+#include %A_ScriptDir%\counter\counter.ahk
 
