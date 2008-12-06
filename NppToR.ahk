@@ -99,7 +99,7 @@ runbatch:
 	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
 	command = CMD /C %Rdir%\bin\Rcmd.exe BATCH -q "%file%"
 	run %command%, %dir%, hide, RprocID
-	WinWait ahk_pid %RprocID%
+	WinWait ,ahk_pid %RprocID%,,.5
 	addProc(RprocID,File, "Local")
 	WinWaitClose ahk_pid %RprocID%
 	run %NppDir%\Notepad++.exe "%dir%\%Name%.Rout"
