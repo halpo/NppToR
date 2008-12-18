@@ -1,21 +1,23 @@
 About the INI parameters
 ------------------------
+key		default		description
+-------------------------------
 SECTION executables
-R			Tells the location of the R executable to be used
-Npp			Tells the location of the Notepad++ executable to be used
-RcmdParms	Command line parameters for the Rgui
+R			Read from registry		Tells the location of the R executable to be used
+Npp			Read From Registry		Tells the location of the Notepad++ executable to be used
+RcmdParms	empty					Command line parameters for the Rgui
 
 SECTION hotkeys
-passline	Key for pass by line command
-passfile	Key for pass entire file command
-batchrun	Key for Run in Batch and Open in Notepad++
+passline	F8		Key for pass by line command
+passfile	^F8		Key for pass entire file command
+batchrun	^!F8	Key for Run in Batch and Open in Notepad++
 
 SECTION Putty
-activateputty	Should putty commands be activated or not? true/false
-puttyline	Key for pass line to putty
-puttyfile	Key for pass file to putty
+activateputty	false	Should putty commands be activated or not? true/false
+puttyline		F9		Key for pass line to putty
+puttyfile		^F9		Key for pass file to putty
 
 SECTION controls (tuned for each machine)
-Rpastewait			time in miliseconds for script to wait before restoring the clipboard.
-Rrunwait			time in seconds to wait for the Rgui to open before considering failure.
-restoreclipboard	restoreclipboard after passing code? true/false
+Rpastewait			50		time in miliseconds for script to wait before restoring the clipboard.
+Rrunwait			10		time in seconds to wait for the Rgui to open before considering failure.
+restoreclipboard	true	restoreclipboard after passing code? true/false

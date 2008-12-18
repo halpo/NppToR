@@ -4,6 +4,8 @@
 
 #NOENV
 #SINGLEINSTANCE ignore
+#MaxThreads 10
+
 AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows On
@@ -48,6 +50,11 @@ if nppexe=""
 	regread, nppdir, hkey_local_machine, software\notepad++
 	nppexe = %nppdir%\notepad++.exe
 }
+if Rguiexe=""
+{	
+	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+	Rguiexe = %Rdir%\bin\Rgui.exe
+}
 if NOT startup
 {
 	run %nppexe%
@@ -55,18 +62,25 @@ if NOT startup
 
 menu, tray, add ; separator
 menu, tray, add, Show Simulations, showCounter
+menu, tray, add, Start Notepad++, RunNpp
+menu, tray, add, Reset R working directory, UpdateRWD
+menu, tray, add ; separator
 Menu, tray, add, About, MakeAboutDialog  ; Creates a new menu item.
 
 gosub makeCounter
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;assign hotkeys dynamically
-hotkey , IfWinActive, ahk_class Notepad++
+if NOT makeglobal
+	hotkey , IfWinActive, ahk_class Notepad++
+#MaxThreadsPerHotkey 3
 hotkey ,%passlinekey%,runline
 hotkey ,%passfilekey%,runall
+#MaxThreadsPerHotkey 10
 hotkey ,%batchrunkey%,runbatch
 if activateputty=true
 {
+	#MaxThreadsPerHotkey 3
 	hotkey , %puttylinekey% , puttyLineOrSelection
 	hotkey , %puttyfilekey% , puttyRunAll
 }
@@ -83,7 +97,6 @@ gosub Rpaste
 return
 }
 ; Run All ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 runall:
 {
 gosub NppGetAll
@@ -145,11 +158,6 @@ getOrStartR()
 		global Rcmdparms
 		getCurrNppFileDir(File,dir)
 		setworkingdir %dir%
-		if Rguiexe=""
-		{	
-			RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-			Rguiexe = %Rdir%\bin\Rgui.exe
-		}
 		run %Rguiexe% %RcmdParms%,dir,,RprocID
 		winwait ,R Console,, %Rrunwait%
 		WinGet RprocID, ID ;,A
@@ -175,15 +183,17 @@ puttypaste:
 {	
 	WinGet nppID, ID, A          ; save current window ID to return here later
 	IfWinExist , ahk_class PuTTY
-	if clipboard<>""
 	{
-		ControlClick , x4 y30,,, right
-	}
-	WinActivate ahk_id %nppID%    ; go back to the original window
-	if restoreclipboard=true
-	{
-		clipboard = %oldclipboard%
-	}
+		if clipboard<>""
+		{
+			ControlClick , x4 y30,,, right
+		}
+		WinActivate ahk_id %nppID%    ; go back to the original window
+		if restoreclipboard=true
+		{
+			clipboard = %oldclipboard%
+		}
+	} else msgbox ,16,PuTTY not found, PuTTY was not found.  Launch PuTTY and start R on remote server.
 	return
 }
 puttyLineOrSelection:
@@ -213,6 +223,22 @@ NppGetLineOrSelection:
 			clipboard := CheckForNewLine( clipboard )
 	} 
 	else sendevent {right}
+	return
+}
+RunNpp:
+{
+	Run %Nppexe%
+	return 
+}
+UpdateRWD:
+{
+	oldclipboard = %clipboard%
+	WinActivate ahk_class Notepad++
+	currdir:=getCurrNppFileDir()
+	StringReplace , wd, currdir, \, /, All 
+	msgbox %wd%
+	clipboard = setwd("%wd%")
+	gosub Rpaste
 	return
 }
 NppGetAll:
