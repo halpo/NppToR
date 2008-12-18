@@ -1,5 +1,7 @@
 NppToR CHANGELOG
 ----------------
+12/17/2008 8:51 PM - Added NppEditR as a script as a go between for R function edit to be able to 
+	leverage Notepad++ as the editor of choice.
 12/6/2008 8:50 AM - Finished integration of running simulations dialog.
 	with this it may be necessary to look at the about dialog again and specify it as 2 permanantly and create
 	it with script initialization.

@@ -1,5 +1,5 @@
 ; NppToR: R in Notepad++
-; by Andrew Redd 2008 <aredd@stat.tamu.edu>
+; by Andrew Redd 2008 <halpo@users.sourceforge.net>
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
 
 #NOENV
@@ -102,7 +102,7 @@ runbatch:
 	WinWait ,ahk_pid %RprocID%,,.5
 	addProc(RprocID,File, "Local")
 	WinWaitClose ahk_pid %RprocID%
-	run %NppDir%\Notepad++.exe "%dir%\%Name%.Rout"
+	run %nppexe% "%dir%\%Name%.Rout"
 	removeProc(RprocID)
 return
 }
@@ -151,7 +151,7 @@ getOrStartR()
 			Rguiexe = %Rdir%\bin\Rgui.exe
 		}
 		run %Rguiexe% %RcmdParms%,dir,,RprocID
-		winwait ,R Console,,%Rrunwait%
+		winwait ,R Console,, %Rrunwait%
 		WinGet RprocID, ID ;,A
 		return RprocID
 	}
