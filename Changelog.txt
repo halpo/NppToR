@@ -1,5 +1,6 @@
 NppToR CHANGELOG
 ----------------
+12/18/2008 12:43 PM - Fixed bug for sending selection.
 12/17/2008 8:51 PM - Added NppEditR as a script as a go between for R function edit to be able to 
 	leverage Notepad++ as the editor of choice.
 12/6/2008 8:50 AM - Finished integration of running simulations dialog.

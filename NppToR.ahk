@@ -201,9 +201,10 @@ puttyRunAll:
 NppGetLineOrSelection:
 {
 	oldclipboard = %clipboard%
-	clipboard = ""
+	clipboard = 
 	WinMenuSelectItem ,A,,Edit,Copy
-	if clipboard = ""
+	clipwait .1
+	if clipboard = 
 	{
 		sendevent {end}{home 2}+{down}
 		WinMenuSelectItem ,A,,Edit,Copy
