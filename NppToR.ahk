@@ -73,14 +73,14 @@ gosub makeCounter
 ;assign hotkeys dynamically
 if NOT makeglobal
 	hotkey , IfWinActive, ahk_class Notepad++
-#MaxThreadsPerHotkey 3
+#MaxThreadsPerHotkey 10
 hotkey ,%passlinekey%,runline
 hotkey ,%passfilekey%,runall
-#MaxThreadsPerHotkey 10
+#MaxThreadsPerHotkey 100
 hotkey ,%batchrunkey%,runbatch
 if activateputty=true
 {
-	#MaxThreadsPerHotkey 3
+	#MaxThreadsPerHotkey 10
 	hotkey , %puttylinekey% , puttyLineOrSelection
 	hotkey , %puttyfilekey% , puttyRunAll
 }
