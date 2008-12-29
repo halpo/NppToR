@@ -6,7 +6,7 @@
 #
 
 
-#Dir.chdir("C:/Users/Andrew/Documents/Projects/npptor.sf.net/syntax")
+#Dir.chdir("C:/Users/Andrew/Documents/Projects/npptor.sf.net/syntax")  #for development
 
 require 'rexml/document'
 require 'win32/registry'
@@ -73,25 +73,33 @@ end
 puts "using R library: #{Rlib.path}"
 Rlib.each{
 	|foldername| 
-	if (File.directory?(Rlib.path.concat("\\").concat(foldername)) && File.exists?(Rlib.path.concat("\\").concat(foldername).concat('\\INDEX'))) then
+	if (File.directory?(Rlib.path.concat("\\").concat(foldername)) && File.exists?(Rlib.path.concat("\\").concat(foldername).concat('\\CONTENTS'))) then
 		puts "Processing #{foldername}"
 		priority = PkgPriority[foldername]
-		File.open(Rlib.path.concat("\\").concat(foldername).concat('\\INDEX'),'r') do |file|
-		  while line = file.gets
-			key = line.slice(/^[A-Za-z0-9\._]+\s/)
-			if !key.nil? then 
-				key.strip!
-				Words[priority] << key
-			end
-		  end
-		end
+		
+		lines = IO.readlines(Rlib.path.concat("\\").concat(foldername).concat('\\CONTENTS'))
+		aliases = lines.grep(/^Aliases/)
+		aliases.each{ |line|
+			lwords = line.split
+			lwords.delete_at(0)
+			Words[priority] << lwords.grep(/^[A-Za-z\._]+[A-Za-z0-9\._]*$/)
+			Words[priority].flatten!
+		}
 	end
 }
 
+BuiltInWords = %w{if else for while repeat break next in TRUE FALSE NULL Inf NaN NA NA_integer_ NA_real_ NA_complex_ NA_character_ ... ..1 ..2 ..3 ..4 ..5 ..6 ..7 ..8 ..9}
+
+Words['base'] = Words['base'].uniq - BuiltInWords
+# Words['recommended']-=Words['base']
+Words['recommended']= (Words['recommended'].uniq - BuiltInWords) - Words['base']
+# Words['other'] -= Words['recommended'] | Words['base']
+Words['other']= (((Words['other'].uniq - BuiltInWords) - Words['recommended']) - Words['base'])
+
 rlang = rbase.elements["//UserLang[@name='R']"]
-rlang.elements["//Keywords[@name='Words2']"].text = Words['base'].uniq.join(" ")
-rlang.elements["//Keywords[@name='Words3']"].text = Words['recommended'].uniq.join(" ")
-rlang.elements["//Keywords[@name='Words4']"].text = Words['other'].uniq.join(" ")
+rlang.elements["//Keywords[@name='Words2']"].text = Words['base'].join(" ")
+rlang.elements["//Keywords[@name='Words3']"].text = Words['recommended'].join(" ")
+rlang.elements["//Keywords[@name='Words4']"].text = Words['other'].join(" ")
 
 if !UDL.elements["//UserLang[@name='R']"].nil? then
 	UDL.elements["//UserLang[@name='R']"]=rlang
