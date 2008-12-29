@@ -65,10 +65,10 @@ menu, tray, add, Show Simulations, showCounter
 menu, tray, add, Start Notepad++, RunNpp
 menu, tray, add, Reset R working directory, UpdateRWD
 menu, tray, add ; separator
-Menu, tray, add, About, MakeAboutDialog  ; Creates a new menu item.
+Menu, tray, add, About, ShowAbout  ; Creates a new menu item.
 
 gosub makeCounter
-
+gosub MakeAboutDialog
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;assign hotkeys dynamically
 if NOT makeglobal
@@ -236,8 +236,7 @@ UpdateRWD:
 	WinActivate ahk_class Notepad++
 	currdir:=getCurrNppFileDir()
 	StringReplace , wd, currdir, \, /, All 
-	msgbox %wd%
-	clipboard = setwd("%wd%")
+	clipboard = setwd("%wd%")`n
 	gosub Rpaste
 	return
 }
@@ -252,8 +251,8 @@ return
 MakeAboutDialog:
 {
 ;Gui, -AlwaysOnTop -SysMenu +Owner ; +Owner avoids a taskbar button.
-Gui, Add, Picture,,NppToR.png
-Gui, Add, Text,, 
+Gui, 2:Add, Picture,,icons\NppToR.png
+Gui, 2:Add, Text,, 
 (
 NppToR
 by Andrew Redd
@@ -261,7 +260,7 @@ by Andrew Redd
 version %version%
 use of this program or source files are governed by the MIT lisence. See License.txt.
 )
-Gui, Add, Text,, 
+Gui, 2:Add, Text,, 
 (
 This package enable syntax highlighting, code folding and autocompletion in notepad++.  This specific utility enables passing code from Notepad++ to the RGui.  
 
@@ -273,14 +272,17 @@ The following are the keyboard shortcuts (can be modified in the npptor.ini file
 
 (#=Win,!=Alt,^=Control,+=Shift)
 )
-Gui, Add, Button, Default, OK
-Gui, Show, , NppToR by Andrew Redd  ; NoActivate avoids deactivating the currently active window.
+Gui, 2:Add, Button, Default gButtonOK2, OK
+;Gui, 2:Show, , NppToR by Andrew Redd  ; NoActivate avoids deactivating the currently active window.
 return
 }
-ButtonOK:
-GuiClose:
-GuiEscape:
-Gui destroy
+ShowAbout:
+Gui , 2:Show,,NpptoR by Andrew Redd
+return
+ButtonOK2:
+GuiClose2:
+GuiEscape2:
+Gui 2:hide
 return
 
 CheckForNewLine(var)

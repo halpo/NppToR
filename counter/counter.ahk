@@ -105,7 +105,8 @@ Loop % LV_GetCount() ;%
 return
 }
 
-
+GuiClose:
+GuiEscape:
 ButtonHide:
 GUI Hide
 return
