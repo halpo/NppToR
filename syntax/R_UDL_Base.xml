@@ -9,7 +9,7 @@
             <Keywords name="Delimiters">&apos;&quot;0&apos;&quot;0</Keywords>
             <Keywords name="Folder+">{</Keywords>
             <Keywords name="Folder-">}</Keywords>
-            <Keywords name="Operators">+ - * / %% ^ &lt; &lt;= &gt; &gt;= == !=! &amp; | ~ -&lt; &gt;- $ @ : [ ] ( )</Keywords>
+            <Keywords name="Operators">, + - * / %% ^ &lt; &lt;= &gt; &gt;= == !=! &amp; | ~ -&lt; &gt;- $ @ : [ ] ( )</Keywords>
             <Keywords name="Comment">1 2 0#</Keywords>
             <Keywords name="Words1">if else for while repeat break next in TRUE FALSE NULL Inf NaN NA NA_integer_ NA_real_ NA_complex_ NA_character_ ... ..1 ..2 ..3 ..4 ..5 ..6 ..7 ..8 ..9</Keywords>
             <Keywords name="Words2"></Keywords>
