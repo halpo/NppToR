@@ -121,7 +121,11 @@ return
 }
 Rpaste:
 {
-	if clipboard<>""
+;	if clipboard<>
+	; isblank := 
+	; msgbox %isblank%
+	; msgbox %ERRRORLEVEL%
+	if !regExMatch(clipboard, "DS)^`s*$")
 	{
 		WinGet nppID, ID, A          ; save current window ID to return here later
 		RprocID:=getOrStartR()
@@ -136,7 +140,7 @@ Rpaste:
 		WinMenuSelectItem ,ahk_id %RprocID%,,Edit,paste
 		;WinMenuSelectItem ,ahk_id %RprocID%,,file,Print...
 		WinActivate ahk_id %nppID%    ; go back to the original window if moved
-	}
+	} 
 	sleep %Rpastewait%
 	if restoreclipboard=true
 	{
@@ -216,7 +220,7 @@ NppGetLineOrSelection:
 	clipwait .1
 	if clipboard = 
 	{
-		sendevent {end}{home 2}+{down}
+		sendevent {end}{home 2}+{end}+{right}
 		WinMenuSelectItem ,A,,Edit,Copy
 		sendevent {right}
 		if clipboard<>"" 
