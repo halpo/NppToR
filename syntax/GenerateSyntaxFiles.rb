@@ -6,7 +6,7 @@
 #
 
 
-#Dir.chdir("C:/Users/Andrew/Documents/Projects/npptor.sf.net/syntax")  #for development
+Dir.chdir("C:/Users/Andrew/Documents/Projects/npptor.sf.net/syntax")  #for development
 
 require 'rexml/document'
 require 'win32/registry'
@@ -82,7 +82,7 @@ Rlib.each{
 		aliases.each{ |line|
 			lwords = line.split
 			lwords.delete_at(0)
-			Words[priority] << lwords.grep(/^[A-Za-z\._]+[A-Za-z0-9\._]*$/)
+			Words[priority] << lwords.grep(/^[A-Za-z]+[A-Za-z\._]*[A-Za-z0-9\._]*$/)
 			Words[priority].flatten!
 		}
 	end
