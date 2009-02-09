@@ -134,7 +134,7 @@ Rpaste:
 			IfWinExist , RGui
 				msgbox , 16 ,R in MDI Mode, R in running in MDI mode. Please switch to SDI mode for this utility to work.
 			else
-				msgbox , 16 ,Could not find R, Could nor start or find R. Please check you installation or start R manually.
+				msgbox , 16 ,Could not find R, Could not start or find R. Please check you installation or start R manually.
 			return
 		}
 		WinMenuSelectItem ,ahk_id %RprocID%,,Edit,paste

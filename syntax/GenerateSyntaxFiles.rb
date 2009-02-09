@@ -53,6 +53,14 @@ Words={
 'other' => Array.new()
 }
 
+require 'rinruby'
+R.eval <<SETGENERIC
+		is.generic<-function(names){
+			sapply(names,function(n)
+				tryCatch(length(methods(n))>0,error=function(e)FALSE))
+		}
+SETGENERIC
+
 
 if ARGV[0] then Rlibpath = ARGV[0]
 else
