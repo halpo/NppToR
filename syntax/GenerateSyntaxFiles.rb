@@ -6,10 +6,11 @@
 #
 
 
-Dir.chdir("C:/Users/Andrew/Documents/Projects/npptor.sf.net/syntax")  #for development
+#Dir.chdir("C:/Documents and Settings/AREDD/My Documents/Projects/npptor.sf.net/syntax")  #for development
 
 require 'rexml/document'
 require 'win32/registry'
+load "GenericFilter.rb"
 
 
 rbase = REXML::Document.new(File.open("R_UDL_Base.xml"))
@@ -47,20 +48,16 @@ PkgPriority.default = 'other'
 
 #operators = {'+', '-', '*', '/', '%%', '^', '&lt;', '&lt;=', '&gt;', '&gt;=', '==', '!=!', '&amp;', '|', '~', '-&lt;', '&gt;-', '$', '@', ':', '[', ']'}
 
-Words={
+words={
 'base' => Array.new(),
 'recommended' => Array.new(),
 'other' => Array.new()
 }
-
-require 'rinruby'
-R.eval <<SETGENERIC
-		is.generic<-function(names){
-			sapply(names,function(n)
-				tryCatch(length(methods(n))>0,error=function(e)FALSE))
-		}
-SETGENERIC
-
+libraries={
+'base' => Array.new(),
+'recommended' => Array.new(),
+'other' => Array.new()
+}
 
 if ARGV[0] then Rlibpath = ARGV[0]
 else
@@ -84,30 +81,36 @@ Rlib.each{
 	if (File.directory?(Rlib.path.concat("\\").concat(foldername)) && File.exists?(Rlib.path.concat("\\").concat(foldername).concat('\\CONTENTS'))) then
 		puts "Processing #{foldername}"
 		priority = PkgPriority[foldername]
-		
+		libraries[priority] << foldername
 		lines = IO.readlines(Rlib.path.concat("\\").concat(foldername).concat('\\CONTENTS'))
 		aliases = lines.grep(/^Aliases/)
 		aliases.each{ |line|
 			lwords = line.split
 			lwords.delete_at(0)
-			Words[priority] << lwords.grep(/^[A-Za-z]+[A-Za-z\._]*[A-Za-z0-9\._]*$/)
-			Words[priority].flatten!
+			words[priority] << lwords.grep(/^[A-Za-z]+[A-Za-z\._]*[A-Za-z0-9\._]*$/)
+			words[priority].flatten!
 		}
 	end
 }
 
 BuiltInWords = %w{if else for while repeat break next in TRUE FALSE NULL Inf NaN NA NA_integer_ NA_real_ NA_complex_ NA_character_ ... ..1 ..2 ..3 ..4 ..5 ..6 ..7 ..8 ..9}
 
-Words['base'] = Words['base'].uniq - BuiltInWords
-# Words['recommended']-=Words['base']
-Words['recommended']= (Words['recommended'].uniq - BuiltInWords) - Words['base']
-# Words['other'] -= Words['recommended'] | Words['base']
-Words['other']= (((Words['other'].uniq - BuiltInWords) - Words['recommended']) - Words['base'])
+words['base'] = words['base'].uniq - BuiltInWords
+words['recommended']= (words['recommended'].uniq - BuiltInWords) - words['base']
+words['other']= (((words['other'].uniq - BuiltInWords) - words['recommended']) - words['base'])
+
+puts "filtering base package keywords"
+base_filter=GenericFilter.new(words['base'],libraries=libraries['base'])
+puts "filtering recommended package keywords"
+recommended_filter=GenericFilter.new(words['recommended'], base_filter.S3generics,libraries=libraries['recommended'])
+puts "filtering other packages keywords"
+other_filter=GenericFilter.new(words['other'], base_filter.S3generics+recommended_filter.S3generics,libraries=libraries['other'])
+
 
 rlang = rbase.elements["//UserLang[@name='R']"]
-rlang.elements["//Keywords[@name='Words2']"].text = Words['base'].join(" ")
-rlang.elements["//Keywords[@name='Words3']"].text = Words['recommended'].join(" ")
-rlang.elements["//Keywords[@name='Words4']"].text = Words['other'].join(" ")
+rlang.elements["//Keywords[@name='Words2']"].text = base_filter.filtered.join(" ")
+rlang.elements["//Keywords[@name='Words3']"].text = recommended_filter.filtered.join(" ")
+rlang.elements["//Keywords[@name='Words4']"].text = other_filter.filtered.join(" ")
 
 if !UDL.elements["//UserLang[@name='R']"].nil? then
 	UDL.elements["//UserLang[@name='R']"]=rlang

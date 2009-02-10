@@ -2,7 +2,7 @@ require 'rinruby'
 R.quit
 
 class GenericFilter
-	def initialize(keywords=nil, extragenerics=Array.new ,r_exe=nil)
+	def initialize(keywords=nil, extragenerics=Array.new ,r_exe=nil, libraries= nil)
 		@extragenerics = extragenerics
 		@generics=Array.new
 		@specifics=Array.new
@@ -15,6 +15,10 @@ class GenericFilter
 						warning=function(w)NA))
 				}
 		ISGENERIC
+		if(!libraries.nil?) then libraries.each{|lib|
+			puts lib
+			@myR.eval "library(#{lib})"
+		} end
 		# BEGIN FILTERING LIST OF KEYWORDS TO PARTS
 		if(!keywords.nil?)
 			keywords.delete_if{ |key|
