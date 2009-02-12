@@ -2,8 +2,8 @@ require 'rinruby'
 R.quit
 
 class GenericFilter
-	def initialize(keywords=nil, extragenerics=Array.new ,r_exe=nil, libraries= nil)
-		@extragenerics = extragenerics
+	def initialize(keywords=nil, extragenerics=Array.new ,r_exe=nil, libs= nil)
+    @extragenerics = extragenerics
 		@generics=Array.new
 		@specifics=Array.new
 		@myR = RinRuby.new(echo=false,interactive=false,executable=r_exe)
@@ -15,8 +15,7 @@ class GenericFilter
 						warning=function(w)NA))
 				}
 		ISGENERIC
-		if(!libraries.nil?) then libraries.each{|lib|
-			puts lib
+		if(!libs.nil?) then libs.each{|lib|
 			@myR.eval "library(#{lib})"
 		} end
 		# BEGIN FILTERING LIST OF KEYWORDS TO PARTS

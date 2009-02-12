@@ -29,7 +29,7 @@ Loop, %0%  ; For each parameter:
 ;INI file paramters
 inifile = %A_ScriptDir%\npptor.ini
 ;executables
-IniRead ,Rguiexe, %inifile%, executables, R,""
+IniRead ,Rhome, %inifile%, executables, R,""
 IniRead ,Rcmdparms, %inifile%, executables, Rcmdparms,""
 IniRead ,Nppexe, %inifile%, executables, Npp,""
 ;hotkeys
@@ -64,6 +64,7 @@ menu, tray, add ; separator
 menu, tray, add, Show Simulations, showCounter
 menu, tray, add, Start Notepad++, RunNpp
 menu, tray, add, Reset R working directory, UpdateRWD
+menu, tray, add, Regenerate R Syntax files, DoSyntax
 menu, tray, add ; separator
 Menu, tray, add, About, ShowAbout  ; Creates a new menu item.
 
@@ -296,6 +297,13 @@ CheckForNewLine(var)
 		var = %var% `r`n
 	return %var%
 }
+
+DoSyntax:
+ifwinexist ahk_class Notepad++
+  winclose,,,15
+RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.rb "%Rhome%" "%NppConfig%"
+run %Nppexe%
+return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Includes

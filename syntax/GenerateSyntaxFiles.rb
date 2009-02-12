@@ -6,15 +6,39 @@
 #
 
 
-#Dir.chdir("C:/Documents and Settings/AREDD/My Documents/Projects/npptor.sf.net/syntax")  #for development
+#Dir.chdir("C:/Documents and Settings/AREDD/My Dogcuments/Projects/npptor.sf.net/syntax")  #for development
 
 require 'rexml/document'
 require 'win32/registry'
 load "GenericFilter.rb"
 
+if ARGV[0] then r_home = ARGV[0]
+else
+	Win32::Registry::HKEY_LOCAL_MACHINE.open('Software\R-core\R') do |reg|
+		reg_type, r_home = reg.read('InstallPath')
+	end
+end
+puts "R home directory: #{r_home}"
+r_exe = r_home ? "#{r_home}\\bin\\Rterm.exe" : nil 
+if ARGV[1] then NppConfig = ARGV[1]
+else
+	npp_config = "#{ENV['APPDATA']}\\Notepad++"
+end
+puts "Notepad++ Config Directory:#{npp_config}"
+=begin  #old code for running default location
+if File.directory?(Rlibpath) 
+then
+	if File.readable?(Rlibpath)
+	then 
+		Rlib=Dir.new(Rlibpath)
+	else raise "R library not readable"
+	end
+else raise "R library not found"
+end
+=end
 
 rbase = REXML::Document.new(File.open("R_UDL_Base.xml"))
-UDL = REXML::Document.new(File.open("#{ENV['APPDATA']}/Notepad++/userDefineLang.xml"))
+UDL = REXML::Document.new(File.open("#{npp_config}\\userDefineLang.xml"))
 
 PkgPriority = { 
 "base"       =>	"base"       ,
@@ -59,30 +83,22 @@ libraries={
 'other' => Array.new()
 }
 
-if ARGV[0] then Rlibpath = ARGV[0]
-else
-	Win32::Registry::HKEY_LOCAL_MACHINE.open('Software\R-core\R') do |reg|
-		reg_type, reg_val = reg.read('InstallPath')
-		Rlibpath = reg_val.concat('\\library')
-	end
-end
-if File.directory?(Rlibpath) 
-then
-	if File.readable?(Rlibpath)
-	then 
-		Rlib=Dir.new(Rlibpath)
-	else raise "R library not readable"
-	end
-else raise "R library not found"
-end
-puts "using R library: #{Rlib.path}"
-Rlib.each{
+thisR=RinRuby.new(echo=false,interactive=false,executable=r_exe)
+r_libs = thisR.pull '.libPaths()'
+thisR.quit
+puts "libraries:"
+puts r_libs
+
+r_libs.each{|libpath|
+lib=Dir.new(libpath)
+puts "reading R library: #{libpath}"
+lib.each{
 	|foldername| 
-	if (File.directory?(Rlib.path.concat("\\").concat(foldername)) && File.exists?(Rlib.path.concat("\\").concat(foldername).concat('\\CONTENTS'))) then
+	if (File.directory?(lib.path.concat("\\").concat(foldername)) && File.exists?(lib.path.concat("\\").concat(foldername).concat('\\CONTENTS'))) then
 		puts "Processing #{foldername}"
 		priority = PkgPriority[foldername]
 		libraries[priority] << foldername
-		lines = IO.readlines(Rlib.path.concat("\\").concat(foldername).concat('\\CONTENTS'))
+		lines = IO.readlines(lib.path.concat("\\").concat(foldername).concat('\\CONTENTS'))
 		aliases = lines.grep(/^Aliases/)
 		aliases.each{ |line|
 			lwords = line.split
@@ -92,7 +108,7 @@ Rlib.each{
 		}
 	end
 }
-
+}
 BuiltInWords = %w{if else for while repeat break next in TRUE FALSE NULL Inf NaN NA NA_integer_ NA_real_ NA_complex_ NA_character_ ... ..1 ..2 ..3 ..4 ..5 ..6 ..7 ..8 ..9}
 
 words['base'] = words['base'].uniq - BuiltInWords
@@ -100,11 +116,11 @@ words['recommended']= (words['recommended'].uniq - BuiltInWords) - words['base']
 words['other']= (((words['other'].uniq - BuiltInWords) - words['recommended']) - words['base'])
 
 puts "filtering base package keywords"
-base_filter=GenericFilter.new(words['base'],libraries=libraries['base'])
+base_filter=GenericFilter.new(words['base'],[],r_exe, libraries['base'])
 puts "filtering recommended package keywords"
-recommended_filter=GenericFilter.new(words['recommended'], base_filter.S3generics,libraries=libraries['recommended'])
+recommended_filter=GenericFilter.new(words['recommended'], base_filter.S3generics, r_exe, libraries['recommended'])
 puts "filtering other packages keywords"
-other_filter=GenericFilter.new(words['other'], base_filter.S3generics+recommended_filter.S3generics,libraries=libraries['other'])
+other_filter=GenericFilter.new(words['other'], base_filter.S3generics+recommended_filter.S3generics, r_exe, libraries['other'])
 
 
 rlang = rbase.elements["//UserLang[@name='R']"]
@@ -118,6 +134,6 @@ else
 	UDL.root.add_element(rlang)
 end
 
-newUDL = File.open("#{ENV['APPDATA']}/Notepad++/userDefineLang.xml","w")
+newUDL = File.open("#{npp_config}/userDefineLang.xml","w")
 UDL.write(newUDL)
 newUDL.close
