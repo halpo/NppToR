@@ -300,7 +300,12 @@ CheckForNewLine(var)
 
 DoSyntax:
 ifwinexist ahk_class Notepad++
-  winclose,,,15
+{
+	msgbox ,4,Close Notepad++, Notepad++ must be closed to generate the syntax files.  Continue?
+	ifmsgbox no 
+		return
+	winclose,,,15
+}
 RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.rb "%Rhome%" "%NppConfig%"
 run %Nppexe%
 return

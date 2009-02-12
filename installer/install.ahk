@@ -22,11 +22,13 @@ if %errorlevel%
 envget APPDATA, APPDATA
 envget HOMEPATH, HOMEPATH
 envget HOMEDRIVE, HOMEDRIVE
+envget USERPROFILE, USERPROFILE
 HOME = %HOMEDRIVE%%HOMEPATH%
 
 RegRead, regRdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
 RegRead, startup, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Startup
-RegRead, start_menu, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Programs
+RegRead, start_menu_base, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Programs
+stringreplace start_menu,start_menu_base, `%USERPROFILE`%, %USERPROFILE%
 
 ;Gui Creation
 Gui, +OwnDialogs
@@ -76,40 +78,34 @@ GUICONTROL ,Disable, BtnCancel
 ifnotexist %INSTALLDIR%
 	filecreatedir %INSTALLDIR%
 ;executable files
-FILEINSTALL ,NppToR.exe, %INSTALLDIR%,1
+FILEINSTALL ,..\NppToR.exe, %INSTALLDIR%\NppToR.exe,1
 if %errorlevel%
 	msgbox  2 ,NppToR.exe could not be copied. Continue?,Could not be copied
-ifmsgbox retry
-{
-	FILECOPY ,..\NppToR.exe, %INSTALLDIR%,1
-	if %errorlevel%
-		exitapp 
-}
 ifmsgbox abort
 	exitapp
-FILEINSTALL ,..\NppEditsR\NppEditR.exe, %INSTALLDIR%,1
-FILEINSTALL ,..\syntax\GenerateSyntaxFiles.exe, %INSTALLDIR%,1
+FILEINSTALL ,..\NppEditsR\NppEditR.exe, %INSTALLDIR%\NppEditR.exe,1
+FILEINSTALL ,..\syntax\GenerateSyntaxFiles.exe, %INSTALLDIR%\GenerateSyntaxFiles.exe,1
+IniWrite, http://npptor.sourceforge.net, %INSTALLDIR%\npptor.url, InternetShortcut, URL 
 ;FILEINSTALL ,uninstall.exe,%INSTALLDIR%,1
-GuiControl,, InstallProgress, +10  ; Increase the current position by 20.
+GuiControl,, InstallProgress, +10
 
 ;setting files
-FILEINSTALL ,..\npptor.ini, %INSTALLDIR%,0
+FILEINSTALL ,..\npptor.ini, %INSTALLDIR%\npptor.ini,0
 
 ;documentation files
-FILEINSTALL ,..\iniparameters.txt,%INSTALLDIR%,0
-FILEINSTALL ,..\License.txt,%INSTALLDIR%,0
-GuiControl,, InstallProgress, +10  ; Increase the current position by 20.
+FILEINSTALL ,..\iniparameters.txt,%INSTALLDIR%\iniparameters.txt,0
+FILEINSTALL ,..\License.txt,%INSTALLDIR%\License.txt,0
+GuiControl,, InstallProgress, +10
 
 ;write ini settings
 if Rdir<>regRdir
-{
-  IniWrite, Value, %INSTALLDIR%\npptor.ini, executables, Rhome 
-}
+  IniWrite, %Rdir%, %INSTALLDIR%\npptor.ini, executables, Rhome 
+
 ; if NppConfig<>%APPDATA%\Notepad++
 ; {
   ; IniWrite, Value, %INSTALLDIR%\npptor.ini, executables, Npp 
 ; }
-GuiControl,, InstallProgress, +10  ; Increase the current position by 20.
+GuiControl,, InstallProgress, +10
 
 
 ;set R options to work with NppToR
@@ -117,16 +113,17 @@ if doRprofile
 	fileappend ,options(editor="%INSTALLDIR%\NppEditsR.exe") ,%HOME%\Rprofile
 if doRconsole
 	fileappend ,MDI = no, %HOME%\Rconsole
-GuiControl,, InstallProgress, +10  ; Increase the current position by 20.
+GuiControl,, InstallProgress, +10
 
 ;start menu entries
 ifnotexist %start_menu%\NppToR
 	filecreatedir %start_menu%\NppToR
 FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %start_menu%\NppToR\NpptoR.lnk ,,, Enables passing code from notepad++ to the R interpreter.
 FileCreateShortcut, %INSTALLDIR%\License.txt, %start_menu%\NppToR\License.txt.lnk
+FileCreateShortcut, %INSTALLDIR%\npptor.url, %start_menu%\NppToR\Website.lnk
 if addStartup
 	FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %Startup%\NpptoR.lnk ,, -startup, Enables passing code from notepad++ to the R interpreter.
-GuiControl,, InstallProgress, +10  ; Increase the current position by 20.
+GuiControl,, InstallProgress, +10
 	
 ;generate syntax
 ifwinexist ahk_class Notepad++
@@ -134,8 +131,8 @@ ifwinexist ahk_class Notepad++
 	winclose,,,15
 	restart_npp = true
 } else restart_npp = false
-RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe "%Rhome%" "%NppConfig%"
-GuiControl,, InstallProgress, +50  ; Increase the current position by 20.
+RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe "%Rdir%" "%NppConfig%"
+GuiControl,, InstallProgress, +50 
 
 ;runinstalled NppToR
 if restart_npp 

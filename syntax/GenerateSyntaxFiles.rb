@@ -11,6 +11,9 @@
 require 'rexml/document'
 require 'win32/registry'
 load "GenericFilter.rb"
+load "R_UDL_Base.xml.rb"
+
+puts ARGV
 
 if ARGV[0] then r_home = ARGV[0]
 else
@@ -20,24 +23,14 @@ else
 end
 puts "R home directory: #{r_home}"
 r_exe = r_home ? "#{r_home}\\bin\\Rterm.exe" : nil 
-if ARGV[1] then NppConfig = ARGV[1]
+if ARGV[1] then npp_config = ARGV[1]
 else
 	npp_config = "#{ENV['APPDATA']}\\Notepad++"
 end
 puts "Notepad++ Config Directory:#{npp_config}"
-=begin  #old code for running default location
-if File.directory?(Rlibpath) 
-then
-	if File.readable?(Rlibpath)
-	then 
-		Rlib=Dir.new(Rlibpath)
-	else raise "R library not readable"
-	end
-else raise "R library not found"
-end
-=end
 
-rbase = REXML::Document.new(File.open("R_UDL_Base.xml"))
+# rbase = REXML::Document.new(File.open("R_UDL_Base.xml"))
+rbase = REXML::Document.new(R_UDL_Base)
 UDL = REXML::Document.new(File.open("#{npp_config}\\userDefineLang.xml"))
 
 PkgPriority = { 

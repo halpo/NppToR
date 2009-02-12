@@ -1,3 +1,4 @@
+R_UDL_Base = <<ENDXML
 <NotepadPlus>
     <UserLang name="R" ext="R">	<!--Added as part of NppToR-->
         <Settings>
@@ -34,3 +35,4 @@
         </Styles>
     </UserLang>
 </NotepadPlus>
+ENDXML
