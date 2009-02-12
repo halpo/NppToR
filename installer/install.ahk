@@ -11,8 +11,12 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+DetectHiddenWindows, On
 
-Fileappend ,test,testfile.txt
+;kill any current running copy
+process, close, NpptoR.exe
+if %errorlevel%
+	winwaitclose ahk_pid %errorlevel%
 
 ;environment variables
 envget APPDATA, APPDATA
@@ -21,10 +25,11 @@ envget HOMEDRIVE, HOMEDRIVE
 HOME = %HOMEDRIVE%%HOMEPATH%
 
 RegRead, regRdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-RegRead, Startup, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurentVersion\Explorer\User Shell Folders\Startup, Startup
-msgbox %Startup%
+RegRead, startup, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Startup
+RegRead, start_menu, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Programs
 
 ;Gui Creation
+Gui, +OwnDialogs
 GUI ,ADD, PIC,, %A_ScriptDir%\..\icons\NppToR.png
 GUI ,FONT, s14 bold
 GUI ,ADD, TEXT,ym,NppToR Install
@@ -68,9 +73,21 @@ GUICONTROL ,Disable, BtnInstall
 GUICONTROL ,Disable, BtnCancel
 
 ;install section
+ifnotexist %INSTALLDIR%
+	filecreatedir %INSTALLDIR%
 ;executable files
-FILEINSTALL ,..\NppToR.exe, %INSTALLDIR%\,1
-FILEINSTALL ,..\NppEditsR\NppEditsR.exe, %INSTALLDIR%,1
+FILEINSTALL ,NppToR.exe, %INSTALLDIR%,1
+if %errorlevel%
+	msgbox  2 ,NppToR.exe could not be copied. Continue?,Could not be copied
+ifmsgbox retry
+{
+	FILECOPY ,..\NppToR.exe, %INSTALLDIR%,1
+	if %errorlevel%
+		exitapp 
+}
+ifmsgbox abort
+	exitapp
+FILEINSTALL ,..\NppEditsR\NppEditR.exe, %INSTALLDIR%,1
 FILEINSTALL ,..\syntax\GenerateSyntaxFiles.exe, %INSTALLDIR%,1
 ;FILEINSTALL ,uninstall.exe,%INSTALLDIR%,1
 GuiControl,, InstallProgress, +10  ; Increase the current position by 20.
@@ -88,10 +105,10 @@ if Rdir<>regRdir
 {
   IniWrite, Value, %INSTALLDIR%\npptor.ini, executables, Rhome 
 }
-if NppConfig<>%APPDATA%\Notepad++
-{
-  IniWrite, Value, %INSTALLDIR%\npptor.ini, executables, Npp 
-}
+; if NppConfig<>%APPDATA%\Notepad++
+; {
+  ; IniWrite, Value, %INSTALLDIR%\npptor.ini, executables, Npp 
+; }
 GuiControl,, InstallProgress, +10  ; Increase the current position by 20.
 
 
@@ -102,18 +119,30 @@ if doRconsole
 	fileappend ,MDI = no, %HOME%\Rconsole
 GuiControl,, InstallProgress, +10  ; Increase the current position by 20.
 
+;start menu entries
+ifnotexist %start_menu%\NppToR
+	filecreatedir %start_menu%\NppToR
+FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %start_menu%\NppToR\NpptoR.lnk ,,, Enables passing code from notepad++ to the R interpreter.
+FileCreateShortcut, %INSTALLDIR%\License.txt, %start_menu%\NppToR\License.txt.lnk
 if addStartup
 	FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %Startup%\NpptoR.lnk ,, -startup, Enables passing code from notepad++ to the R interpreter.
 GuiControl,, InstallProgress, +10  ; Increase the current position by 20.
 	
 ;generate syntax
 ifwinexist ahk_class Notepad++
-  winclose,,,15
-RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.rb "%Rhome%" "%NppConfig%"
+{
+	winclose,,,15
+	restart_npp = true
+} else restart_npp = false
+RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe "%Rhome%" "%NppConfig%"
 GuiControl,, InstallProgress, +50  ; Increase the current position by 20.
 
 ;runinstalled NppToR
-RUN ,%INSTALLDIR%\NppToR.exe -startup
+if restart_npp 
+	RUN ,%INSTALLDIR%\NppToR.exe
+else
+	RUN ,%INSTALLDIR%\NppToR.exe -startup
+ExitApp
 return
 
 DoCancel:

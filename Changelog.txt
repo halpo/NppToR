@@ -1,5 +1,6 @@
 NppToR CHANGELOG
 ----------------
+2/11/2009 10:16 PM - added build.npx to hold NppExec command that need to be ran to build a new install.
 2/10/2009 9:26 PM - Finished word on GenerateSyntax.rb including the work on GenericFilter.rb which is part of the generate sytax structure.
 1/20/2009 1:26 PM - Fixed bug for passing lines when line wrapping is on. (it wouldn't)
 1/20/2009 1:25 PM - Added a regular expression match (regExMatch) to prevent lines with only whitespace being passes.
