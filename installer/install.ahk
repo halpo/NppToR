@@ -110,9 +110,9 @@ GuiControl,, InstallProgress, +10
 
 ;set R options to work with NppToR
 if doRprofile
-	fileappend ,options(editor="%INSTALLDIR%\NppEditsR.exe") ,%HOME%\Rprofile
+	fileappend ,options(editor="%INSTALLDIR%NppEditsR.exe")`n ,%HOME%\Rprofile
 if doRconsole
-	fileappend ,MDI = no, %HOME%\Rconsole
+	fileappend ,MDI = no`n, %HOME%\Rconsole
 GuiControl,, InstallProgress, +10
 
 ;start menu entries
