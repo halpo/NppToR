@@ -2,7 +2,7 @@
 ; by Andrew Redd 2008 <halpo@users.sourceforge.net>
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
 
-#NOENV
+; #NOENV
 #SINGLEINSTANCE ignore
 #MaxThreads 10
 
@@ -14,6 +14,10 @@ version = 1.9.0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin Initial execution code
+
+;set environment variable for spawned R processes
+envset ,R_PROFILE_USER, %A_ScriptDir%\Rprofile
+envset ,R_USER, %A_ScriptDir%
 
 ;;;;;;;;;;;;;;;;;;;;
 ;CMD line Parameters
@@ -29,9 +33,9 @@ Loop, %0%  ; For each parameter:
 ;INI file paramters
 inifile = %A_ScriptDir%\npptor.ini
 ;executables
-IniRead ,Rhome, %inifile%, executables, R,""
-IniRead ,Rcmdparms, %inifile%, executables, Rcmdparms,""
-IniRead ,Nppexe, %inifile%, executables, Npp,""
+IniRead ,Rhome, %inifile%, executables, R,
+IniRead ,Rcmdparms, %inifile%, executables, Rcmdparms,
+IniRead ,Nppexe, %inifile%, executables, Npp,
 ;hotkeys
 IniRead ,passlinekey, %inifile%, hotkeys, passline,F8
 IniRead ,passfilekey, %inifile%, hotkeys, passfile,^F8
@@ -45,21 +49,24 @@ IniRead ,Rpastewait, %inifile%, controls, Rpastewait, 50
 IniRead ,Rrunwait, %inifile%, controls, Rrunwait, 10
 IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, true
 
-if nppexe=""
+if nppexe=ERROR
 {
 	regread, nppdir, hkey_local_machine, software\notepad++
 	nppexe = %nppdir%\notepad++.exe
 }
-if Rguiexe=""
+if Rhome=ERROR
 {	
 	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-	Rguiexe = %Rdir%\bin\Rgui.exe
+	Rhome = %Rdir%
 }
+Rguiexe = %Rhome%\bin\Rgui.exe
 if NOT startup
 {
 	run %nppexe%
 }
-
+if Rcmdparms=ERROR
+	Rcmdparms=
+;menu functions
 menu, tray, add ; separator
 menu, tray, add, Show Simulations, showCounter
 menu, tray, add, Start Notepad++, RunNpp
@@ -163,6 +170,7 @@ getOrStartR()
 		global Rcmdparms
 		getCurrNppFileDir(File,dir)
 		setworkingdir %dir%
+		msgbox %Rguiexe% %RcmdParms%
 		run %Rguiexe% %RcmdParms%,dir,,RprocID
 		winwait ,R Console,, %Rrunwait%
 		WinGet RprocID, ID ;,A

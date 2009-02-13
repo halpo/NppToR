@@ -23,12 +23,13 @@ envget APPDATA, APPDATA
 envget HOMEPATH, HOMEPATH
 envget HOMEDRIVE, HOMEDRIVE
 envget USERPROFILE, USERPROFILE
-HOME = %HOMEDRIVE%%HOMEPATH%
 
 RegRead, regRdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+RegRead, personalfolder, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Personal
 RegRead, startup, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Startup
 RegRead, start_menu_base, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Programs
 stringreplace start_menu,start_menu_base, `%USERPROFILE`%, %USERPROFILE%
+stringreplace HOME,personalfolder, `%USERPROFILE`%, %USERPROFILE%
 
 ;Gui Creation
 Gui, +OwnDialogs
@@ -110,9 +111,13 @@ GuiControl,, InstallProgress, +10
 
 ;set R options to work with NppToR
 if doRprofile
-	fileappend ,options(editor="%INSTALLDIR%NppEditsR.exe")`n ,%HOME%\Rprofile
+{
+	optstring = options(editor="%INSTALLDIR%NppEditsR.exe")`n
+	StringReplace options, optstring, \ , / , All
+	fileappend , %options% , %INSTALLDIR%\Rprofile
+}
 if doRconsole
-	fileappend ,MDI = no`n, %HOME%\Rconsole
+	fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
 GuiControl,, InstallProgress, +10
 
 ;start menu entries
@@ -135,11 +140,12 @@ RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe "%Rdir%" "%NppConfig%"
 GuiControl,, InstallProgress, +50 
 
 ;runinstalled NppToR
-if restart_npp 
+if restart_npp = true
 	RUN ,%INSTALLDIR%\NppToR.exe
 else
 	RUN ,%INSTALLDIR%\NppToR.exe -startup
 ExitApp
+msgbox 0, Installation Finished, NppToR has been successfully setup for you user profile.
 return
 
 DoCancel:
