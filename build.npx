@@ -2,7 +2,7 @@
 // builds the executables and the install files for NppToR
 set version = 1.9.0
 
-set AHK2EXE = C:\programs\AutoHotKey\Compiler\Ahk2exe.exe
+set AHK2EXE = $(SYS.PROGRAMFILES)\AutoHotKey\Compiler\Ahk2exe.exe
 
 // build GenerateSyntaaxFiles.exe
 // cd syntax
@@ -15,3 +15,5 @@ $(AHK2EXE) /in NppToR.ahk /out NppToR.exe /icon icons\NppToR.ico
 
 // compile install script
 $(AHK2EXE) /in installer\install.ahk /out NppToR-$(version).exe /icon icons\NppToR.ico
+
+npp_run NppToR-$(version).exe

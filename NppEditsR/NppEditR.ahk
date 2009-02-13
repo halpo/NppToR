@@ -16,10 +16,12 @@
 #NoTrayIcon  ; Prevents icon in system tray
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+settitlematchmode 2
 
 winget ,RID, ID, A  ;Assume R is active window retrieve ahk_id 
+in1 = %1%
 
-inifile = ..\npptor.ini
+inifile = npptor.ini
 IniRead ,Nppexe, %inifile%, executables, Npp,""
 if nppexe=""
 {
@@ -27,7 +29,7 @@ if nppexe=""
 	nppexe = %nppdir%\notepad++.exe
 }
 
-run , "%nppexe%" "%1%" 
+run , "%nppexe%" "%in1%" 
 
 Gui , +AlwaysOnTop +toolWindow +LastFound
 GUI , Margin,, x0 y0
@@ -37,11 +39,12 @@ Gui , Show,,NppToR
 return
 
 ButtonReturnToR:
-run , "%nppexe%" "%1%" 
-WinWait %1%
+SplitPath, in1 , OutFileName, OutDir, OutExtension, OutNameNoExt, OutDrive
+run , "%nppexe%" "%in1%" 
+WinWait %OutFileName%
 WinMenuSelectItem ,,,File,Save
 WinMenuSelectItem ,,,File,Close
-WinWaitClose %1%
+WinWaitClose %OutFileName%
 WinActivate ahk_id %RID%
 ;continue on
 GuiClose:

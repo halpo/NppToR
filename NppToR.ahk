@@ -170,7 +170,6 @@ getOrStartR()
 		global Rcmdparms
 		getCurrNppFileDir(File,dir)
 		setworkingdir %dir%
-		msgbox %Rguiexe% %RcmdParms%
 		run %Rguiexe% %RcmdParms%,dir,,RprocID
 		winwait ,R Console,, %Rrunwait%
 		WinGet RprocID, ID ;,A

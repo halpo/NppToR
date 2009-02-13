@@ -26,8 +26,9 @@ envget USERPROFILE, USERPROFILE
 
 RegRead, regRdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
 RegRead, personalfolder, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Personal
-RegRead, startup, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Startup
+RegRead, startup_base, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Startup
 RegRead, start_menu_base, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Programs
+stringreplace startup,startup_base, `%USERPROFILE`%, %USERPROFILE%
 stringreplace start_menu,start_menu_base, `%USERPROFILE`%, %USERPROFILE%
 stringreplace HOME,personalfolder, `%USERPROFILE`%, %USERPROFILE%
 
@@ -53,8 +54,8 @@ GUICONTROL ,,Rdir,%regRdir%
 GUI ,ADD, TEXT, wp, Notepad++ config directory (defaults to `%APPDATA`%\Notepad++)
 GUI ,ADD, EDIT, wp vNppConfig 
 GUICONTROL ,,NppConfig, %APPDATA%\Notepad++\
-GUI	,ADD, CHECKBOX,wp vdoRconsole checked,Add/Edit User Rconsole to make use of SDI(required by NppToR)
-GUI	,ADD, CHECKBOX,wp vdoRprofile checked,Add/Edit User Rprofile to make Notepad++ the editor for editing initiated from R.
+; GUI	,ADD, CHECKBOX,wp vdoRconsole checked,Add/Edit User Rconsole to make use of SDI(required by NppToR)
+; GUI	,ADD, CHECKBOX,wp vdoRprofile checked,Add/Edit User Rprofile to make Notepad++ the editor for editing initiated from R.
 GUI	,ADD, CHECKBOX,wp vaddStartup checked,launch at startup?.
 GUI ,ADD, PROGRESS, wp h20 cBlue vInstallProgress
 GUI ,ADD,BUTTON,section X+-155 Y+5 w75 gdoinstall default,&Install
@@ -110,13 +111,13 @@ GuiControl,, InstallProgress, +10
 
 
 ;set R options to work with NppToR
-if doRprofile
-{
-	optstring = options(editor="%INSTALLDIR%NppEditsR.exe")`n
-	StringReplace options, optstring, \ , / , All
+;if doRprofile
+; {
+	optstring = options(editor="%INSTALLDIR%NppEditR.exe")`n
+	StringReplace options, optstring, \ , \\ , All
 	fileappend , %options% , %INSTALLDIR%\Rprofile
-}
-if doRconsole
+; }
+; if doRconsole
 	fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
 GuiControl,, InstallProgress, +10
 
