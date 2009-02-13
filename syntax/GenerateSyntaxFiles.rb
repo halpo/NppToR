@@ -31,7 +31,11 @@ puts "Notepad++ Config Directory:#{npp_config}"
 
 # rbase = REXML::Document.new(File.open("R_UDL_Base.xml"))
 rbase = REXML::Document.new(R_UDL_Base)
-UDL = REXML::Document.new(File.open("#{npp_config}\\userDefineLang.xml"))
+begin
+	UDL = REXML::Document.new(File.open("#{npp_config}\\userDefineLang.xml"))
+rescue Errno::ENOENT
+	UDL = rbase.clone
+end 
 
 PkgPriority = { 
 "base"       =>	"base"       ,

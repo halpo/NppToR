@@ -313,7 +313,7 @@ ifwinexist ahk_class Notepad++
 		return
 	winclose,,,15
 }
-RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.rb "%Rhome%" "%NppConfig%"
+RUNWAIT ,%A_ScriptDir%\GenerateSyntaxFiles.rb "%Rhome%" "%NppConfig%"
 run %Nppexe%
 return
 

@@ -1,5 +1,8 @@
 NppToR CHANGELOG
 ----------------
+2/13/2009 1:19 PM - fixed bug 2596859 - changed by creating a copy of rbase if UDL does not exist
+2/13/2009 1:19 PM - fixed bug 2596827 - copy paste error. for got to change variable name.
+
 2/13/2009 11:36 AM - Version 1.9.0 (Version 2.0 beta) released
 2/13/2009 11:30 AM - Fixed bug in NppEditR so that it will return to R better.
 2/13/2009 11:30 AM - tweeked installer again.  everything should be installed now
