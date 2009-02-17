@@ -11,6 +11,7 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+#NoTrayIcon
 DetectHiddenWindows, On
 
 ;kill any current running copy
@@ -141,7 +142,7 @@ RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe "%Rdir%" "%NppConfig%"
 GuiControl,, InstallProgress, +50 
 
 ;runinstalled NppToR
-if restart_npp = true
+if %restart_npp%
 	RUN ,%INSTALLDIR%\NppToR.exe
 else
 	RUN ,%INSTALLDIR%\NppToR.exe -startup

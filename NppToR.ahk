@@ -3,14 +3,14 @@
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
 
 ; #NOENV
-#SINGLEINSTANCE ignore
+#SINGLEINSTANCE force
 #MaxThreads 10
 
 AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows On
 
-version = 1.9.0 
+version = 1.9.1 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin Initial execution code
@@ -21,7 +21,6 @@ envset ,R_USER, %A_ScriptDir%
 
 ;;;;;;;;;;;;;;;;;;;;
 ;CMD line Parameters
-startup = false
 Loop, %0%  ; For each parameter:
 {
     param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
@@ -60,10 +59,9 @@ if Rhome=ERROR
 	Rhome = %Rdir%
 }
 Rguiexe = %Rhome%\bin\Rgui.exe
-if NOT startup
-{
+; msgbox %startup%
+if  not startup
 	run %nppexe%
-}
 if Rcmdparms=ERROR
 	Rcmdparms=
 ;menu functions
