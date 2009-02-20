@@ -59,7 +59,6 @@ if Rhome=ERROR
 	Rhome = %Rdir%
 }
 Rguiexe = %Rhome%\bin\Rgui.exe
-; msgbox %startup%
 if  not startup
 	run %nppexe%
 if Rcmdparms=ERROR
