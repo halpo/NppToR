@@ -21,3 +21,4 @@ SECTION controls (tuned for each machine)
 Rpastewait			50		time in miliseconds for script to wait before restoring the clipboard.
 Rrunwait			10		time in seconds to wait for the Rgui to open before considering failure.
 restoreclipboard	true	restoreclipboard after passing code? true/false
+appendnewline		true	should the program automatically add a newline to selections when passed when it does not terminate is a new line?

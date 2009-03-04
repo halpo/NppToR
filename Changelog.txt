@@ -1,5 +1,8 @@
 NppToR CHANGELOG
 ----------------
+3/3/09 10:31 PM - Fixed a bug in vista by changing the DetectHiddenWindows to Off
+3/3/09 10:31 PM - Added the ini paramter appendnewline and changed default behavior
+
 7:49 AM 2/17/2009 - refixed startup bug.  deleted compiled exes (do not belong in repository).
 2/16/2009 10:37 PM - Fixed startup bug.  Now starts notepad++ Automatically when NppToR starts unlesss -startup is given as a command line parameter.  Also fixed associated bug in installer to relaunch notepad++ after install if open before.
 

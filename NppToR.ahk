@@ -8,10 +8,10 @@
 
 AUTOTRIM OFF
 sendmode event
-DetectHiddenWindows On
+DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 1.9.1 
-
+version = 1.9.2 
+debug = true
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin Initial execution code
 
@@ -47,6 +47,7 @@ IniRead ,puttyfilekey, %inifile%, putty, puttyfile, ^F9
 IniRead ,Rpastewait, %inifile%, controls, Rpastewait, 50
 IniRead ,Rrunwait, %inifile%, controls, Rrunwait, 10
 IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, true
+IniRead ,appendnewline, %inifile%, controls, appendnewline, true
 
 if nppexe=ERROR
 {
@@ -228,10 +229,10 @@ NppGetLineOrSelection:
 		sendevent {end}{home 2}+{end}+{right}
 		WinMenuSelectItem ,A,,Edit,Copy
 		sendevent {right}
-		if clipboard<>"" 
-			clipboard := CheckForNewLine( clipboard )
 	} 
 	else sendevent {right}
+	if clipboard<>"" AND appendnewline
+		clipboard := CheckForNewLine( clipboard )
 	return
 }
 RunNpp:
