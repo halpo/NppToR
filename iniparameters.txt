@@ -12,7 +12,7 @@ passline	F8		Key for pass by line command
 passfile	^F8		Key for pass entire file command
 batchrun	^!F8	Key for Run in Batch and Open in Notepad++
 
-SECTION Putty
+SECTION putty
 activateputty	false	Should putty commands be activated or not? true/false
 puttyline		F9		Key for pass line to putty
 puttyfile		^F9		Key for pass file to putty
