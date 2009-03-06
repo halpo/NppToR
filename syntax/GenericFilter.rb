@@ -1,8 +1,7 @@
 require 'rinruby'
-R.quit
 
 class GenericFilter
-	def initialize(keywords=nil, extragenerics=Array.new ,r_exe=nil, libs= nil)
+	def initialize(keywords=nil, extragenerics=Array.new,r_exe=nil, libs= nil)
     @extragenerics = extragenerics
 		@generics=Array.new
 		@specifics=Array.new
