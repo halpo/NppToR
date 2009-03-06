@@ -41,7 +41,7 @@ if A_GuiEvent = DoubleClick
 	ENVSUB CurrTime, LongTime, seconds
 	Seconds := Mod(CurrTime,60)
 	Minutes := Floor(Mod(CurrTime,60*60)/60)
-	Hours	:= Floor(Mod(CurrTime,60*60*24)/24)
+	Hours	:= Floor(Mod(CurrTime,60*60*24)/(60*60))
 	Days	:= Floor(CurrTime/(60*60*24))
 	CurrTime := ((days>0) ? (A_Space . days . " days") : ("")) . ((hours>0) ? (A_Space . Hours . " hours") : ("")) . ((minutes>0) ? (A_SPACE . minutes . " minutes") : ("")) . ((seconds>0) ? (A_SPACE . seconds . " seconds") : (""))
     ToolTip Simulation(PID:%PID%) for file "%File%" has been running for%CurrTime%.
