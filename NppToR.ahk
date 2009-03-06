@@ -112,6 +112,7 @@ return
 ; Run in R CMD BATCH ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 runbatch:
 {
+	DetectHiddenWindows On
 	WinMenuSelectItem ,A,,File,Save
 	getCurrNppFileDir(file, dir, ext, Name)
 	SetWorkingDir %dir%
@@ -123,6 +124,7 @@ runbatch:
 	WinWaitClose ahk_pid %RprocID%
 	run %nppexe% "%dir%\%Name%.Rout"
 	removeProc(RprocID)
+	DetectHiddenWindows Off
 return
 }
 Rpaste:
