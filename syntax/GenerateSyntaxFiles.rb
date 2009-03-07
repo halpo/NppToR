@@ -15,13 +15,11 @@ R="don't start R"
 require 'rexml/document'
 require 'win32/registry'
 require 'pathname'
-puts "loading required files"
 load "GenericFilter.rb"
 load "R_UDL_Base.xml.rb"
 load "process_namespace.rb"
 
 
-puts "reading arguments"
 if ARGV[0] then r_home = ARGV[0]
 else
 	Win32::Registry::HKEY_LOCAL_MACHINE.open('Software\R-core\R') do |reg|
@@ -61,15 +59,12 @@ thisR.eval "pkg_priority<-function(pkgname)((function(x){ifelse(is.na(x),'other'
 thisR.eval "pkg_location<-function(pkgname)(installed.packages()[pkgname,'LibPath'])"
 r_libs = thisR.pull '.libPaths()'
 r_pkgs = thisR.pull "unique(installed.packages()[,'Package'])"
-# puts "libraries:"
-# puts r_pkgs
 
-puts "processing R packages"
+puts "processing R packages..."
 keyword_loader=R_keywords.new()
 r_pkgs.each{|pkg|
 	puts "processing #{pkg}"
 	priority = thisR.pull "pkg_priority('#{pkg}')"
-	puts "priority: #{priority}"
 	libraries[priority] << pkg
 	words[priority] << pkg
 	begin	
