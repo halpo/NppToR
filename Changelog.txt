@@ -1,5 +1,13 @@
 NppToR CHANGELOG
 ----------------
+3/7/2009 3:25 PM - Released Version 1.9.2
+3/7/2009 3:23 PM - finished update to syntax generator.  
+				Added .R.rb files to store R code for RinRuby connection.  
+				Added Class file proccess_namespace.rb
+				updated GenerateSyntaxFiles.rb
+
+3/5/2009 - fixed bug in simulation monitor caused by fixing vista bug.
+				
 3/3/09 10:31 PM - Fixed a bug in vista by changing the DetectHiddenWindows to Off
 3/3/09 10:31 PM - Added the ini paramter appendnewline and changed default behavior
 
