@@ -63,21 +63,3 @@ public
 		@generics+@others
 	end
 end
-##  TESTING
-# words= %w[alias.formula
-# alias.lm
-# alist
-# all
-# all.equal
-# all.equal.POSIXct
-# all.equal.character
-# all.equal.default
-# all.equal.factor]
-
-# gf=GenericFilter.new(keywords=words)
-# puts "Generics:"
-# puts gf.S3generics
-# puts "filtered:"
-# puts gf.filtered
-# puts gf.isgeneric?('all.equal')
-# puts gf.isspecific?('all.equal.factor')
