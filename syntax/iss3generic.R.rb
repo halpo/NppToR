@@ -1,4 +1,4 @@
-is_S3Generic_R_code=S3GENERICRCODE
+@@is_s3generic_r_code=<<S3GENERICRCODE
 is.S3Generic<-function (generic.function, methods=TRUE) 
 {
 	if(missing(generic.function))stop('generic.function must be provided')
@@ -31,7 +31,7 @@ is.S3Generic<-function (generic.function, methods=TRUE)
 	}
 	rtn<-TRUE
 	name <- paste("^", generic.function, ".", sep = "")
-	name <- gsub("([.[$+*])", "\\\\\\1", name)
+	name <- gsub("([.[$+*])", "\\\\\\\\\\\\1", name)
 	info <- info[grep(name, row.names(info)), ]
 	info <- info[!row.names(info) %in% S3MethodsStopList, ]
 	if (nrow(info)) {
@@ -57,7 +57,7 @@ is.S3Generic<-function (generic.function, methods=TRUE)
         rbind(df[keep[1:n], ], dnew[keep[(n + 1):(n + n2)], ])
     }
 	if (length(S3reg)) info <- rbindSome(info, S3reg, msg = paste("registered S3method for", generic.function))
-	if (generic.function == "all") info <- info[-grep("^all\\.equal", row.names(info)),]
+	if (generic.function == "all") info <- info[-grep("^all\\\\.equal", row.names(info)),]
 	info <- info[sort.list(row.names(info)), ]
 	res <- row.names(info)
 	class(res) <- "MethodsFunction"

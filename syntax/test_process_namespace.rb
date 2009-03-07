@@ -7,6 +7,7 @@ keyword_loader=R_keywords.new()
 puts keyword_loader.get_keywords('base').length
 puts keyword_loader.get_keywords('stats').length
 puts keyword_loader.get_keywords('tcltk').length
+puts keyword_loader.get_keywords('pfda').length
 puts keyword_loader.get_keywords('KernSmooth')
 
 begin
