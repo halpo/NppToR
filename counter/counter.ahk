@@ -83,10 +83,10 @@ return
 }
 ProcKill(row, PID)
 {
-winkill ahk_pid %PID%
-;lv_delete(row)
-RemoveProc(PID)
-return
+	RUNWAIT, taskkill /t /F /pid %PID%
+	; winkill ahk_pid %PID%
+	RemoveProc(PID)
+	return
 }
 
 RemoveProc(PID)
