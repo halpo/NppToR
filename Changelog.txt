@@ -1,5 +1,7 @@
 NppToR CHANGELOG
 ----------------
+4/30/2009 2:29 PM - Fixed WinMenuSelect bug  - changed to go by position instead of name
+
 3/7/2009 3:25 PM - Released Version 1.9.2
 3/7/2009 3:23 PM - finished update to syntax generator.  
 				Added .R.rb files to store R code for RinRuby connection.  

@@ -145,7 +145,7 @@ Rpaste:
 				msgbox , 16 ,Could not find R, Could not start or find R. Please check you installation or start R manually.
 			return
 		}
-		WinMenuSelectItem ,ahk_id %RprocID%,,Edit,paste
+		WinMenuSelectItem ,ahk_id %RprocID%,,2&,2& ;edit->paste
 		;WinMenuSelectItem ,ahk_id %RprocID%,,file,Print...
 		WinActivate ahk_id %nppID%    ; go back to the original window if moved
 	} 
@@ -185,7 +185,7 @@ getCurrNppFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="",
 	; StringTrimRight title, title, 12
 	ocb = %clipboard%
 	clipboard =
-	WinMenuSelectItem ,A,,Edit,Copy Current full file path to Clipboard
+	WinMenuSelectItem ,A,,2&,10& ; Edit,Copy Current full file path to Clipboard
 	clipwait
 	splitpath, clipboard,file,dir, ext, NameNoExt, Drive
 	clipboard = %ocb%
@@ -224,12 +224,12 @@ NppGetLineOrSelection:
 {
 	oldclipboard = %clipboard%
 	clipboard = 
-	WinMenuSelectItem ,A,,Edit,Copy
+	WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
 	clipwait .1
 	if clipboard = 
 	{
 		sendevent {end}{home 2}+{end}+{right}
-		WinMenuSelectItem ,A,,Edit,Copy
+		WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
 		sendevent {right}
 	} 
 	else sendevent {right}
@@ -255,8 +255,8 @@ UpdateRWD:
 NppGetAll:
 {
 oldclipboard = %clipboard%
-WinMenuSelectItem ,A,,Edit,Select All
-WinMenuSelectItem ,A,,Edit,Copy
+WinMenuSelectItem ,A,,2&,8& ;Edit,Select All
+WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
 sendevent {right}
 return
 }
