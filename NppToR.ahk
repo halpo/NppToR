@@ -38,6 +38,7 @@ IniRead ,Nppexe, %inifile%, executables, Npp,
 ;hotkeys
 IniRead ,passlinekey, %inifile%, hotkeys, passline,F8
 IniRead ,passfilekey, %inifile%, hotkeys, passfile,^F8
+IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
 IniRead ,batchrunkey, %inifile%, hotkeys, batchrun,^!F8
 ;putty
 IniRead ,activateputty, %inifile%, putty, activateputty, false
@@ -82,6 +83,7 @@ if NOT makeglobal
 #MaxThreadsPerHotkey 10
 hotkey ,%passlinekey%,runline
 hotkey ,%passfilekey%,runall
+hotkey ,%passtopointkey%,runtocursor
 #MaxThreadsPerHotkey 100
 hotkey ,%batchrunkey%,runbatch
 if activateputty=true
@@ -106,6 +108,12 @@ return
 runall:
 {
 gosub NppGetAll
+gosub Rpaste
+return
+}
+runtocursor:
+{
+gosub NppGetToPoint
 gosub Rpaste
 return
 }
@@ -258,8 +266,19 @@ oldclipboard = %clipboard%
 WinMenuSelectItem ,A,,2&,8& ;Edit,Select All
 WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
 sendevent {right}
+clipboard := CheckForNewLine( clipboard )
 return
 }
+NppGetToPoint:
+{
+oldclipboard = %clipboard%
+sendevent ^+{home}
+WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
+sendevent {right}
+clipboard := CheckForNewLine( clipboard )
+return
+}
+
 MakeAboutDialog:
 {
 ;Gui, -AlwaysOnTop -SysMenu +Owner ; +Owner avoids a taskbar button.
@@ -280,6 +299,7 @@ The following are the keyboard shortcuts (can be modified in the npptor.ini file
 
 	%passlinekey%: Passes a line or a selection to R.
 	%passfilekey%: Passes the entire file to R.
+	%passtopointkey%: Evaluates the file to the point of the cursor.
 	%batchrunkey%: Saves then evaluates the current script in batch mode then opens the results in notepad++.
 
 (#=Win,!=Alt,^=Control,+=Shift)
@@ -299,9 +319,13 @@ return
 
 CheckForNewLine(var)
 {
-	found := regexmatch( var, "m`a)`n$")
+	if var <>
+	{
+	stringright , right, var, 1 	;for long strings
+	found := regexmatch( right, "m`a)`a$")
 	if found=0
-		var = %var% `r`n
+		var = %var% `n
+	}
 	return %var%
 }
 

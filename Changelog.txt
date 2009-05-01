@@ -1,5 +1,7 @@
 NppToR CHANGELOG
 ----------------
+4/30/2009 10:24 PM - Added option for evaluate top cursor.  Also added the ini parameter passtopointkey to reflect this option.
+                   - Fixed the bug that long selections are not given a newline 
 4/30/2009 2:29 PM - Fixed WinMenuSelect bug  - changed to go by position instead of name
 
 3/7/2009 3:25 PM - Released Version 1.9.2

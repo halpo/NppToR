@@ -10,7 +10,8 @@ RcmdParms	empty					Command line parameters for the Rgui
 SECTION hotkeys
 passline	F8		Key for pass by line command
 passfile	^F8		Key for pass entire file command
-batchrun	^!F8	Key for Run in Batch and Open in Notepad++
+passtopointkey +F8	Key for evaluating to cursor
+batchrun	^!F8	Key for run as batch file and open results in Notepad++ (when finished)
 
 SECTION putty
 activateputty	false	Should putty commands be activated or not? true/false
