@@ -57,6 +57,7 @@ GUI ,ADD, EDIT, wp vNppConfig
 GUICONTROL ,,NppConfig, %APPDATA%\Notepad++\
 ; GUI	,ADD, CHECKBOX,wp vdoRconsole checked,Add/Edit User Rconsole to make use of SDI(required by NppToR)
 ; GUI	,ADD, CHECKBOX,wp vdoRprofile checked,Add/Edit User Rprofile to make Notepad++ the editor for editing initiated from R.
+GUI	,ADD, CHECKBOX,wp vchkSyntax checked, Extract keywords for non-priority keywords from R-packages.
 GUI	,ADD, CHECKBOX,wp vaddStartup checked,launch at startup?.
 GUI ,ADD, PROGRESS, wp h20 cBlue vInstallProgress
 GUI ,ADD,BUTTON,section X+-155 Y+5 w75 gdoinstall default,&Install
@@ -73,6 +74,7 @@ GUICONTROL ,Disable, Rdir
 GUICONTROL ,Disable, NppConfig
 GUICONTROL ,Disable, doRconsole
 GUICONTROL ,Disable, doRprofile
+GUICONTROL ,Disable, chkSyntax
 GUICONTROL ,Disable, addStartup
 GUICONTROL ,Disable, BtnInstall
 GUICONTROL ,Disable, BtnCancel
@@ -116,10 +118,22 @@ GuiControl,, InstallProgress, +10
 ; {
 	optstring = options(editor="%INSTALLDIR%NppEditR.exe")`n
 	StringReplace options, optstring, \ , \\ , All
-	fileappend , %options% , %INSTALLDIR%\Rprofile
+	ifExist %INSTALLDIR%\Rprofile
+	{
+		FileRead, RprofileOld, %INSTALLDIR%\Rprofile
+		ifNotInString RprofileOld, %options%
+			fileappend , %options% , %INSTALLDIR%\Rprofile
+	} ELSE 
+		fileappend , %options% , %INSTALLDIR%\Rprofile
 ; }
 ; if doRconsole
-	fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
+	ifExist %INSTALLDIR%\Rconsole
+	{
+		FileRead, RconsoleOld, %INSTALLDIR%\Rconsole
+		ifNotInString Rconsole, MDI = no
+		fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
+	} ELSE
+		fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
 GuiControl,, InstallProgress, +10
 
 ;start menu entries
@@ -138,8 +152,12 @@ ifwinexist ahk_class Notepad++
 	winclose,,,15
 	restart_npp = true
 } else restart_npp = false
-RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe "%Rdir%" "%NppConfig%"
-GuiControl,, InstallProgress, +50 
+if chkSyntax 
+	RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe --rhome="%Rdir%" --npp-config="%NppConfig%"
+else 
+	RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe -N --file=internal --rhome="%Rdir%" --npp-config="%NppConfig%"
+	
+	GuiControl,, InstallProgress, +50 
 
 ;runinstalled NppToR
 if %restart_npp%

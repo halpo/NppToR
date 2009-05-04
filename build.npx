@@ -1,6 +1,6 @@
 // build.npx
 // builds the executables and the install files for NppToR
-set version = 1.9.2
+set version = 1.9.3
 
 set AHK2EXE = $(SYS.PROGRAMFILES)\AutoHotKey\Compiler\Ahk2exe.exe
 

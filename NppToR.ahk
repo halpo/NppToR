@@ -70,12 +70,13 @@ menu, tray, add ; separator
 menu, tray, add, Show Simulations, showCounter
 menu, tray, add, Start Notepad++, RunNpp
 menu, tray, add, Reset R working directory, UpdateRWD
-menu, tray, add, Regenerate R Syntax files, DoSyntax
+menu, tray, add, Regenerate R Syntax files, showSyntaxGui
 menu, tray, add ; separator
 Menu, tray, add, About, ShowAbout  ; Creates a new menu item.
 
 gosub makeCounter
 gosub MakeAboutDialog
+gosub makeSyntaxGui
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;assign hotkeys dynamically
 if NOT makeglobal
@@ -344,4 +345,5 @@ return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Includes
 #include %A_ScriptDir%\counter\counter.ahk
+#include %A_ScriptDir%\syntax\SyntaxGui.ahk
 

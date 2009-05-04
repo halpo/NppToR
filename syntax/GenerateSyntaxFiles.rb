@@ -35,7 +35,7 @@ options.fileout = String.new
 options.filein = String.new
 options.retain = true
 options.verbose = false
-options.quite = false
+options.quiet = false
 
 opts.on_tail( "-h", "--help", "Print help menu"){
 	puts opts
@@ -47,7 +47,7 @@ options.rhome = val
 }
 opts.on( "-c",	"--npp-config=VAL", String){|val| options.npp_config_dir = val}
 opts.on( "-b",	"--do-base", "include base packages in syntax generation"){ options.base = true}
-opts.on( "-m",	"--do-recommended", "include recommended packages in syntax generation"){ options.recommended = true}
+opts.on( "-r",	"--do-recommended", "include recommended packages in syntax generation"){ options.recommended = true}
 opts.on( "-N",	"--no-other-packages","Do not include non-standard packages."){ options.other = false }
 opts.on( "-i",	"--include=LIST","also include the packages listed", String){ |list|
 	puts "extra includes: #{list}"
@@ -57,7 +57,7 @@ opts.on( "-x",	"--exclude=LIST","exclude the packages listed.", String){ |list|
 	puts "exclude packages: #{list}"
 	options.include = list.split(/,\s*/)
 }
-opts.on( "-o=FILE","--out=OUTFILE","Output generated syntax to FILE", String){ |file|
+opts.on( "-o=FILE","--out=OUTFILE","Output generated syntax to OUTFILE", String){ |file|
 	puts "syntax file output to #{file}."
 	options.fileout=file
 }
@@ -67,11 +67,11 @@ opts.on( "-f=FILE","--file=INFILE","Syntax file for reading and writing unless -
 }
 opts.on("","--no-retain", "replace generated sections with new words rather than the default of merging"){options.retain=false}
 opts.on("-v","--verbose", "verbose"){options.verbose=true}
-opts.on("-q","--quite", "run as silently as possible"){options.quite=true}
+opts.on("-q","--quiet", "run as silently as possible"){options.quiet=true}
 
 opts.parse(ARGV)
 
-raise "no package classes specified." if !options.base && !options.recommended && !options.other && options.include.length==0
+# raise "no package classes specified." if not options.merge && !options.base && !options.recommended && !options.other && options.include.length==0
 
 
 if  options.rhome == "" then
@@ -85,7 +85,7 @@ r_exe = options.rhome ? "#{options.rhome}\\bin\\Rterm.exe" : nil
 if options.npp_config_dir == "" then 
 	options.npp_config_dir = "#{ENV['APPDATA']}\\Notepad++"
 end
-raise "no Notepad++ config directory found or sspecified." if options.npp_config_dir.empty?
+raise "no Notepad++ config directory found or sspecified." if options.npp_config_dir.empty? && options.outfile.empty?
 puts "Notepad++ Config Directory:#{options.npp_config_dir}"
 
 pkgpriorities=['base','recommended','other']
@@ -111,8 +111,7 @@ getpkgpriorities << 'NA' if options.other
 if getpkgpriorities.empty? then
 	r_pkgs = []
 else
-	rcmd = "unique(installed.packages(priority=c(#{getpkgpriorities.join(', ')}))[,'Package'])"
-	puts rcmd
+	rcmd = "unique(installed.packages(priority=c('#{getpkgpriorities.join("', '")}'))[,'Package'])"
 	r_pkgs = thisR.pull rcmd
 end 
 
@@ -155,20 +154,18 @@ r_pkgs.each do |pkg|
 	end
 end 
 
-options.filein  = "#{options.npp_config_dir}/userDefineLang.xml" if options.filein.empty?
+options.filein  = "#{options.npp_config_dir}\\userDefineLang.xml" if options.filein.empty?
 options.fileout = options.filein if options.fileout.empty?
 
-
-puts "reading base syntax from #{options.filein}"
-if File.exists?(options.filein) then
+if (not options.filein == "internal") and File.exists?(options.filein) then
 	rbase = REXML::Document.new(File.open(options.filein)) 
-	unless rbase.elements["//UserLang[@name='R']"].nil? then 
+	rbase.elements.each("NotepadPlus/UserLang"){|e| p e}
+	unless rbase.elements["NotepadPlus/UserLang[@name='R']"].nil? then 
 		puts "extracting syntax given from #{options.filein}"
-		rlang = rbase.elements["//UserLang[@name='R']"] 
+		rlang = rbase.elements["NotepadPlus/UserLang[@name='R']"] 
 	else 
-		puts "failed to find defined R language, reverting to internally stored syntax"
-		rbase = REXML::Document.new(R_UDL_Base)
-		rlang = rbase.elements["//UserLang[@name='R']"]
+		puts "failed to find defined R language, ..."
+		rlang = REXML::Document.new(R_UDL_Base).elements["NotepadPlus/UserLang[@name='R']"]
 	end
 else 
 	puts "using internal syntax as a base"
@@ -185,6 +182,7 @@ oldwords={
 'other' => Array.new()
 }
 
+p rlang.elements["//Keywords[@name='Words1']"].text
 oldwords['builtin'] 	= rlang.elements["//Keywords[@name='Words1']"].text.split(/\s/) unless rlang.elements["//Keywords[@name='Words1']"].text.nil?
 oldwords['base'] 		= rlang.elements["//Keywords[@name='Words2']"].text.split(/\s/) unless rlang.elements["//Keywords[@name='Words2']"].text.nil?
 oldwords['recommended']	= rlang.elements["//Keywords[@name='Words3']"].text.split(/\s/) unless rlang.elements["//Keywords[@name='Words3']"].text.nil?
@@ -205,8 +203,14 @@ if newotherwords.length > 1024*30 then
 else
 	rlang.elements["//Keywords[@name='Words4']"].text = newotherwords unless libraries['other'].empty?
 end
+# puts rlang
+unless rbase.elements["NotepadPlus/UserLang[@name='R']"].nil? then 
+	rbase.elements["NotepadPlus/UserLang[@name='R']"]=rlang
+else
+	rbase.root.add(rlang)
+end
+# puts rbase 
+rbase.elements.each('NotepadPlus/UserLang'){|e| p e}
 puts "writing to #{options.fileout}"
-out = File.open(options.fileout,"w")
-rbase.write(out)
-out.close
+rbase.write(File.open(options.fileout,"w"))
 
