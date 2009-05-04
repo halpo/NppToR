@@ -172,6 +172,9 @@ else
 	rbase = REXML::Document.new(R_UDL_Base)
 	rlang = rbase.elements["//UserLang[@name='R']"]
 end
+# puts "rlang = "
+# puts rlang
+# puts "end rlang"
 
 BuiltInWords = %w{if else for while repeat break next in TRUE FALSE NULL Inf NaN NA NA_integer_ NA_real_ NA_complex_ NA_character_ ... ..1 ..2 ..3 ..4 ..5 ..6 ..7 ..8 ..9}
 
@@ -203,14 +206,8 @@ if newotherwords.length > 1024*30 then
 else
 	rlang.elements["//Keywords[@name='Words4']"].text = newotherwords unless libraries['other'].empty?
 end
-# puts rlang
-unless rbase.elements["NotepadPlus/UserLang[@name='R']"].nil? then 
-	rbase.elements["NotepadPlus/UserLang[@name='R']"]=rlang
-else
-	rbase.root.add(rlang)
-end
-# puts rbase 
-rbase.elements.each('NotepadPlus/UserLang'){|e| p e}
+rbase.elements.delete("NotepadPlus/UserLang[@name='R']") unless rbase.elements["NotepadPlus/UserLang[@name='R']"].nil?
+rbase.root.add(rlang)
 puts "writing to #{options.fileout}"
 rbase.write(File.open(options.fileout,"w"))
 
