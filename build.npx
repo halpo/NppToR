@@ -27,3 +27,4 @@ cd ..
 
 // build source folder
 7z a -aoa -tzip NppToR-$(version).src.zip @sources.7zlist
+7z t NppToR-$(version).src.zip

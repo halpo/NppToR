@@ -1,5 +1,6 @@
 NppToR CHANGELOG
 ----------------
+5/4/2009 10:00 PM - Version 1.9.3 released
 5/4/2009 6:43 PM - Fixed bug in SyntaxGenerator that deleted the users other languages, and put R in the wrong place.
 4/30/2009 10:24 PM - Added option for evaluate top cursor.  Also added the ini parameter passtopointkey to reflect this option.
                    - Fixed the bug that long selections are not given a newline 
