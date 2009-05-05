@@ -185,7 +185,6 @@ oldwords={
 'other' => Array.new()
 }
 
-p rlang.elements["//Keywords[@name='Words1']"].text
 oldwords['builtin'] 	= rlang.elements["//Keywords[@name='Words1']"].text.split(/\s/) unless rlang.elements["//Keywords[@name='Words1']"].text.nil?
 oldwords['base'] 		= rlang.elements["//Keywords[@name='Words2']"].text.split(/\s/) unless rlang.elements["//Keywords[@name='Words2']"].text.nil?
 oldwords['recommended']	= rlang.elements["//Keywords[@name='Words3']"].text.split(/\s/) unless rlang.elements["//Keywords[@name='Words3']"].text.nil?

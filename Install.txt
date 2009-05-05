@@ -1,31 +1,33 @@
 NppToR Installation instructions
 (c) Andrew Redd
 
-	0. You should already have unzipped the folder containing follwing files.
-		a. Readme.txt
-		b. License.txt
-		f. Install.txt
-		c. NppToR.exe
-		d. UserDefinLang.xml
-		e. NppToR.exe
-		f. R.xml
+	0. You should already have unzipped the folder containing this and the follwing files:
+		*	GenerateSyntaxFile.exe (Generates and merges with any existing UserDefinedLang.xml file)
+		*	iniparameters.txt (tells how to form the npptor.ini file)
+		*	License.txt (A copy of the license used by NppToR)
+		*	NppEditR.exe (a utility to enable Notepad++ as the default edit in R)
+		*	NppToR.exe (Main file)
 		
-	1. copy userDefineLang.xml to %APPDATA%/Notepad++/userDefineLang.xml.  
-		If userDefineLang.xml already exists you will have to copy the <UserLang name="R" ext="R"> ... </UserLang>
-		portion to the same level as the other UserLang tags so that proper XML syntax is preserved, 
-		and your other languages are not removed.
-	2. Copy R.xml to %PROGRAMFILES%\Notepad++\plugins\APIs or the appropriate folder on your system.
-		This setp requires administrator privilages.  If you cannot get these you cannot do this setp
-		and you will not have code completion.
-	3. Copy NppToR.exe to a permanant location on your computer if you would like.
-	4. Restart notepad++. congratulations you now have a batch file editor that includes
-		* syntax highlighting
-		* function recognition and tracking
-	5. start NppToR.exe
-	
-	O1. (OPTIONAL) Open notepad++ and under the start menu goto Plugins>Function List>User Rules (1)
-		1. From the dropdown box choose R
-		2. Click `Edit rule'
-		3. Enter the following into the section rules (without quotes)
-			function begin = '[a-zA-Z]+[a-zA-Z0-9_\.]*<\-[ \t]*function[ \t]*'
-	O2. Place a shortcut to NppToR.exe in the startup folder of your start/windows menu. Include the -startup option on the command line
+	1. Extract file to a permanant directory
+	2. Update npptor.ini file to locate notepad++ and Rhome directories.  
+		This is not necessary if both are standard installations, as the correct locations will be found via 
+		the windows registry, and automatically adjust to new versions.
+	3. Run NppToR.exe, this will also open Notepad++, which behavior can be turned off with the -startup 
+		flag on a link
+	4. Right click on the NppToR icon (R icon with a yellow triangle overlayed) and select 'Regenerate R 
+		Syntax Files' from the menu.  This will regenerate the syntax files for R.  Repeat as you install
+		new R packages to update the syntax files with the keywords for the newly installed packages.  This
+		will close notepad++, if open, and restart when the files are updated.
+
+Optional steps
+	5. npptor requires that R run in sdi mode.  This can be enforced for R windows spawned by NppToR by
+		including a file named Rconsole (no extension) with with the line
+			MDI = no
+		included, and most likely as the only line.
+	6 npptor also has the ability to make R use notepad++ as the editor for commands like fix and edit by
+		including the file Rprofile (no extension) with the line
+			options(editor="PATH\\TO\\...\\NppToR\\NppEditR.exe")
+		,fix the path as appropriate.  This line is R code so backslashes must be escaped with an extra 
+		backslash, or can be replaced with forward slashes.
+	7 Place a shortcut to NppToR.exe in the startup folder of your start/windows menu. Include the 
+		-startup option on the command line to prevent notepad++ from opening at startup.

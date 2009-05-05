@@ -1,0 +1,5 @@
+NOTES ON LIMITS FOR USER DEFINED LANGUAGE SYNTAX
+
+http://notepad-plus.svn.sourceforge.net/viewvc/notepad-plus/trunk/PowerEditor/src/ScitillaComponent/UserDefineLangReference.h?view=markup&sortdir=down
+notes the limits on the max number of characters max_char = 1024*30 = 30720
+

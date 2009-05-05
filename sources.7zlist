@@ -1,0 +1,10 @@
+counter\*.ahk
+icons\NppToR.*
+installer\install.ahk
+NppEditsR\NppEditR.ahk
+syntax\*.rb
+syntax\*.ahk
+syntax\*.npx
+*.ahk
+*.txt
+*.npx

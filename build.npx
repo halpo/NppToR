@@ -15,3 +15,15 @@ $(AHK2EXE) /in NppToR.ahk /out NppToR.exe /icon icons\NppToR.ico
 
 // compile install script
 $(AHK2EXE) /in installer\install.ahk /out NppToR-$(version).exe /icon icons\NppToR.ico
+
+// Build independent zip folder
+cd Syntax
+7z a -aoa -tzip ..\NppToR-$(version).zip GenerateSyntaxFiles.exe 
+cd ..\NppEditsR
+7z a -aoa -tzip ..\NppToR-$(version).zip NppEditR.exe 
+cd ..
+7z a -aoa -tzip NppToR-$(version).zip NppToR.exe npptor.ini *.txt
+7z t NppToR-$(version).zip
+
+// build source folder
+7z a -aoa -tzip NppToR-$(version).src.zip @sources.7zlist

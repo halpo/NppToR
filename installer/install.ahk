@@ -116,21 +116,22 @@ GuiControl,, InstallProgress, +10
 ;set R options to work with NppToR
 ;if doRprofile
 ; {
-	optstring = options(editor="%INSTALLDIR%NppEditR.exe")`n
+	optstring = options(editor="%INSTALLDIR%NppEditR.exe")
 	StringReplace options, optstring, \ , \\ , All
 	ifExist %INSTALLDIR%\Rprofile
 	{
 		FileRead, RprofileOld, %INSTALLDIR%\Rprofile
+		msgbox %RProfileOld%
 		ifNotInString RprofileOld, %options%
-			fileappend , %options% , %INSTALLDIR%\Rprofile
+			fileappend , %options%`n , %INSTALLDIR%\Rprofile
 	} ELSE 
-		fileappend , %options% , %INSTALLDIR%\Rprofile
+		fileappend , %options%`n , %INSTALLDIR%\Rprofile
 ; }
 ; if doRconsole
 	ifExist %INSTALLDIR%\Rconsole
 	{
 		FileRead, RconsoleOld, %INSTALLDIR%\Rconsole
-		ifNotInString Rconsole, MDI = no
+		ifNotInString RconsoleOld, MDI = no
 		fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
 	} ELSE
 		fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
@@ -164,7 +165,6 @@ if %restart_npp%
 	RUN ,%INSTALLDIR%\NppToR.exe
 else
 	RUN ,%INSTALLDIR%\NppToR.exe -startup
-ExitApp
 msgbox 0, Installation Finished, NppToR has been successfully setup for you user profile.
 return
 
