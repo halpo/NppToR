@@ -112,7 +112,8 @@ r_pkgs = []
 unless getpkgpriorities.empty? then
 	thisR.eval ".NppToR.packagelist <- unique(installed.packages(priority=c('#{getpkgpriorities.join("', '")}')))"
 	num_packages = thisR.pull "NROW(.NppToR.packagelist)"
-	r_pkgs = thisR.pull ".NppToR.packagelist[,'Package']" unless num_packages==0
+	r_pkgs = thisR.pull(".NppToR.packagelist[,'Package']").to_a unless num_packages==0
+	
 end 
 
 r_pkgs = r_pkgs + options.include - options.exclude
