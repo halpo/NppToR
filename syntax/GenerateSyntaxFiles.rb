@@ -108,50 +108,55 @@ getpkgpriorities=[]
 getpkgpriorities << 'base' if options.base
 getpkgpriorities << 'recommended' if options.recommended
 getpkgpriorities << 'NA' if options.other
-if getpkgpriorities.empty? then
-	r_pkgs = []
-else
-	rcmd = "unique(installed.packages(priority=c('#{getpkgpriorities.join("', '")}'))[,'Package'])"
-	r_pkgs = thisR.pull rcmd
+r_pkgs = []
+unless getpkgpriorities.empty? then
+	thisR.eval ".NppToR.packagelist <- unique(installed.packages(priority=c('#{getpkgpriorities.join("', '")}')))"
+	num_packages = thisR.pull "NROW(.NppToR.packagelist)"
+	r_pkgs = thisR.pull ".NppToR.packagelist[,'Package']" unless num_packages==0
 end 
 
 r_pkgs = r_pkgs + options.include - options.exclude
 r_pkgs.uniq!
 
-puts "processing R packages..."
-keyword_loader=R_keywords.new()
-r_pkgs.each do |pkg|
-	priority = (thisR.pull "pkg_priority('#{pkg}')")
-	priority.downcase!
-	if not options.include.include?(pkg) then case priority
-		when "base": next if !options.base
-		when "recommended": next if !options.recommended
-		when "other": next if !options.other
-		else raise "unknown package priority for package #{pkg}"
-	end end 
-	puts "processing #{pkg}"
-	libraries[priority] << pkg
-	words[priority] << pkg
-	begin	
-		words[priority] << keyword_loader.get_keywords(pkg)
-	rescue	
-		libpath = Pathname.new(thisR.pull("pkglibpath<-pkg_location('#{pkg}')"))
-		libpath += pkg
-		pkgwords=Array.new()
-		if (File.directory?(libpath) && File.exists?(libpath+'CONTENTS')) then
-			puts "Processing #{pkg} by CONTENTS file"
-			libraries[priority] << pkg
-			lines = (libpath+'CONTENTS').readlines
-			lines.grep(/^Aliases/).each{ |line|
-				lwords = line.split
-				lwords.delete_at(0)
-				pkgwords << lwords.grep(/^[A-Za-z]+[A-Za-z\._]*[A-Za-z0-9\._]*$/)
-			}
-			pkgwords.flatten!
+if (r_pkgs.length > 0) then
+	puts "processing R packages..." 
+	keyword_loader=R_keywords.new()
+	r_pkgs.each do |pkg|
+		priority = (thisR.pull "pkg_priority('#{pkg}')")
+		priority.downcase!
+		if not options.include.include?(pkg) then 
+			case priority
+			when "base": next if !options.base
+			when "recommended": next if !options.recommended
+			when "other": next if !options.other
+			else raise "unknown package priority for package #{pkg}"
+			end 
+		end 
+		puts "processing #{pkg}"
+		libraries[priority] << pkg
+		words[priority] << pkg
+		begin	
+			words[priority] << keyword_loader.get_keywords(pkg)
+		rescue	
+			libpath = Pathname.new(thisR.pull("pkglibpath<-pkg_location('#{pkg}')"))
+			libpath += pkg
+			pkgwords=Array.new()
+			if (File.directory?(libpath) && File.exists?(libpath+'CONTENTS')) then
+				puts "Processing #{pkg} by CONTENTS file"
+				libraries[priority] << pkg
+				lines = (libpath+'CONTENTS').readlines
+				lines.grep(/^Aliases/).each{ |line|
+					lwords = line.split
+					lwords.delete_at(0)
+					pkgwords << lwords.grep(/^[A-Za-z]+[A-Za-z\._]*[A-Za-z0-9\._]*$/)
+				}
+				pkgwords.flatten!
+			end
+			puts "filtering out S3 methods for #{pkg}."
+			words[priority] << GenericFilter.new(pkgwords, [], nil,pkg).filtered
 		end
-		puts "filtering out S3 methods for #{pkg}."
-		words[priority] << GenericFilter.new(pkgwords, [], nil,pkg).filtered
-	end
+	end 
+else puts 'no packages found/selected'
 end 
 
 options.filein  = "#{options.npp_config_dir}\\userDefineLang.xml" if options.filein.empty?
@@ -159,7 +164,6 @@ options.fileout = options.filein if options.fileout.empty?
 
 if (not options.filein == "internal") and File.exists?(options.filein) then
 	rbase = REXML::Document.new(File.open(options.filein)) 
-	rbase.elements.each("NotepadPlus/UserLang"){|e| p e}
 	unless rbase.elements["NotepadPlus/UserLang[@name='R']"].nil? then 
 		puts "extracting syntax given from #{options.filein}"
 		rlang = rbase.elements["NotepadPlus/UserLang[@name='R']"] 
@@ -172,9 +176,6 @@ else
 	rbase = REXML::Document.new(R_UDL_Base)
 	rlang = rbase.elements["//UserLang[@name='R']"]
 end
-# puts "rlang = "
-# puts rlang
-# puts "end rlang"
 
 BuiltInWords = %w{if else for while repeat break next in TRUE FALSE NULL Inf NaN NA NA_integer_ NA_real_ NA_complex_ NA_character_ ... ..1 ..2 ..3 ..4 ..5 ..6 ..7 ..8 ..9}
 

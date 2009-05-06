@@ -1,6 +1,7 @@
 // build.npx
 // builds the executables and the install files for NppToR
-set version = 1.9.3
+set version = 1.9.4  
+// also needs to be changed in NppToR.ahk:13
 
 set AHK2EXE = $(SYS.PROGRAMFILES)\AutoHotKey\Compiler\Ahk2exe.exe
 
@@ -28,3 +29,5 @@ cd ..
 // build source folder
 7z a -aoa -tzip NppToR-$(version).src.zip @sources.7zlist
 7z t NppToR-$(version).src.zip
+
+con_saveto $(FILE_NAME).log

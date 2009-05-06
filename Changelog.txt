@@ -1,5 +1,15 @@
 NppToR CHANGELOG
 ----------------
+5/6/2009 5:15 PM - Version 1.9.4 released
+5/6/2009 - 
+	Added SyntaxGui to repository which was not included before
+	Fixed reported bug from the Syntax generator where it fails on empty R packages.
+	Added warning msgbox for failed syntax generation on install.
+	Added warning msgbox for failed syntax generation in SYntaxGui
+	Removed a few artifact msgboxes from install
+	Fixed extra newline problem. 
+	
+
 5/4/2009 10:00 PM - Version 1.9.3 released
 5/4/2009 6:43 PM - Fixed bug in SyntaxGenerator that deleted the users other languages, and put R in the wrong place.
 4/30/2009 10:24 PM - Added option for evaluate top cursor.  Also added the ini parameter passtopointkey to reflect this option.

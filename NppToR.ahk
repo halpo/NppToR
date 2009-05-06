@@ -10,8 +10,8 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 1.9.2 
-debug = true
+version = 1.9.4 
+debug = false
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin Initial execution code
 
@@ -323,8 +323,8 @@ CheckForNewLine(var)
 	if var <>
 	{
 	stringright , right, var, 1 	;for long strings
-	found := regexmatch( right, "m`a)`a$")
-	if found=0
+	found := regexmatch( right, "[`r`n]")
+	if !found
 		var = %var% `n
 	}
 	return %var%

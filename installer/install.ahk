@@ -121,7 +121,6 @@ GuiControl,, InstallProgress, +10
 	ifExist %INSTALLDIR%\Rprofile
 	{
 		FileRead, RprofileOld, %INSTALLDIR%\Rprofile
-		msgbox %RProfileOld%
 		ifNotInString RprofileOld, %options%
 			fileappend , %options%`n , %INSTALLDIR%\Rprofile
 	} ELSE 
@@ -154,18 +153,21 @@ ifwinexist ahk_class Notepad++
 	restart_npp = true
 } else restart_npp = false
 if chkSyntax 
-	RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe --rhome="%Rdir%" --npp-config="%NppConfig%"
+	RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe --rhome="%Rdir%" --npp-config="%NppConfig%",, UseErrorLevel
 else 
-	RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe -N --file=internal --rhome="%Rdir%" --npp-config="%NppConfig%"
-	
-	GuiControl,, InstallProgress, +50 
+	RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe -N --file=internal --rhome="%Rdir%" --npp-config="%NppConfig%",, UseErrorLevel
+if ErrorLevel
+	MsgBox There was an error generating the syntax files.  You may need to change options in the dialog from the menu command 'Regenerate R syntax files'
+
+GuiControl,, InstallProgress, +50 
 
 ;runinstalled NppToR
 if %restart_npp%
 	RUN ,%INSTALLDIR%\NppToR.exe
 else
 	RUN ,%INSTALLDIR%\NppToR.exe -startup
-msgbox 0, Installation Finished, NppToR has been successfully setup for you user profile.
+msgbox 0, Installation Finished, NppToR has been successfully setup for you user profile.,10
+ExitApp
 return
 
 DoCancel:
