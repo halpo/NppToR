@@ -55,13 +55,13 @@ opts.on( "-i",	"--include=LIST","also include the packages listed", String){ |li
 }
 opts.on( "-x",	"--exclude=LIST","exclude the packages listed.", String){ |list|
 	puts "exclude packages: #{list}"
-	options.include = list.split(/,\s*/)
+	options.exclude = list.split(/,\s*/)
 }
-opts.on( "-o=FILE","--out=OUTFILE","Output generated syntax to OUTFILE", String){ |file|
+opts.on( "-o","--out=OUTFILE","Output generated syntax to OUTFILE", String){ |file|
 	puts "syntax file output to #{file}."
 	options.fileout=file
 }
-opts.on( "-f=FILE","--file=INFILE","Syntax file for reading and writing unless --out is specified", String){ |file|
+opts.on( "-f","--file=INFILE","Syntax file for reading and writing unless --out is specified", String){ |file|
 	puts "Reading R laguage syntax file from #{file}."
 	options.filein=file
 }
