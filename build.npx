@@ -1,7 +1,5 @@
 // build.npx
-// builds the executables and the install files for NppToR
-set version = 1.9.4  
-// also needs to be changed in NppToR.ahk:13
+// builds the executables for NppToR
 
 set AHK2EXE = $(SYS.PROGRAMFILES)\AutoHotKey\Compiler\Ahk2exe.exe
 
@@ -13,21 +11,3 @@ cd ..
 // compile AHK scripts
 $(AHK2EXE) /in NppEditsR\NppEditR.ahk /out NppEditsR\NppEditR.exe /icon icons\NppToR.ico
 $(AHK2EXE) /in NppToR.ahk /out NppToR.exe /icon icons\NppToR.ico
-
-// compile install script
-$(AHK2EXE) /in installer\install.ahk /out NppToR-$(version).exe /icon icons\NppToR.ico
-
-// Build independent zip folder
-cd Syntax
-7z a -aoa -tzip ..\NppToR-$(version).zip GenerateSyntaxFiles.exe 
-cd ..\NppEditsR
-7z a -aoa -tzip ..\NppToR-$(version).zip NppEditR.exe 
-cd ..
-7z a -aoa -tzip NppToR-$(version).zip NppToR.exe npptor.ini *.txt
-7z t NppToR-$(version).zip
-
-// build source folder
-7z a -aoa -tzip NppToR-$(version).src.zip @sources.7zlist
-7z t NppToR-$(version).src.zip
-
-con_saveto $(FILE_NAME).log

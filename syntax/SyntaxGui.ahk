@@ -48,8 +48,14 @@ ButtonGoSyntax:
 		StringReplace, varExclude, editExclude, "`r`n", ALL
 		runsyntaxcmd .= " --exclude=""" . varExclude . """"
 	}
+	if debug
+	{
+		runsyntaxcmd .= " --debug"
+		msgbox %runsyntaxcmd%
+	}
 	RUNWAIT ,%runsyntaxcmd%,,UseErrorLevel
 	if ErrorLevel
 		msgbox There was an error generating the syntax. Sorry try different options.
 	run %Nppexe%
+	return
 }

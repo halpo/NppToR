@@ -68,9 +68,10 @@ opts.on( "-f","--file=INFILE","Syntax file for reading and writing unless --out 
 opts.on("","--no-retain", "replace generated sections with new words rather than the default of merging"){options.retain=false}
 opts.on("-v","--verbose", "verbose"){options.verbose=true}
 opts.on("-q","--quiet", "run as silently as possible"){options.quiet=true}
+opts.on("-d","--debug", "enable debugging"){$DEBUG=true}
 
 opts.parse(ARGV)
-
+STDOUT.flush
 # raise "no package classes specified." if not options.merge && !options.base && !options.recommended && !options.other && options.include.length==0
 
 
@@ -87,6 +88,7 @@ if options.npp_config_dir == "" then
 end
 raise "no Notepad++ config directory found or sspecified." if options.npp_config_dir.empty? && options.outfile.empty?
 puts "Notepad++ Config Directory:#{options.npp_config_dir}"
+STDOUT.flush
 
 pkgpriorities=['base','recommended','other']
 words={
@@ -109,11 +111,11 @@ getpkgpriorities << 'base' if options.base
 getpkgpriorities << 'recommended' if options.recommended
 getpkgpriorities << 'NA' if options.other
 r_pkgs = []
+STDOUT.flush
 unless getpkgpriorities.empty? then
 	thisR.eval ".NppToR.packagelist <- unique(installed.packages(priority=c('#{getpkgpriorities.join("', '")}')))"
 	num_packages = thisR.pull "NROW(.NppToR.packagelist)"
 	r_pkgs = thisR.pull(".NppToR.packagelist[,'Package']").to_a unless num_packages==0
-	
 end 
 
 r_pkgs = r_pkgs + options.include - options.exclude
@@ -134,6 +136,7 @@ if (r_pkgs.length > 0) then
 			end 
 		end 
 		puts "processing #{pkg}"
+		STDOUT.flush
 		libraries[priority] << pkg
 		words[priority] << pkg
 		begin	
@@ -159,6 +162,7 @@ if (r_pkgs.length > 0) then
 	end 
 else puts 'no packages found/selected'
 end 
+STDOUT.flush
 
 options.filein  = "#{options.npp_config_dir}\\userDefineLang.xml" if options.filein.empty?
 options.fileout = options.filein if options.fileout.empty?
@@ -177,6 +181,7 @@ else
 	rbase = REXML::Document.new(R_UDL_Base)
 	rlang = rbase.elements["//UserLang[@name='R']"]
 end
+STDOUT.flush
 
 BuiltInWords = %w{if else for while repeat break next in TRUE FALSE NULL Inf NaN NA NA_integer_ NA_real_ NA_complex_ NA_character_ ... ..1 ..2 ..3 ..4 ..5 ..6 ..7 ..8 ..9}
 
@@ -211,4 +216,5 @@ rbase.elements.delete("NotepadPlus/UserLang[@name='R']") unless rbase.elements["
 rbase.root.add(rlang)
 puts "writing to #{options.fileout}"
 rbase.write(File.open(options.fileout,"w"))
-
+STDOUT.flush
+STDIN.getc if $DEBUG

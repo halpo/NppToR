@@ -10,8 +10,7 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 1.9.4 
-debug = false
+version = 1.9.5
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin Initial execution code
 
@@ -35,6 +34,7 @@ inifile = %A_ScriptDir%\npptor.ini
 IniRead ,Rhome, %inifile%, executables, R,
 IniRead ,Rcmdparms, %inifile%, executables, Rcmdparms,
 IniRead ,Nppexe, %inifile%, executables, Npp,
+IniRead ,NppConfig, %inifile%, executables, NppConfig,
 ;hotkeys
 IniRead ,passlinekey, %inifile%, hotkeys, passline,F8
 IniRead ,passfilekey, %inifile%, hotkeys, passfile,^F8
@@ -49,11 +49,21 @@ IniRead ,Rpastewait, %inifile%, controls, Rpastewait, 50
 IniRead ,Rrunwait, %inifile%, controls, Rrunwait, 10
 IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, true
 IniRead ,appendnewline, %inifile%, controls, appendnewline, true
+IniRead ,debug, %inifile%, controls, debug, false 
+
+if debug
+	msgbox debugging has been turned on.
 
 if nppexe=ERROR
 {
 	regread, nppdir, hkey_local_machine, software\notepad++
 	nppexe = %nppdir%\notepad++.exe
+}
+if nppconfig=ERROR
+{
+	envget, appdata, appdata
+	nppconfig = %APPDATA%\notepad++
+
 }
 if Rhome=ERROR
 {	
@@ -65,6 +75,12 @@ if  not startup
 	run %nppexe%
 if Rcmdparms=ERROR
 	Rcmdparms=
+
+if debug
+{
+	msgbox nppconfig=%nppconfig%
+}	
+	
 ;menu functions
 menu, tray, add ; separator
 menu, tray, add, Show Simulations, showCounter
@@ -329,18 +345,6 @@ CheckForNewLine(var)
 	}
 	return %var%
 }
-
-DoSyntax:
-ifwinexist ahk_class Notepad++
-{
-	msgbox ,4,Close Notepad++, Notepad++ must be closed to generate the syntax files.  Continue?
-	ifmsgbox no 
-		return
-	winclose,,,15
-}
-RUNWAIT ,%A_ScriptDir%\GenerateSyntaxFiles.exe "%Rhome%" "%NppConfig%"
-run %Nppexe%
-return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Includes

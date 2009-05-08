@@ -5,6 +5,7 @@ key		default		description
 SECTION executables
 Rhome		Read from registry		Tells the location of the R install directory
 Npp			Read From Registry		Tells the location of the Notepad++ executable to be used
+NppConfig		%AppData%\Notepad++		Tells the location of the Notepad++ Configuration Directory
 RcmdParms	empty					Command line parameters for the Rgui
 
 SECTION hotkeys
