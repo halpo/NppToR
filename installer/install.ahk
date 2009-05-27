@@ -156,8 +156,12 @@ if chkSyntax
 	RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe --rhome="%Rdir%" --npp-config="%NppConfig%",, UseErrorLevel
 else 
 	RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe -N --file=internal --rhome="%Rdir%" --npp-config="%NppConfig%",, UseErrorLevel
-if ErrorLevel
-	MsgBox There was an error generating the syntax files.  You may need to change options in the dialog from the menu command 'Regenerate R syntax files'
+if ErrorLevel = 2
+	msgbox ,48,Error: File not found, There were problems finding the R and Notepad++ folders, please check your settings and retry
+else if ErrorLevel = 3 
+	msgbox ,48,Error: Too many keywords, "The packages that you have installed result in too many keywords for Notepad to handle.  Please exclude some packages or narrow the packages list to only those you use regularly."
+else if ErrorLevel
+	msgbox ,48,Error: Generic, Sorry. There was an error I couldn't predict generating the syntax. Perhaps try again with different options.
 
 GuiControl,, InstallProgress, +50 
 

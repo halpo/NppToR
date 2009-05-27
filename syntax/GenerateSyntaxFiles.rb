@@ -10,6 +10,13 @@
 puts "Welcome to the R Syntax Generator for NppToR"
 puts "(c) 2009 Andrew Redd"
 
+
+# define error type to be used
+class FileNotFound < StandardError 
+end
+class DefinedLimitExceeded < RangeError 
+end
+
 R="don't start R"
 
 require 'rexml/document'
@@ -22,6 +29,7 @@ load "GenericFilter.rb"
 load "R_UDL_Base.xml.rb"
 load "process_namespace.rb"
 
+begin 
 opts = OptionParser.new
 options = OpenStruct.new
 options.rhome = String.new
@@ -72,21 +80,19 @@ opts.on("-d","--debug", "enable debugging"){$DEBUG=true}
 
 opts.parse(ARGV)
 STDOUT.flush
-# raise "no package classes specified." if not options.merge && !options.base && !options.recommended && !options.other && options.include.length==0
-
 
 if  options.rhome == "" then
 	Win32::Registry::HKEY_LOCAL_MACHINE.open('Software\R-core\R') do |reg|
 		reg_type, options.rhome = reg.read('InstallPath')
 	end
 end
-raise "no Rhome directory found" if options.rhome.empty?
+raise FileNotFound, "no Rhome directory found" if options.rhome.empty?
 puts "R home directory: #{options.rhome}"
 r_exe = options.rhome ? "#{options.rhome}\\bin\\Rterm.exe" : nil 
 if options.npp_config_dir == "" then 
 	options.npp_config_dir = "#{ENV['APPDATA']}\\Notepad++"
 end
-raise "no Notepad++ config directory found or sspecified." if options.npp_config_dir.empty? && options.outfile.empty?
+raise FileNotFound, "no Notepad++ config directory found or sspecified." if options.npp_config_dir.empty? && options.outfile.empty?
 puts "Notepad++ Config Directory:#{options.npp_config_dir}"
 STDOUT.flush
 
@@ -127,14 +133,14 @@ if (r_pkgs.length > 0) then
 	r_pkgs.each do |pkg|
 		priority = (thisR.pull "pkg_priority('#{pkg}')")
 		priority.downcase!
-		if not options.include.include?(pkg) then 
+		# if not options.include.include?(pkg) then 
 			case priority
 			when "base": next if !options.base
 			when "recommended": next if !options.recommended
 			when "other": next if !options.other
 			else raise "unknown package priority for package #{pkg}"
 			end 
-		end 
+		# end 
 		puts "processing #{pkg}"
 		STDOUT.flush
 		libraries[priority] << pkg
@@ -208,7 +214,7 @@ rlang.elements["//Keywords[@name='Words2']"].text = words['base'].join(" ") unle
 rlang.elements["//Keywords[@name='Words3']"].text = words['recommended'].join(" ") unless libraries['recommended'].empty? 
 newotherwords = words['other'].join(" ")
 if newotherwords.length > 1024*30 then 
-	raise "Keywords for non high priority packages exceeds the allowable limit for Notepad++.  This shortcoming can be bypassed by regenerating the syntax files and specifying a subset of packages to have highlighting for (-N with --include=libs)."
+	raise DefinedLimitExceeded, "Keywords for non high priority packages exceeds the allowable limit for Notepad++.  This shortcoming can be bypassed by regenerating the syntax files and specifying a subset of packages to have highlighting for (-N with --include=libs)."
 else
 	rlang.elements["//Keywords[@name='Words4']"].text = newotherwords unless libraries['other'].empty?
 end
@@ -217,4 +223,17 @@ rbase.root.add(rlang)
 puts "writing to #{options.fileout}"
 rbase.write(File.open(options.fileout,"w"))
 STDOUT.flush
-STDIN.getc if $DEBUG
+
+rescue FileNotFound
+	puts $!
+	STDIN.getc if $DEBUG
+	exit(2)
+rescue DefinedLimitExceeded
+	puts $!
+	STDIN.getc if $DEBUG
+	exit(3)
+rescue 
+	puts "Unclassified error encountered." + $!
+	STDIN.getc if $DEBUG
+	exit(1)
+end

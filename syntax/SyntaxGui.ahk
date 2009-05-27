@@ -53,9 +53,15 @@ ButtonGoSyntax:
 		runsyntaxcmd .= " --debug"
 		msgbox %runsyntaxcmd%
 	}
-	RUNWAIT ,%runsyntaxcmd%,,UseErrorLevel
-	if ErrorLevel
-		msgbox There was an error generating the syntax. Sorry try different options.
+	RUNWAIT ,%runsyntaxcmd%,, UseErrorLevel
+	if ErrorLevel = 2
+		msgbox ,48,Error: File not found, There were problems finding the R and Notepad++ folders, please check your settings and retry
+	else if ErrorLevel = 3 
+		msgbox ,48,Error: Too many keywords, "The packages that you have installed result in too many keywords for Notepad to handle.  Please exclude some packages or narrow the packages list to only those you use regularly."
+ 	else if ErrorLevel
+		msgbox ,48,Error: Generic, Sorry. There was an error I couldn't predict generating the syntax. Perhaps try again with different options.
+	
+	
 	run %Nppexe%
 	return
 }

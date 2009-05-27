@@ -84,8 +84,8 @@ if debug
 ;menu functions
 menu, tray, add ; separator
 menu, tray, add, Show Simulations, showCounter
-menu, tray, add, Start Notepad++, RunNpp
-menu, tray, add, Reset R working directory, UpdateRWD
+menu, tray, add, Start Notepad++, NppRun
+menu, tray, add, Reset R working directory, RUpdateWD
 menu, tray, add, Regenerate R Syntax files, showSyntaxGui
 menu, tray, add ; separator
 Menu, tray, add, About, ShowAbout  ; Creates a new menu item.
@@ -113,15 +113,14 @@ return
 ;End Executable potion
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin function declarations
-
-;run line or selection ;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; run functions
 runline:
 {
 gosub NppGetLineOrSelection
 gosub Rpaste
 return
 }
-; Run All ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 runall:
 {
 gosub NppGetAll
@@ -134,12 +133,11 @@ gosub NppGetToPoint
 gosub Rpaste
 return
 }
-; Run in R CMD BATCH ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 runbatch:
 {
 	DetectHiddenWindows On
 	WinMenuSelectItem ,A,,File,Save
-	getCurrNppFileDir(file, dir, ext, Name)
+	NppGetCurrFileDir(file, dir, ext, Name)
 	SetWorkingDir %dir%
 	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
 	command = CMD /C %Rdir%\bin\Rcmd.exe BATCH -q "%file%"
@@ -152,6 +150,8 @@ runbatch:
 	DetectHiddenWindows Off
 return
 }
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; R interface functions
 Rpaste:
 {
 ;	if clipboard<>
@@ -161,7 +161,7 @@ Rpaste:
 	if !regExMatch(clipboard, "DS)^`s*$")
 	{
 		WinGet nppID, ID, A          ; save current window ID to return here later
-		RprocID:=getOrStartR()
+		RprocID:=RGetOrStart()
 		if ErrorLevel
 		{
 			IfWinExist , RGui
@@ -181,7 +181,7 @@ Rpaste:
 	}
 	return
 }
-getOrStartR()
+RGetOrStart()
 {
 	IfWinExist ,R Console
 	{
@@ -193,7 +193,7 @@ getOrStartR()
 	{
 		global Rguiexe
 		global Rcmdparms
-		getCurrNppFileDir(File,dir)
+		NppGetCurrFileDir(File,dir)
 		setworkingdir %dir%
 		run %Rguiexe% %RcmdParms%,dir,,RprocID
 		winwait ,R Console,, %Rrunwait%
@@ -201,21 +201,18 @@ getOrStartR()
 		return RprocID
 	}
 }
-getCurrNppFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="", ByRef Drive="")
+RUpdateWD:
 {
-	; WinGetActiveTitle, title
-	; stringleft firstchar, title, 1
-	; if firstchar = *
-		; StringTrimLeft title, title, 1
-	; StringTrimRight title, title, 12
-	ocb = %clipboard%
-	clipboard =
-	WinMenuSelectItem ,A,,2&,10& ; Edit,Copy Current full file path to Clipboard
-	clipwait
-	splitpath, clipboard,file,dir, ext, NameNoExt, Drive
-	clipboard = %ocb%
-	return dir
+	oldclipboard = %clipboard%
+	WinActivate ahk_class Notepad++
+	currdir:=NppGetCurrFileDir()
+	StringReplace , wd, currdir, \, /, All 
+	clipboard = setwd("%wd%")`n
+	gosub Rpaste
+	return
 }
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Putty interface functions
 puttypaste:
 {	
 	WinGet nppID, ID, A          ; save current window ID to return here later
@@ -245,6 +242,23 @@ puttyRunAll:
 	gosub puttypaste
 	return
 }
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Notepad++ interface functions
+NppGetCurrFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="", ByRef Drive="")
+{
+	; WinGetActiveTitle, title
+	; stringleft firstchar, title, 1
+	; if firstchar = *
+		; StringTrimLeft title, title, 1
+	; StringTrimRight title, title, 12
+	ocb = %clipboard%
+	clipboard =
+	WinMenuSelectItem ,A,,2&,10&,1& ; Edit,Copy to Clipboard,Copy Current full file path to Clipboard
+	clipwait
+	splitpath, clipboard,file,dir, ext, NameNoExt, Drive
+	clipboard = %ocb%
+	return dir
+}
 NppGetLineOrSelection:
 {
 	oldclipboard = %clipboard%
@@ -262,20 +276,10 @@ NppGetLineOrSelection:
 		clipboard := CheckForNewLine( clipboard )
 	return
 }
-RunNpp:
+NppRun:
 {
 	Run %Nppexe%
 	return 
-}
-UpdateRWD:
-{
-	oldclipboard = %clipboard%
-	WinActivate ahk_class Notepad++
-	currdir:=getCurrNppFileDir()
-	StringReplace , wd, currdir, \, /, All 
-	clipboard = setwd("%wd%")`n
-	gosub Rpaste
-	return
 }
 NppGetAll:
 {
@@ -295,7 +299,8 @@ sendevent {right}
 clipboard := CheckForNewLine( clipboard )
 return
 }
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 MakeAboutDialog:
 {
 ;Gui, -AlwaysOnTop -SysMenu +Owner ; +Owner avoids a taskbar button.

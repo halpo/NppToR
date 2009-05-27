@@ -1,9 +1,10 @@
 // buildtest.npx
 // builds the executables and moves to the test folder for a test installation
 
+taskkill /FI "imagename eq NppToR.exe" /f
+taskkill /FI "windowtitle eq NppToR.ahk" /f
+
 npp_exec build.npx
-taskkill /FI "imagename eq NppToR.exe"
-taskkill /FI "windowtitle eq NppToR.ahk"
 
 cp syntax\GenerateSyntaxFiles.exe test\GenerateSyntaxFiles.exe
 cp NppEditsR\NppEditR.exe test\NppEditR.exe
