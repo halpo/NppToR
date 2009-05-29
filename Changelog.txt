@@ -1,5 +1,7 @@
 NppToR CHANGELOG
 ----------------
+5/29/2009 5:24 PM - Now Checks the specified version of Notepad++ dynamically and chooses the appropriate menu commands to use.
+	also built the IniGui.  It will read but not update or write the settings to file.
 5/27/2009 5:35 PM - install.ahk also gives messages like SyntaxGUI
 5/27/2009 5:32 PM - GenerateSyntaxFiles.rb now returns codes according to the type of error raised.
 	SyntaxGui also gives messages for the new error codes.

@@ -27,92 +27,32 @@ Loop, %0%  ; For each parameter:
 		startup = true
 }
 
-;;;;;;;;;;;;;;;;;;;
-;INI file paramters
+;ini settings
 inifile = %A_ScriptDir%\npptor.ini
-;executables
-IniRead ,Rhome, %inifile%, executables, R,
-IniRead ,Rcmdparms, %inifile%, executables, Rcmdparms,
-IniRead ,Nppexe, %inifile%, executables, Npp,
-IniRead ,NppConfig, %inifile%, executables, NppConfig,
-;hotkeys
-IniRead ,passlinekey, %inifile%, hotkeys, passline,F8
-IniRead ,passfilekey, %inifile%, hotkeys, passfile,^F8
-IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
-IniRead ,batchrunkey, %inifile%, hotkeys, batchrun,^!F8
-;putty
-IniRead ,activateputty, %inifile%, putty, activateputty, false
-IniRead ,puttylinekey, %inifile%, putty, puttyline, F9
-IniRead ,puttyfilekey, %inifile%, putty, puttyfile, ^F9
-;controls
-IniRead ,Rpastewait, %inifile%, controls, Rpastewait, 50
-IniRead ,Rrunwait, %inifile%, controls, Rrunwait, 10
-IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, true
-IniRead ,appendnewline, %inifile%, controls, appendnewline, true
-IniRead ,debug, %inifile%, controls, debug, false 
+gosub startupini
 
 if debug
-	msgbox debugging has been turned on.
+	msgbox ,,%debug%,debugging has been turned on.
 
-if nppexe=ERROR
-{
-	regread, nppdir, hkey_local_machine, software\notepad++
-	nppexe = %nppdir%\notepad++.exe
-}
-if nppconfig=ERROR
-{
-	envget, appdata, appdata
-	nppconfig = %APPDATA%\notepad++
-
-}
-if Rhome=ERROR
-{	
-	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-	Rhome = %Rdir%
-}
-Rguiexe = %Rhome%\bin\Rgui.exe
-if  not startup
-	run %nppexe%
-if Rcmdparms=ERROR
-	Rcmdparms=
-
-if debug
-{
-	msgbox nppconfig=%nppconfig%
-}	
-	
-;menu functions
-menu, tray, add ; separator
-menu, tray, add, Show Simulations, showCounter
-menu, tray, add, Start Notepad++, NppRun
-menu, tray, add, Reset R working directory, RUpdateWD
-menu, tray, add, Regenerate R Syntax files, showSyntaxGui
-menu, tray, add ; separator
-Menu, tray, add, About, ShowAbout  ; Creates a new menu item.
+gosub makeMenus	
+gosub makeHotkeys
 
 gosub makeCounter
 gosub MakeAboutDialog
 gosub makeSyntaxGui
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;assign hotkeys dynamically
-if NOT makeglobal
-	hotkey , IfWinActive, ahk_class Notepad++
-#MaxThreadsPerHotkey 10
-hotkey ,%passlinekey%,runline
-hotkey ,%passfilekey%,runall
-hotkey ,%passtopointkey%,runtocursor
-#MaxThreadsPerHotkey 100
-hotkey ,%batchrunkey%,runbatch
-if activateputty=true
+gosub makeIniGui
+
+if  not startup
 {
-	#MaxThreadsPerHotkey 10
-	hotkey , %puttylinekey% , puttyLineOrSelection
-	hotkey , %puttyfilekey% , puttyRunAll
+	if debug
+		msgbox attempting to start %nppexe%
+	run %nppexe%
 }
 return
 ;End Executable potion
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin function declarations
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; run functions
 runline:
@@ -244,6 +184,15 @@ puttyRunAll:
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Notepad++ interface functions
+NppGetVersion(ByRef major, ByRef minor)
+{	
+	global NppExe
+	FileGetVersion , NppVersion, %Nppexe%
+	StringSplit, VersionNumbers, NppVersion , .
+	major := VersionNumbers1
+	minor := VersionNumbers2
+	return
+}
 NppGetCurrFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="", ByRef Drive="")
 {
 	; WinGetActiveTitle, title
@@ -253,7 +202,19 @@ NppGetCurrFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="",
 	; StringTrimRight title, title, 12
 	ocb = %clipboard%
 	clipboard =
-	WinMenuSelectItem ,A,,2&,10&,1& ; Edit,Copy to Clipboard,Copy Current full file path to Clipboard
+	NppGetVersion(major, minor)
+	msgbox major = %major% `n minor = %minor%
+	if(major>=5)&&(minor>=4)
+	{
+		msgbox using new menu system
+		WinMenuSelectItem ,A,,2&,10&,1& ; Edit,Copy to Clipboard, Current full file path to Clipboard
+	}
+	else 
+	{
+		msgbox using old menu system
+		WinMenuSelectItem ,A,,2&,10& ; Edit,Copy Current full file path to Clipboard
+	}
+		
 	clipwait
 	splitpath, clipboard,file,dir, ext, NameNoExt, Drive
 	clipboard = %ocb%
@@ -350,9 +311,114 @@ CheckForNewLine(var)
 	}
 	return %var%
 }
+;;;;;;;;;;;;;;;;;;;
+;INI file paramters
+IniGet:
+{
+;executables
+IniRead ,iniRhome,     %inifile%, executables, R,
+IniRead ,iniRcmdparms, %inifile%, executables, Rcmdparms,
+IniRead ,iniNppexe,    %inifile%, executables, Npp,
+IniRead ,iniNppConfig, %inifile%, executables, NppConfig,
+;hotkeys
+IniRead ,passlinekey,    %inifile%, hotkeys, passline,F8
+IniRead ,passfilekey,    %inifile%, hotkeys, passfile,^F8
+IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
+IniRead ,batchrunkey,    %inifile%, hotkeys, batchrun,^!F8
+;putty
+IniRead ,activateputty, %inifile%, putty, activateputty, false
+IniRead ,puttylinekey,  %inifile%, putty, puttyline, F9
+IniRead ,puttyfilekey,  %inifile%, putty, puttyfile, ^F9
+;controls
+IniRead ,Rpastewait,       %inifile%, controls, Rpastewait, 50
+IniRead ,Rrunwait,         %inifile%, controls, Rrunwait, 10
+IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, true
+IniRead ,appendnewline,    %inifile%, controls, appendnewline, true
+IniRead ,debug,            %inifile%, controls, debug, false 
+if debug=true
+	debug=true
+else
+	debug=
+return
+}
+distillIni:
+{
+if ininppexe=ERROR
+{
+	regread, nppdir, hkey_local_machine, software\notepad++
+	nppexe = %nppdir%\notepad++.exe
+}
+else
+	nppexe = %ininppexe%
+if ininppconfig=ERROR
+{
+	envget, appdata, appdata
+	nppconfig = %APPDATA%\notepad++
 
+}
+else
+	nppconfig = %ininppconfig%
+if iniRhome=ERROR
+{	
+	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+	Rhome = %Rdir%
+}
+else 
+	Rhome = %iniRhome%
+Rguiexe = %Rhome%\bin\Rgui.exe
+if iniRcmdparms=ERROR
+	Rcmdparms=
+else 
+	Rcmdparms = %iniRcmdparms%
+return
+}
+startupini:
+gosub iniget
+gosub distillini
+return
+
+writeinisettings:
+{
+
+
+return
+}
+
+;;;;;;;;;;;;;;;;;;;;
+makeMenus:
+{
+;menu functions
+menu, tray, add ; separator
+menu, tray, add, Show Simulations, showCounter
+menu, tray, add, Start Notepad++, NppRun
+menu, tray, add, Reset R working directory, RUpdateWD
+menu, tray, add, Regenerate R Syntax files, showSyntaxGui
+menu, tray, add ; separator
+Menu, tray, add, Settings, ShowIniGui
+Menu, tray, add, About, ShowAbout 
+return
+}
+makeHotkeys:
+{
+if NOT makeglobal
+	hotkey , IfWinActive, ahk_class Notepad++
+#MaxThreadsPerHotkey 10
+hotkey ,%passlinekey%,runline
+hotkey ,%passfilekey%,runall
+hotkey ,%passtopointkey%,runtocursor
+#MaxThreadsPerHotkey 100
+hotkey ,%batchrunkey%,runbatch
+if activateputty=true
+{
+	#MaxThreadsPerHotkey 10
+	hotkey , %puttylinekey% , puttyLineOrSelection
+	hotkey , %puttyfilekey% , puttyRunAll
+}
+return
+}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Includes
 #include %A_ScriptDir%\counter\counter.ahk
 #include %A_ScriptDir%\syntax\SyntaxGui.ahk
+#include %A_ScriptDir%\iniGUI\inigui.ahk
 
