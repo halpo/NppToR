@@ -184,13 +184,19 @@ puttyRunAll:
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Notepad++ interface functions
-NppGetVersion(ByRef major, ByRef minor)
+NppGetVersion(ByRef major, ByRef minor, ByRef bug, ByRef build)
 {	
-	global NppExe
-	FileGetVersion , NppVersion, %Nppexe%
-	StringSplit, VersionNumbers, NppVersion , .
-	major := VersionNumbers1
-	minor := VersionNumbers2
+	ifWinExist ahk_class Notepad++
+	{
+		winGet , NppPID, PID
+		CurrNppExePath := GetModuleFileNameEx( NppPID )
+		FileGetVersion , NppVersion, %CurrNppExePath%
+		StringSplit, VersionNumbers, NppVersion , .
+		major := VersionNumbers1
+		minor := VersionNumbers2
+		bug   := VersionNumbers3
+		build := VersionNumbers4
+	}
 	return
 }
 NppGetCurrFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="", ByRef Drive="")
@@ -202,7 +208,7 @@ NppGetCurrFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="",
 	; StringTrimRight title, title, 12
 	ocb = %clipboard%
 	clipboard =
-	NppGetVersion(major, minor)
+	NppGetVersion(major, minor, bug, build)
 	msgbox major = %major% `n minor = %minor%
 	if(major>=5)&&(minor>=4)
 	{
@@ -421,4 +427,4 @@ return
 #include %A_ScriptDir%\counter\counter.ahk
 #include %A_ScriptDir%\syntax\SyntaxGui.ahk
 #include %A_ScriptDir%\iniGUI\inigui.ahk
-
+#include %A_ScriptDir%\GetModuleFileName.ahk
