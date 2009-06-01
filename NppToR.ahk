@@ -10,7 +10,11 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 1.9.5
+version = 1.10.0
+
+NppToRHeadingFont = Comic Sans MS
+NppToRTextFont = Georgia
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin Initial execution code
 
@@ -274,19 +278,22 @@ MakeAboutDialog:
 {
 ;Gui, -AlwaysOnTop -SysMenu +Owner ; +Owner avoids a taskbar button.
 Gui, 2:Add, Picture,,icons\NppToR.png
+Gui, 2:Font, S14 CDefault, %NppToRHeadingFont%
+Gui, 2:Add, Text,x+10 ys , NppToR ~ About
+Gui, 2:Font, S8 CDefault, %NppToRTextFont%
 Gui, 2:Add, Text,, 
 (
-NppToR
 by Andrew Redd
 (c)2008
 version %version%
-use of this program or source files are governed by the MIT lisence. See License.txt.
+use of this program or source files are governed by the MIT license. See License.txt.
 )
 Gui, 2:Add, Text,, 
 (
-This package enable syntax highlighting, code folding and autocompletion in notepad++.  This specific utility enables passing code from Notepad++ to the RGui.  
+This package enable syntax highlighting, code folding and auto-completion in notepad++.  
+This specific utility enables passing code from Notepad++ to the R Gui Window.  
 
-The following are the keyboard shortcuts (can be modified in the npptor.ini file).
+The following are the keyboard shortcuts (can be modified from the setting in the main menu).
 
 	%passlinekey%: Passes a line or a selection to R.
 	%passfilekey%: Passes the entire file to R.

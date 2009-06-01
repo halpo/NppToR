@@ -15,19 +15,19 @@ makeCounter:
 Gui, +AlwaysOnTop +toolWindow +LastFound
 GUI, Color, %customColor%
 GUI, Margin, x5 y5
-GUI, Font, S10 bold
-GUI, Add, text, section ,NppToR - Active Simulations
-GUI, Font, norm s8
+Gui, Font, S14 CDefault, %NppToRHeadingFont%
+GUI, Add, text, section ,NppToR ~ Active Simulations
+Gui, Font, S8 CDefault, %NppToRTextFont%
 GUI, Add, Button, x+10 ys vBtnKill c%CustomColor%, Kill Simulation
 Gui, Add, Button, Default x ys, Hide
-GUI, Add, ListView, section xs r5 w330 vProcList gListViewClick, PID|LongTime|Start|Where|File
+GUI, Add, ListView, section xs+10 r5 w375 vProcList gListViewClick, PID|LongTime|Start|Where|File
 ;WinSet, TransColor, %CustomColor% 200
 WinSet, Transparent, 200
 return
 }
 showCounter:
 {
-	GUI Show
+	GUI ,show, Active Simulations
 	return
 }
 ListViewClick:

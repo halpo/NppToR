@@ -1,11 +1,15 @@
 
 makeSyntaxGui:
 {
-	GUI, 3:Add, TEXT,,R Syntax/Keyword Extraction Options
+	Gui, 3:Font, S14 CDefault, %NppToRHeadingFont%
+	Gui, 3:Add, Text,, NppToR ~ Keyword Extraction
+	Gui, 3:Font, S8 CDefault, %NppToRTextFont%
+	GUI, 3:Add, TEXT,,Options:
 	GUI, 3:Add, CHECKBOX, vchkBase, Include all base packages?
 	GUI, 3:Add, CHECKBOX, vchkRecommended, Include all recommended packages?
 	GUI, 3:Add, CHECKBOX, vchkOther checked, Include all non-high priority packages?
 	GUI, 3:Add, CHECKBOX, vchkRetain checked, Retain previous keywords (including customizations)?
+	GUI, 3:Add, CHECKBOX, vchkByContents, Infer keywords for packages with out a namespace?
 	GUI, 3:Add, TEXT,,Include packages (separate with commas)
 	GUI, 3:Add, EDIT, r3 w300 veditInclude
 	GUI, 3:Add, TEXT,,Exclude packages
@@ -38,6 +42,8 @@ ButtonGoSyntax:
 		runsyntaxcmd .= " --no-other-packages"
 	if (chkRetain = 0) 
 		runsyntaxcmd .= " --no-retain"
+	if (chkByContents = 0)
+		runsyntaxcmd .= " --by-contents"
 	if (editInclude <> "")
 	{
 		StringReplace, varInclude, editInclude, "`r`n", ALL

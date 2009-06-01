@@ -44,16 +44,19 @@ options.filein = String.new
 options.retain = true
 options.verbose = false
 options.quiet = false
+options.bycontents=false
+options.forcelarge=false
 
 opts.on_tail( "-h", "--help", "Print help menu"){
 	puts opts
 	exit
 }
-opts.on( "-R",	"--RHome=VAL",	String ){|val| 
+opts.on( "-R",	"--RHome=VAL",	"specify the R home folder" ){|val| 
 puts val
 options.rhome = val
 }
-opts.on( "-c",	"--npp-config=VAL", String){|val| options.npp_config_dir = val}
+opts.on( "-c",	"--npp-config=VAL", "specify the config folder for notpad++"){|val| options.npp_config_dir = val}
+opts.on( "-C", "--by-contents", "infer keywords from package CONTENTS files for those packages that do not have a NAMESPACE"){options.bycontents  = true}
 opts.on( "-b",	"--do-base", "include base packages in syntax generation"){ options.base = true}
 opts.on( "-r",	"--do-recommended", "include recommended packages in syntax generation"){ options.recommended = true}
 opts.on( "-N",	"--no-other-packages","Do not include non-standard packages."){ options.other = false }
@@ -73,6 +76,7 @@ opts.on( "-f","--file=INFILE","Syntax file for reading and writing unless --out 
 	puts "Reading R laguage syntax file from #{file}."
 	options.filein=file
 }
+opts.on("","--force-large","force file too large for notepad++ to be made"){options.forcelarge=true}
 opts.on("","--no-retain", "replace generated sections with new words rather than the default of merging"){options.retain=false}
 opts.on("-v","--verbose", "verbose"){options.verbose=true}
 opts.on("-q","--quiet", "run as silently as possible"){options.quiet=true}
@@ -148,22 +152,26 @@ if (r_pkgs.length > 0) then
 		begin	
 			words[priority] << keyword_loader.get_keywords(pkg)
 		rescue	
-			libpath = Pathname.new(thisR.pull("pkglibpath<-pkg_location('#{pkg}')"))
-			libpath += pkg
-			pkgwords=Array.new()
-			if (File.directory?(libpath) && File.exists?(libpath+'CONTENTS')) then
-				puts "Processing #{pkg} by CONTENTS file"
-				libraries[priority] << pkg
-				lines = (libpath+'CONTENTS').readlines
-				lines.grep(/^Aliases/).each{ |line|
-					lwords = line.split
-					lwords.delete_at(0)
-					pkgwords << lwords.grep(/^[A-Za-z]+[A-Za-z\._]*[A-Za-z0-9\._]*$/)
-				}
-				pkgwords.flatten!
+			if (options.bycontents) then 
+				libpath = Pathname.new(thisR.pull("pkglibpath<-pkg_location('#{pkg}')"))
+				libpath += pkg
+				pkgwords=Array.new()
+				if (File.directory?(libpath) && File.exists?(libpath+'CONTENTS')) then
+					puts "Processing #{pkg} by CONTENTS file"
+					libraries[priority] << pkg
+					lines = (libpath+'CONTENTS').readlines
+					lines.grep(/^Aliases/).each{ |line|
+						lwords = line.split
+						lwords.delete_at(0)
+						pkgwords << lwords.grep(/^[A-Za-z]+[A-Za-z\._]*[A-Za-z0-9\._]*$/)
+					}
+					pkgwords.flatten!
+				end
+				puts "filtering out S3 methods for #{pkg}."
+				words[priority] << GenericFilter.new(pkgwords, [], nil,pkg).filtered
+			else
+				puts "skipping #{pkg}: does not have a defined NAMESPACE, and not a base/recommended package."
 			end
-			puts "filtering out S3 methods for #{pkg}."
-			words[priority] << GenericFilter.new(pkgwords, [], nil,pkg).filtered
 		end
 	end 
 else puts 'no packages found/selected'
@@ -213,7 +221,7 @@ words['other']+= oldwords['other'] if options.retain
 rlang.elements["//Keywords[@name='Words2']"].text = words['base'].join(" ") unless libraries['base'].empty?
 rlang.elements["//Keywords[@name='Words3']"].text = words['recommended'].join(" ") unless libraries['recommended'].empty? 
 newotherwords = words['other'].join(" ")
-if newotherwords.length > 1024*30 then 
+if newotherwords.length > 1024*30 and not options.forcelarge then 
 	raise DefinedLimitExceeded, "Keywords for non high priority packages exceeds the allowable limit for Notepad++.  This shortcoming can be bypassed by regenerating the syntax files and specifying a subset of packages to have highlighting for (-N with --include=libs)."
 else
 	rlang.elements["//Keywords[@name='Words4']"].text = newotherwords unless libraries['other'].empty?

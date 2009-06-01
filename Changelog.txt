@@ -1,5 +1,9 @@
 NppToR CHANGELOG
 ----------------
+6/1/2009 5:41 PM - added option to syntax generator to force it to output file too large for notepad++
+6/1/2009 5:36 PM - Added option for including generating packages by CONTENTS file or not, defaults to false(no).
+6/1/2009 4:41 PM - changed GUI to be consistent on fonts and style.
+6/1/2009 4:42 PM - Finished adding support for environment variables in the settings.
 5/29/2009 10:16 PM - Got code from forums to have the Version of Notepad++ checked dynamically.
 5/29/2009 5:24 PM - Now Checks the specified version of Notepad++ dynamically and chooses the appropriate menu commands to use.
 	also built the IniGui.  It will read but not update or write the settings to file.

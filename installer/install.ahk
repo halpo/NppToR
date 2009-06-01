@@ -36,9 +36,9 @@ stringreplace HOME,personalfolder, `%USERPROFILE`%, %USERPROFILE%
 ;Gui Creation
 Gui, +OwnDialogs
 GUI ,ADD, PIC,, %A_ScriptDir%\..\icons\NppToR.png
-GUI ,FONT, s14 bold
-GUI ,ADD, TEXT,ym,NppToR Install
-GUI ,FONT, s10 normal
+GUI ,FONT, s14 bold Comic Sans MS
+GUI ,ADD, TEXT,ym,NppToR ~ Install
+GUI ,FONT, s10 normal Georgia
 GUI ,ADD, TEXT,,
 (
 © 2009 Andrew Redd 
