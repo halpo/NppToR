@@ -347,24 +347,23 @@ else
 	debug=
 return
 }
-distillIni:
+iniDistill:
 {
-if ininppexe=ERROR
+if (ininppexe=ERROR) || (ininppexe=)
 {
 	regread, nppdir, hkey_local_machine, software\notepad++
 	nppexe = %nppdir%\notepad++.exe
 }
 else
 	nppexe = %ininppexe%
-if ininppconfig=ERROR
+if (ininppconfig=ERROR) || (ininppconfig=)
 {
 	envget, appdata, appdata
 	nppconfig = %APPDATA%\notepad++
-
 }
 else
 	nppconfig = %ininppconfig%
-if iniRhome=ERROR
+if (iniRhome=ERROR) || (iniRhome=)
 {	
 	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
 	Rhome = %Rdir%
@@ -372,23 +371,45 @@ if iniRhome=ERROR
 else 
 	Rhome = %iniRhome%
 Rguiexe = %Rhome%\bin\Rgui.exe
-if iniRcmdparms=ERROR
+if (iniRcmdparms=ERROR)
 	Rcmdparms=
 else 
 	Rcmdparms = %iniRcmdparms%
 return
 }
+replaceEnvVariables(ByRef string)
+{
+	EnvGet ALLUSERSPROFILE, ALLUSERSPROFILE
+	EnvGet APPDATA, APPDATA
+	EnvGet CLASSPATH, CLASSPATH
+	EnvGet CommonProgramFiles, CommonProgramFiles
+	EnvGet COMPUTERNAME, COMPUTERNAME
+	EnvGet ComSpec, ComSpec
+	EnvGet HOMEDRIVE, HOMEDRIVE
+	EnvGet HOMEPATH, HOMEPATH
+	EnvGet LOCALAPPDATA, LOCALAPPDATA
+	EnvGet LOGONSERVER, LOGONSERVER
+	EnvGet ProgramData, ProgramData
+	EnvGet ProgramFiles, ProgramFiles
+	EnvGet PUBLIC, PUBLIC
+	EnvGet SystemDrive, SystemDrive
+	EnvGet SystemRoot, SystemRoot
+	EnvGet TEMP, TEMP
+	EnvGet TMP, TMP
+	EnvGet USERDOMAIN, USERDOMAIN
+	EnvGet USERNAME, USERNAME
+	EnvGet USERPROFILE, USERPROFILE
+	EnvGet WINDIR, WINDIR
+	
+
+
+
+}
+
 startupini:
 gosub iniget
-gosub distillini
+gosub iniDistill
 return
-
-writeinisettings:
-{
-
-
-return
-}
 
 ;;;;;;;;;;;;;;;;;;;;
 makeMenus:

@@ -47,7 +47,14 @@ return
 
 showIniGui:
 {
+if debug
+	msgbox ,,inifile, %inifile%
 gosub IniGet
+if debug
+{
+	msgbox %iniRhome%
+}
+
 guiControl,4:, guitxtpassline, %passlinekey%
 guiControl,4:, guitxtpassfile, %passfilekey%
 guiControl,4:, guitxtpasstopoint, %passtopointkey%
@@ -65,19 +72,19 @@ if appendnewline
 	guiControl,4:, guichkappendnewline, 1
 else
 	guiControl,4:, guichkappendnewline, 0
-if iniRhome=Error
+if (iniRhome=Error) || (iniRhome=)
 	guicontrol,4:, guitxtRhome, (read from registry)
 else
 	guicontrol,4:, guitxtRhome, %iniRhome%
-if iniRcmdparms=Error
+if (iniRcmdparms=Error) || (iniRcmdparms=)
 	guicontrol,4:, guitxtRcmdparms, 
 else
 	guicontrol,4:, guitxtRcmdparms, %iniRcmdparms%
-if iniNppExe=Error
+if (iniNppExe=Error) || (iniNppExe=)
 	guicontrol,4:, guitxtNppExe, (read from registry)
 else
 	guicontrol,4:, guitxtNppExe, %iniNppExe%
-if iniNppConfig=Error
+if (iniNppConfig=Error) || (iniNppConfig=)
 	guiControl,4:, guitxtNppConfig, `%AppData`%\Notepad++
 else
 	guiControl,4:, guitxtNppConfig, %iniNppConfig%
@@ -86,10 +93,93 @@ Gui, 4:Show, x581 y147 h632 w474, NppToR: Settings
 Return
 }
 guibtnBrowseRhome:
-return
+{
+	FileSelectFolder, filegetRhome, *::{20d04fe0-3aea-1069-a2d8-08002b30309d},0, Select R Home folder (the folder bin is in not the bin folder itself)  ; My Computer.
+	if NOT ErrorLevel
+		guiControl, 4:, guitxtRhome, %filegetRhome%
+	return
+}
 guibtnBrowseNppExe:
-return
+{
+	FileSelectFile , filegetNppExe, 3 , *::{20d04fe0-3aea-1069-a2d8-08002b30309d}, Select the Notepad++ Executable to use., *.exe
+	if NOT ErrorLevel
+		guiControl, 4:, guitxtNppExe, %filegetNppExe%
+	return
+}
 guibtnBrowseNppConfig:
-return
+{
+	FileSelectFolder, filegetNppConfig, *::{20d04fe0-3aea-1069-a2d8-08002b30309d}, 0, Select Notepad++ Home Folder  ; My Computer.
+	if NOT ErrorLevel
+		guiControl, 4:, guitxtNppConfig, %filegetNppConfig%
+	return
+}
 guiIniSave:
+{
+gui 4:Submit
+guiControlGet,passlinekey,4:, guitxtpassline
+guiControlGet,passfilekey,4:, guitxtpassfile
+guiControlGet,passtopointkey,4:, guitxtpasstopoint
+guiControlGet,batchrunkey,4:, guitxtbatchrun
+guiControlGet,activateputty,4:, guichkactivateputty
+guiControlGet,puttylinekey,4:, guitxtputtyline
+guiControlGet,puttyfilekey,4:, guitxtputtyfile
+guiControlGet,rpastewait,4:, guitxtrpastewait
+guiControlGet,rrunwait,4:, guitxtrrunwait
+guiControlGet,restoreclipboard, 4:, guichkrestoreclipboard
+if restoreclipboard 
+	restoreclipboard = true
+else 
+	restoreclipboard = false
+guiControl,appendnewline,4:, guichkappendnewline
+if appendnewline
+	appendnewline = true
+else
+	appendnewline = false
+	
+guiControlGet ,iniRhome,4:, guitxtRhome
+if iniRhome=(read from registry)
+	Rhome=
+
+guicontrolget ,iniRcmdparms,4:, guitxtRcmdparms
+
+guicontrolget ,iniNppExe,4:, guitxtNppExe, %iniNppExe%
+if iniNppExe=(read from registry)
+	iniNppExe=
+
+guiControlGet , iniNppConfig,4:, guitxtNppConfig, %iniNppConfig%
+if iniNppConfig=`%AppData`%\Notepad++
+	iniNppConfig =
+
+gosub iniWriteSettingsToFile
+gosub iniDistill
+
+msgbox %rhome%
+	
 return
+}
+
+iniWriteSettingsToFile:
+{
+;executables
+iniWrite ,%iniRhome%,     %inifile%, executables, R
+iniWrite ,%iniRcmdparms%, %inifile%, executables, Rcmdparms
+iniWrite ,%iniNppexe%,    %inifile%, executables, Npp
+iniWrite ,%iniNppConfig%, %inifile%, executables, NppConfig
+;hotkeys
+iniWrite ,%passlinekey%,    %inifile%, hotkeys, passline
+iniWrite ,%passfilekey%,    %inifile%, hotkeys, passfile
+iniWrite ,%passtopointkey%, %inifile%, hotkeys, evaltocursor
+iniWrite ,%batchrunkey%,    %inifile%, hotkeys, batchrun
+;putty
+iniWrite ,%activateputty%, %inifile%, putty, activateputty
+iniWrite ,%puttylinekey%,  %inifile%, putty, puttyline
+iniWrite ,%puttyfilekey%,  %inifile%, putty, puttyfile
+;controls
+iniWrite ,%Rpastewait%,       %inifile%, controls, Rpastewait
+iniWrite ,%Rrunwait%,         %inifile%, controls, Rrunwait
+iniWrite ,%restoreclipboard%, %inifile%, controls, restoreclipboard
+iniWrite ,%appendnewline%,    %inifile%, controls, appendnewline
+;iniWrite ,%debug%,            %inifile%, controls, debug, false 
+
+return
+}

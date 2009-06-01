@@ -6,7 +6,7 @@ taskkill /FI "windowtitle eq NppToR.ahk" /f
 
 npp_exec build.npx
 
-cp syntax\GenerateSyntaxFiles.exe test\GenerateSyntaxFiles.exe
+cp .\syntax\GenerateSyntaxFiles.exe .\test\GenerateSyntaxFiles.exe
 cp NppEditsR\NppEditR.exe test\NppEditR.exe
 cp NppToR.exe test\NppToR.exe
 
