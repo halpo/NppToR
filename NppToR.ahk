@@ -32,8 +32,10 @@ inifile = %A_ScriptDir%\npptor.ini
 gosub startupini
 
 if debug
+{
 	msgbox ,,%debug%,debugging has been turned on.
-
+	
+}
 gosub makeMenus	
 gosub makeHotkeys
 
@@ -349,61 +351,103 @@ return
 }
 iniDistill:
 {
-if (ininppexe=ERROR) || (ininppexe=)
+	if debug
+		msgbox ,,ininppexe,%ininppexe%
+	if (ininppexe="ERROR") || (ininppexe="")
+	{
+		if debug
+			msgbox reading Notepad++ directory from registry
+		regread, nppdir, hkey_local_machine, software\notepad++
+		nppexe = %nppdir%\notepad++.exe
+	}
+	else
+		nppexe := replaceEnvVariables(ininppexe)
+
+		
+	if debug
+		msgbox ,,ininppconfig,%ininppconfig%
+	if (ininppconfig="ERROR") || (ininppconfig="")
+	{
+		envget, appdata, appdata
+		nppconfig = %APPDATA%\notepad++
+	}
+	else
+		nppconfig = %ininppconfig%
+		
+	if debug
+		msgbox ,,iniRhome, %iniRhome%
+	if (iniRhome="ERROR") || (iniRhome="")
+	{	
+		RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+		Rhome = %Rdir%
+	}
+	else 
+		Rhome = %iniRhome%
+	Rguiexe = %Rhome%\bin\Rgui.exe
+	if debug
+		msgbox ,, Rguiexe, %Rguiexe%
+
+	if debug
+		msgbox ,,iniRcmdparms,%iniRcmdparms%
+	if (iniRcmdparms="ERROR")
+		Rcmdparms=
+	else 
+		Rcmdparms = %iniRcmdparms%
+	return
+}
+replaceEnvVariables(string)
 {
-	regread, nppdir, hkey_local_machine, software\notepad++
-	nppexe = %nppdir%\notepad++.exe
-}
-else
-	nppexe = %ininppexe%
-if (ininppconfig=ERROR) || (ininppconfig=)
-{
-	envget, appdata, appdata
-	nppconfig = %APPDATA%\notepad++
-}
-else
-	nppconfig = %ininppconfig%
-if (iniRhome=ERROR) || (iniRhome=)
-{	
-	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-	Rhome = %Rdir%
-}
-else 
-	Rhome = %iniRhome%
-Rguiexe = %Rhome%\bin\Rgui.exe
-if (iniRcmdparms=ERROR)
-	Rcmdparms=
-else 
-	Rcmdparms = %iniRcmdparms%
-return
-}
-replaceEnvVariables(ByRef string)
-{
-	EnvGet ALLUSERSPROFILE, ALLUSERSPROFILE
-	EnvGet APPDATA, APPDATA
-	EnvGet CLASSPATH, CLASSPATH
-	EnvGet CommonProgramFiles, CommonProgramFiles
-	EnvGet COMPUTERNAME, COMPUTERNAME
-	EnvGet ComSpec, ComSpec
-	EnvGet HOMEDRIVE, HOMEDRIVE
-	EnvGet HOMEPATH, HOMEPATH
-	EnvGet LOCALAPPDATA, LOCALAPPDATA
-	EnvGet LOGONSERVER, LOGONSERVER
-	EnvGet ProgramData, ProgramData
-	EnvGet ProgramFiles, ProgramFiles
-	EnvGet PUBLIC, PUBLIC
-	EnvGet SystemDrive, SystemDrive
-	EnvGet SystemRoot, SystemRoot
-	EnvGet TEMP, TEMP
-	EnvGet TMP, TMP
-	EnvGet USERDOMAIN, USERDOMAIN
-	EnvGet USERNAME, USERNAME
-	EnvGet USERPROFILE, USERPROFILE
-	EnvGet WINDIR, WINDIR
+	envget ,a_allusersprofile, allusersprofile
+	envget ,a_commonprogramfiles, commonprogramfiles
+	envget ,a_homedrive, homedrive
+	envget ,a_homepath, homepath
+	envget ,a_localappdata, localappdata
+	envget ,a_logonserver, logonserver
+	envget ,a_programdata, programdata
+	envget ,a_public, public
+	envget ,a_systemdrive, systemdrive
+	envget ,a_systemroot, systemroot
+	envget a_userdomain, userdomain
+	envget a_userprofile, userprofile
+	tmp:=a_temp
+	splitpath, a_scriptdir,,cdir,,,cdrive
+
+	stringreplace,string,string,`%npptordir`%,%cdir%
+	stringreplace,string,string,`%drive`%,%cdrive%
+
+	stringreplace,string,string,`%allusersprofile`%,%a_allusersprofile%
+	stringreplace,string,string,`%commonprogramfiles`%,%a_commonprogramfiles%
+	stringreplace,string,string,`%computername`%,%a_computername%
+	stringreplace,string,string,`%homedrive`%,%a_homedrive%
+	stringreplace,string,string,`%homepath`%,%a_homepath%
+	stringreplace,string,string,`%localappdata`%,%a_localappdata%
+	stringreplace,string,string,`%logonserver`%,%a_logonserver%
+	stringreplace,string,string,`%programdata`%,%a_programdata%
+	stringreplace,string,string,`%public`%,%a_public%
+	stringreplace,string,string,`%systemdrive`%,%a_systemdrive%
+	stringreplace,string,string,`%systemroot`%,%a_systemroot%
+	stringreplace,string,string,`%temp`%,%a_temp%
+	stringreplace,string,string,`%tmp`%,%a_tmp%
+	stringreplace,string,string,`%userdomain`%,%a_userdomain%
+	stringreplace,string,string,`%userprofile`%,%a_userprofile%
+
+	stringreplace,string,string,`%language`%, %a_language%	;the system's default language, which is one of these 4-digit codes.
+	stringreplace,string,string,`%username`%,%a_username%	;the logon name of the user who launched this script.
+	stringreplace,string,string,`%windir`%,%a_windir%	;the windows directory. for example: c:\windows
+	stringreplace,string,string,`%programfiles`%,%a_programfiles% 	;the program files directory (e.g. c:\program files). in v1.0.43.08+, the a_ prefix may be omitted, which helps ease the transition to #noenv.
+	stringreplace,string,string,`%appdata`%,%a_appdata% ;[v1.0.43.09+]	the full path and name of the folder containing the current user's application-specific data. for example: c:\documents and settings\username\application data
+	stringreplace,string,string,`%appdatacommon`%,%a_appdatacommon% ;[v1.0.43.09+]	the full path and name of the folder containing the all-users application-specific data.
+	stringreplace,string,string,`%desktop`%,%a_desktop%	;the full path and name of the folder containing the current user's desktop files.
+	stringreplace,string,string,`%desktopcommon`%,%a_desktopcommon%	;the full path and name of the folder containing the all-users desktop files.
+	stringreplace,string,string,`%startmenu`%,%a_startmenu%	;the full path and name of the current user's start menu folder.
+	stringreplace,string,string,`%startmenucommon`%,%a_startmenucommon%	;the full path and name of the all-users start menu folder.
+	stringreplace,string,string,`%programs`%,%a_programs%	;the full path and name of the programs folder in the current user's start menu.
+	stringreplace,string,string,`%programscommon`%,%a_programscommon%	;the full path and name of the programs folder in the all-users start menu.
+	stringreplace,string,string,`%startup`%,%a_startup%	;the full path and name of the startup folder in the current user's start menu.
+	stringreplace,string,string,`%startupcommon`%,%a_startupcommon%	;the full path and name of the startup folder in the all-users start menu.
+	stringreplace,string,string,`%mydocuments`%,%a_mydocuments%	;the full path and name of the current user's "my documents" folder. unlike most of the similar variables, if the folder is the root of a drive, the final backslash is not included. for example, it would contain m: rather than m:\
 	
-
-
-
+	return string
 }
 
 startupini:

@@ -5,7 +5,7 @@ set AHK2EXE = $(CURRENT_DIRECTORY)\buildtools\Ahk2exe.exe
 
 // build GenerateSyntaaxFiles.exe
 cd syntax
-// ruby C:\Programs\ruby\lib\ruby\gems\1.8\gems\rubyscript2exe-0.5.3\realstuff.rb GenerateSyntaxFiles.rb --rubyscript2exe-ruby --rubyscript2exe-quiet
+ruby C:\Programs\ruby\lib\ruby\gems\1.8\gems\rubyscript2exe-0.5.3\realstuff.rb GenerateSyntaxFiles.rb --rubyscript2exe-ruby --rubyscript2exe-quiet
 cd ..
 
 // compile AHK scripts

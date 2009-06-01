@@ -1,9 +1,10 @@
 makeIniGui:
+{
 Gui, 4:Add, Picture, x6 y10 w70 h70 , %A_ScriptDir%\..\icons\NppToR.png
 Gui, 4:Font, S14 CDefault, Comic Sans MS
 Gui, 4:Add, Text, x86 y10 w370 h30 , NppToR Setting and Options
 Gui, 4:Font, S8 CDefault, Georgia
-Gui, 4:Add, Text, x86 y50 w370 h70 , Here you can configure your NppToR to work as you like. Leave entries blank to you defaults or to read from the system.  Use portable variables such as `%Drive`% or `%ScriptDir`% to make locations dynamic.
+Gui, 4:Add, Text, x86 y50 w370 h70 , Here you can configure your NppToR to work as you like. Leave entries blank to you defaults or to read from the system.  Use portable variables such as `%Drive`% or `%NppToRDir`% to make locations dynamic.
 Gui, 4:Add, GroupBox, x16 y120 w440 h150 , Executables and Paths
 	Gui, 4:Add, Text,   	x26  y140 w120 h30                   , R Home
 	Gui, 4:Add, Edit,   	x146 y140 w250 h20 vguitxtRhome      , (read from registry)
@@ -43,8 +44,7 @@ Gui, 4:Add, Button,		x356 y590 w100 h30 gCancel, Cancel
 Gui, 4:Add, Button,		x256 y590 w100 h30 gguiIniSave, Save
 ; Generated using SmartGUI Creator 4.0
 return
-
-
+}
 showIniGui:
 {
 if debug
@@ -72,19 +72,22 @@ if appendnewline
 	guiControl,4:, guichkappendnewline, 1
 else
 	guiControl,4:, guichkappendnewline, 0
-if (iniRhome=Error) || (iniRhome=)
+if (iniRhome="Error") || (iniRhome="")
 	guicontrol,4:, guitxtRhome, (read from registry)
 else
 	guicontrol,4:, guitxtRhome, %iniRhome%
-if (iniRcmdparms=Error) || (iniRcmdparms=)
+if (iniRcmdparms="Error") || (iniRcmdparms="")
 	guicontrol,4:, guitxtRcmdparms, 
 else
 	guicontrol,4:, guitxtRcmdparms, %iniRcmdparms%
-if (iniNppExe=Error) || (iniNppExe=)
+if (iniNppExe="Error") || (iniNppExe="")
 	guicontrol,4:, guitxtNppExe, (read from registry)
 else
 	guicontrol,4:, guitxtNppExe, %iniNppExe%
-if (iniNppConfig=Error) || (iniNppConfig=)
+	
+if debug
+	msgbox,64,iniNppConfig,%iniNppConfig%
+if (iniNppConfig="Error") || (iniNppConfig="")
 	guiControl,4:, guitxtNppConfig, `%AppData`%\Notepad++
 else
 	guiControl,4:, guitxtNppConfig, %iniNppConfig%
@@ -137,17 +140,17 @@ else
 	appendnewline = false
 	
 guiControlGet ,iniRhome,4:, guitxtRhome
-if iniRhome=(read from registry)
-	Rhome=
+if(iniRhome="(read from registry)")
+	iniRhome=
 
 guicontrolget ,iniRcmdparms,4:, guitxtRcmdparms
 
 guicontrolget ,iniNppExe,4:, guitxtNppExe, %iniNppExe%
-if iniNppExe=(read from registry)
+if(iniNppExe="(read from registry)")
 	iniNppExe=
 
 guiControlGet , iniNppConfig,4:, guitxtNppConfig, %iniNppConfig%
-if iniNppConfig=`%AppData`%\Notepad++
+if(iniNppConfig="`%AppData`%\Notepad++")
 	iniNppConfig =
 
 gosub iniWriteSettingsToFile
@@ -157,7 +160,6 @@ msgbox %rhome%
 	
 return
 }
-
 iniWriteSettingsToFile:
 {
 ;executables
