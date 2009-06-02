@@ -155,8 +155,6 @@ if(iniNppConfig="`%AppData`%\Notepad++")
 
 gosub iniWriteSettingsToFile
 gosub iniDistill
-
-msgbox %rhome%
 	
 return
 }

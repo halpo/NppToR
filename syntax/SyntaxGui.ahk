@@ -38,12 +38,13 @@ ButtonGoSyntax:
 		runsyntaxcmd .= " --do-base"
 	if (chkRecommended = 1) 
 		runsyntaxcmd .= " --do-recommended"
+	if (chkByContents = 1)
+		runsyntaxcmd .= " --by-contents"
 	if (chkOther = 0) 
 		runsyntaxcmd .= " --no-other-packages"
 	if (chkRetain = 0) 
 		runsyntaxcmd .= " --no-retain"
-	if (chkByContents = 0)
-		runsyntaxcmd .= " --by-contents"
+
 	if (editInclude <> "")
 	{
 		StringReplace, varInclude, editInclude, "`r`n", ALL

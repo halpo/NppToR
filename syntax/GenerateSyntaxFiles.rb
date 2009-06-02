@@ -80,7 +80,10 @@ opts.on("","--force-large","force file too large for notepad++ to be made"){opti
 opts.on("","--no-retain", "replace generated sections with new words rather than the default of merging"){options.retain=false}
 opts.on("-v","--verbose", "verbose"){options.verbose=true}
 opts.on("-q","--quiet", "run as silently as possible"){options.quiet=true}
-opts.on("-d","--debug", "enable debugging"){$DEBUG=true}
+opts.on("-d","--debug", "enable debugging"){
+	$DEBUG=true
+	puts "debugging turned on."
+}
 
 opts.parse(ARGV)
 STDOUT.flush
@@ -131,26 +134,30 @@ end
 r_pkgs = r_pkgs + options.include - options.exclude
 r_pkgs.uniq!
 
+puts r_pkgs if $DEBUG
 if (r_pkgs.length > 0) then
 	puts "processing R packages..." 
 	keyword_loader=R_keywords.new()
 	r_pkgs.each do |pkg|
+		
 		priority = (thisR.pull "pkg_priority('#{pkg}')")
 		priority.downcase!
-		# if not options.include.include?(pkg) then 
+		puts "priority=#{priority}" if $DEBUG
+		if not options.include.include?(pkg) then 
 			case priority
 			when "base": next if !options.base
 			when "recommended": next if !options.recommended
 			when "other": next if !options.other
 			else raise "unknown package priority for package #{pkg}"
 			end 
-		# end 
+		end 
 		puts "processing #{pkg}"
 		STDOUT.flush
 		libraries[priority] << pkg
 		words[priority] << pkg
 		begin	
-			words[priority] << keyword_loader.get_keywords(pkg)
+			words[priority] << pkgwords = keyword_loader.get_keywords(pkg)
+			puts pkgwords.join(', ') if $DEBUG
 		rescue	
 			if (options.bycontents) then 
 				libpath = Pathname.new(thisR.pull("pkglibpath<-pkg_location('#{pkg}')"))
@@ -218,20 +225,20 @@ words['recommended']+= oldwords['recommended'] if options.retain
 words['other'] = (((words['other'] - BuiltInWords) - words['recommended']) - words['base'])
 words['other']+= oldwords['other'] if options.retain
 
-rlang.elements["//Keywords[@name='Words2']"].text = words['base'].join(" ") unless libraries['base'].empty?
-rlang.elements["//Keywords[@name='Words3']"].text = words['recommended'].join(" ") unless libraries['recommended'].empty? 
+rlang.elements["//UserLang[@name='R']/KeywordLists/Keywords[@name='Words2']"].text = words['base'].join(" ") unless libraries['base'].empty?
+rlang.elements["//UserLang[@name='R']/KeywordLists/Keywords[@name='Words3']"].text = words['recommended'].join(" ") unless libraries['recommended'].empty? 
 newotherwords = words['other'].join(" ")
 if newotherwords.length > 1024*30 and not options.forcelarge then 
 	raise DefinedLimitExceeded, "Keywords for non high priority packages exceeds the allowable limit for Notepad++.  This shortcoming can be bypassed by regenerating the syntax files and specifying a subset of packages to have highlighting for (-N with --include=libs)."
 else
-	rlang.elements["//Keywords[@name='Words4']"].text = newotherwords unless libraries['other'].empty?
+	rlang.elements["//UserLang[@name='R']/KeywordLists/Keywords[@name='Words4']"].text = newotherwords unless libraries['other'].empty?
 end
 rbase.elements.delete("NotepadPlus/UserLang[@name='R']") unless rbase.elements["NotepadPlus/UserLang[@name='R']"].nil?
 rbase.root.add(rlang)
 puts "writing to #{options.fileout}"
 rbase.write(File.open(options.fileout,"w"))
 STDOUT.flush
-
+STDIN.getc if $DEBUG
 rescue FileNotFound
 	puts $!
 	STDIN.getc if $DEBUG

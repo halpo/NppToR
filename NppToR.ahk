@@ -350,7 +350,7 @@ IniRead ,Rrunwait,         %inifile%, controls, Rrunwait, 10
 IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, true
 IniRead ,appendnewline,    %inifile%, controls, appendnewline, true
 IniRead ,debug,            %inifile%, controls, debug, false 
-if debug=true
+if(debug="true")
 	debug=true
 else
 	debug=
