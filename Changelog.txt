@@ -1,5 +1,9 @@
 NppToR CHANGELOG
 ----------------
+6/4/2009 4:10 PM - found two msgbox that should have been debug messages and not regular messages
+
+6/1/2009 7:04 PM - Version 1.10.0 release
+
 6/1/2009 5:41 PM - added option to syntax generator to force it to output file too large for notepad++
 6/1/2009 5:36 PM - Added option for including generating packages by CONTENTS file or not, defaults to false(no).
 6/1/2009 4:41 PM - changed GUI to be consistent on fonts and style.

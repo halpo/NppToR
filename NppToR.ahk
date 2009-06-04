@@ -10,7 +10,7 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 1.10.0
+version = 1.10.1
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
@@ -38,7 +38,6 @@ gosub startupini
 if debug
 {
 	msgbox ,,%debug%,debugging has been turned on.
-	
 }
 gosub makeMenus	
 gosub makeHotkeys
@@ -215,15 +214,18 @@ NppGetCurrFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="",
 	ocb = %clipboard%
 	clipboard =
 	NppGetVersion(major, minor, bug, build)
-	msgbox major = %major% `n minor = %minor%
+	if(debug)
+		msgbox major = %major% `n minor = %minor%
 	if(major>=5)&&(minor>=4)
 	{
-		msgbox using new menu system
+		if(debug)
+			msgbox using new menu system
 		WinMenuSelectItem ,A,,2&,10&,1& ; Edit,Copy to Clipboard, Current full file path to Clipboard
 	}
 	else 
 	{
-		msgbox using old menu system
+		if(debug)
+			msgbox using old menu system
 		WinMenuSelectItem ,A,,2&,10& ; Edit,Copy Current full file path to Clipboard
 	}
 		
