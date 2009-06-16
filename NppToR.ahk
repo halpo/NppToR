@@ -35,10 +35,6 @@ Loop, %0%  ; For each parameter:
 inifile = %A_ScriptDir%\npptor.ini
 gosub startupini
 
-if debug
-{
-	msgbox ,,%debug%,debugging has been turned on.
-}
 gosub makeMenus	
 gosub makeHotkeys
 
@@ -49,8 +45,6 @@ gosub makeIniGui
 
 if  not startup
 {
-	if debug
-		msgbox attempting to start %nppexe%
 	run %nppexe%
 }
 return
@@ -214,18 +208,12 @@ NppGetCurrFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="",
 	ocb = %clipboard%
 	clipboard =
 	NppGetVersion(major, minor, bug, build)
-	if(debug)
-		msgbox major = %major% `n minor = %minor%
 	if(major>=5)&&(minor>=4)
 	{
-		if(debug)
-			msgbox using new menu system
 		WinMenuSelectItem ,A,,2&,10&,1& ; Edit,Copy to Clipboard, Current full file path to Clipboard
 	}
 	else 
 	{
-		if(debug)
-			msgbox using old menu system
 		WinMenuSelectItem ,A,,2&,10& ; Edit,Copy Current full file path to Clipboard
 	}
 		
@@ -353,19 +341,17 @@ IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, true
 IniRead ,appendnewline,    %inifile%, controls, appendnewline, true
 IniRead ,debug,            %inifile%, controls, debug, false 
 if(debug="true")
+{
 	debug=true
-else
+	msgbox ,,%debug%,debugging has been turned on.
+} else
 	debug=
 return
 }
 iniDistill:
 {
-	if debug
-		msgbox ,,ininppexe,%ininppexe%
 	if (ininppexe="ERROR") || (ininppexe="")
 	{
-		if debug
-			msgbox reading Notepad++ directory from registry
 		regread, nppdir, hkey_local_machine, software\notepad++
 		nppexe = %nppdir%\notepad++.exe
 	}
@@ -373,8 +359,6 @@ iniDistill:
 		nppexe := replaceEnvVariables(ininppexe)
 
 		
-	if debug
-		msgbox ,,ininppconfig,%ininppconfig%
 	if (ininppconfig="ERROR") || (ininppconfig="")
 	{
 		envget, appdata, appdata
@@ -383,8 +367,6 @@ iniDistill:
 	else
 		nppconfig = %ininppconfig%
 		
-	if debug
-		msgbox ,,iniRhome, %iniRhome%
 	if (iniRhome="ERROR") || (iniRhome="")
 	{	
 		RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
@@ -393,11 +375,7 @@ iniDistill:
 	else 
 		Rhome = %iniRhome%
 	Rguiexe = %Rhome%\bin\Rgui.exe
-	if debug
-		msgbox ,, Rguiexe, %Rguiexe%
 
-	if debug
-		msgbox ,,iniRcmdparms,%iniRcmdparms%
 	if (iniRcmdparms="ERROR")
 		Rcmdparms=
 	else 

@@ -36,7 +36,7 @@ options.rhome = String.new
 options.npp_config_dir = String.new
 options.base = false
 options.recommended = false
-options.other = true
+options.other = false
 options.include = []
 options.exclude = []
 options.fileout = String.new
@@ -59,7 +59,8 @@ opts.on( "-c",	"--npp-config=VAL", "specify the config folder for notpad++"){|va
 opts.on( "-C", "--by-contents", "infer keywords from package CONTENTS files for those packages that do not have a NAMESPACE"){options.bycontents  = true}
 opts.on( "-b",	"--do-base", "include base packages in syntax generation"){ options.base = true}
 opts.on( "-r",	"--do-recommended", "include recommended packages in syntax generation"){ options.recommended = true}
-opts.on( "-N",	"--no-other-packages","Do not include non-standard packages."){ options.other = false }
+opts.on( "-o", "--do-other","include ALL packages without a priority in syntax generation"){options.other=true}
+# opts.on( "-N",	"--no-other-packages","Do not include non-standard packages."){ options.other = false }
 opts.on( "-i",	"--include=LIST","also include the packages listed", String){ |list|
 	puts "extra includes: #{list}"
 	options.include = list.split(/,\s*/)
@@ -238,17 +239,20 @@ rbase.root.add(rlang)
 puts "writing to #{options.fileout}"
 rbase.write(File.open(options.fileout,"w"))
 STDOUT.flush
-STDIN.getc if $DEBUG
+exit(0)
 rescue FileNotFound
 	puts $!
+	puts 'press enter to exit' if $DEBUG
 	STDIN.getc if $DEBUG
 	exit(2)
 rescue DefinedLimitExceeded
 	puts $!
+	puts 'press enter to exit' if $DEBUG
 	STDIN.getc if $DEBUG
 	exit(3)
 rescue 
 	puts "Unclassified error encountered." + $!
+	puts 'press enter to exit' if $DEBUG
 	STDIN.getc if $DEBUG
 	exit(1)
 end

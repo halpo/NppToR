@@ -7,7 +7,7 @@ makeSyntaxGui:
 	GUI, 3:Add, TEXT,,Options:
 	GUI, 3:Add, CHECKBOX, vchkBase, Include all base packages?
 	GUI, 3:Add, CHECKBOX, vchkRecommended, Include all recommended packages?
-	GUI, 3:Add, CHECKBOX, vchkOther checked, Include all non-high priority packages?
+	GUI, 3:Add, CHECKBOX, vchkOther, Include all packages without a priority?
 	GUI, 3:Add, CHECKBOX, vchkRetain checked, Retain previous keywords (including customizations)?
 	GUI, 3:Add, CHECKBOX, vchkByContents, Infer keywords for packages with out a namespace?
 	GUI, 3:Add, TEXT,,Include packages (separate with commas)
@@ -38,10 +38,10 @@ ButtonGoSyntax:
 		runsyntaxcmd .= " --do-base"
 	if (chkRecommended = 1) 
 		runsyntaxcmd .= " --do-recommended"
+	if (chkOther = 1) 
+		runsyntaxcmd .= " --do-other"
 	if (chkByContents = 1)
 		runsyntaxcmd .= " --by-contents"
-	if (chkOther = 0) 
-		runsyntaxcmd .= " --no-other-packages"
 	if (chkRetain = 0) 
 		runsyntaxcmd .= " --no-retain"
 
@@ -54,11 +54,6 @@ ButtonGoSyntax:
 	{
 		StringReplace, varExclude, editExclude, "`r`n", ALL
 		runsyntaxcmd .= " --exclude=""" . varExclude . """"
-	}
-	if debug
-	{
-		runsyntaxcmd .= " --debug"
-		msgbox %runsyntaxcmd%
 	}
 	RUNWAIT ,%runsyntaxcmd%,, UseErrorLevel
 	if ErrorLevel = 2

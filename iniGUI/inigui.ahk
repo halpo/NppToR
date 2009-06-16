@@ -47,13 +47,7 @@ return
 }
 showIniGui:
 {
-if debug
-	msgbox ,,inifile, %inifile%
 gosub IniGet
-if debug
-{
-	msgbox %iniRhome%
-}
 
 guiControl,4:, guitxtpassline, %passlinekey%
 guiControl,4:, guitxtpassfile, %passfilekey%
@@ -85,8 +79,6 @@ if (iniNppExe="Error") || (iniNppExe="")
 else
 	guicontrol,4:, guitxtNppExe, %iniNppExe%
 	
-if debug
-	msgbox,64,iniNppConfig,%iniNppConfig%
 if (iniNppConfig="Error") || (iniNppConfig="")
 	guiControl,4:, guitxtNppConfig, `%AppData`%\Notepad++
 else
@@ -179,7 +171,6 @@ iniWrite ,%Rpastewait%,       %inifile%, controls, Rpastewait
 iniWrite ,%Rrunwait%,         %inifile%, controls, Rrunwait
 iniWrite ,%restoreclipboard%, %inifile%, controls, restoreclipboard
 iniWrite ,%appendnewline%,    %inifile%, controls, appendnewline
-;iniWrite ,%debug%,            %inifile%, controls, debug, false 
 
 return
 }

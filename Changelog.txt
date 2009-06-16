@@ -1,5 +1,12 @@
 NppToR CHANGELOG
 ----------------
+6/16/2009
+version 1.11.0
+removed nearly all debugging messages.
+changes the default behavior for syntax generation to exclude user packages
+fixed a bug with exiting for the syntax generation that resulted in exiting with an error code
+
+version 1.10.1
 6/4/2009 4:10 PM - found two msgbox that should have been debug messages and not regular messages
 
 6/1/2009 7:04 PM - Version 1.10.0 release

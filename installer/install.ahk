@@ -55,9 +55,7 @@ GUICONTROL ,,Rdir,%regRdir%
 GUI ,ADD, TEXT, wp, Notepad++ config directory (defaults to `%APPDATA`%\Notepad++)
 GUI ,ADD, EDIT, wp vNppConfig 
 GUICONTROL ,,NppConfig, %APPDATA%\Notepad++\
-; GUI	,ADD, CHECKBOX,wp vdoRconsole checked,Add/Edit User Rconsole to make use of SDI(required by NppToR)
-; GUI	,ADD, CHECKBOX,wp vdoRprofile checked,Add/Edit User Rprofile to make Notepad++ the editor for editing initiated from R.
-GUI	,ADD, CHECKBOX,wp vchkSyntax checked, Extract keywords for non-priority keywords from R-packages.
+; GUI	,ADD, CHECKBOX,wp vchkSyntax, Extract keywords for non-priority keywords from R-packages.
 GUI	,ADD, CHECKBOX,wp vaddStartup checked,launch at startup?.
 GUI ,ADD, PROGRESS, wp h20 cBlue vInstallProgress
 GUI ,ADD,BUTTON,section X+-155 Y+5 w75 gdoinstall default,&Install
@@ -152,10 +150,7 @@ ifwinexist ahk_class Notepad++
 	winclose,,,15
 	restart_npp = true
 } else restart_npp = false
-if chkSyntax 
-	RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe --rhome="%Rdir%" --npp-config="%NppConfig%",, UseErrorLevel
-else 
-	RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe -N --file=internal --rhome="%Rdir%" --npp-config="%NppConfig%",, UseErrorLevel
+RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe --rhome="%Rdir%" --npp-config="%NppConfig%",, UseErrorLevel
 if ErrorLevel = 2
 	msgbox ,48,Error: File not found, There were problems finding the R and Notepad++ folders, please check your settings and retry
 else if ErrorLevel = 3 
@@ -170,7 +165,7 @@ if %restart_npp%
 	RUN ,%INSTALLDIR%\NppToR.exe
 else
 	RUN ,%INSTALLDIR%\NppToR.exe -startup
-msgbox 0, Installation Finished, NppToR has been successfully setup for you user profile.,10
+msgbox 0, Installation Finished, NppToR has been successfully setup for your user profile.,10
 ExitApp
 return
 
