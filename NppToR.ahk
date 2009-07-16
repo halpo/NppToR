@@ -89,6 +89,22 @@ runbatch:
 	DetectHiddenWindows Off
 return
 }
+getRhelp:
+{
+	gosub NppGetLineOrSelection
+	found := regexmatch(clipboard, "^[\w.]+\b",match)
+	if found
+	{
+		clipboard = ?%match%`n
+		gosub Rpaste
+	} else {
+		if restoreclipboard=true
+		{
+			clipboard = %oldclipboard%
+		}
+	}
+	return
+}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; R interface functions
 Rpaste:
@@ -262,6 +278,24 @@ sendevent {right}
 clipboard := CheckForNewLine( clipboard )
 return
 }
+NppGetWord:
+{
+	oldclipboard = %clipboard%
+	clipboard = 
+	WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
+	clipwait .1
+	if clipboard = 
+	{
+		sendevent {end}{home 2}+{end}+{right}
+		WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
+		sendevent {right}
+	} 
+	else sendevent {right}
+	if clipboard<>"" AND appendnewline
+		clipboard := CheckForNewLine( clipboard )
+	return
+
+}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 MakeAboutDialog:
@@ -330,6 +364,7 @@ IniRead ,passlinekey,    %inifile%, hotkeys, passline,F8
 IniRead ,passfilekey,    %inifile%, hotkeys, passfile,^F8
 IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
 IniRead ,batchrunkey,    %inifile%, hotkeys, batchrun,^!F8
+IniRead ,Rhelpkey,          %inifile%, hotkeys, rhelp,^F1
 ;putty
 IniRead ,activateputty, %inifile%, putty, activateputty, false
 IniRead ,puttylinekey,  %inifile%, putty, puttyline, F9
@@ -339,14 +374,7 @@ IniRead ,Rpastewait,       %inifile%, controls, Rpastewait, 50
 IniRead ,Rrunwait,         %inifile%, controls, Rrunwait, 10
 IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, true
 IniRead ,appendnewline,    %inifile%, controls, appendnewline, true
-IniRead ,debug,            %inifile%, controls, debug, false 
-if(debug="true")
-{
-	debug=true
-	msgbox ,,%debug%,debugging has been turned on.
-} else
-	debug=
-return
+debug=
 }
 iniDistill:
 {
@@ -464,6 +492,7 @@ if NOT makeglobal
 hotkey ,%passlinekey%,runline
 hotkey ,%passfilekey%,runall
 hotkey ,%passtopointkey%,runtocursor
+hotkey ,%rhelpkey%, getRhelp
 #MaxThreadsPerHotkey 100
 hotkey ,%batchrunkey%,runbatch
 if activateputty=true
