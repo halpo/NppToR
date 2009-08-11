@@ -393,7 +393,7 @@ iniDistill:
 		nppconfig = %APPDATA%\notepad++
 	}
 	else
-		nppconfig = %ininppconfig%
+		nppconfig := replaceEnvVariables(ininppconfig)
 		
 	if (iniRhome="ERROR") || (iniRhome="")
 	{	
@@ -401,7 +401,7 @@ iniDistill:
 		Rhome = %Rdir%
 	}
 	else 
-		Rhome = %iniRhome%
+		Rhome := replaceEnvVariables(iniRhome)
 	Rguiexe = %Rhome%\bin\Rgui.exe
 
 	if (iniRcmdparms="ERROR")
