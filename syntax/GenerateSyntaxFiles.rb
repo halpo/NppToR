@@ -52,7 +52,6 @@ opts.on_tail( "-h", "--help", "Print help menu"){
 	exit
 }
 opts.on( "-R",	"--RHome=VAL",	"specify the R home folder" ){|val| 
-puts val
 options.rhome = val
 }
 opts.on( "-c",	"--npp-config=VAL", "specify the config folder for notpad++"){|val| options.npp_config_dir = val}
@@ -89,14 +88,6 @@ opts.on("-d","--debug", "enable debugging"){
 opts.parse(ARGV)
 STDOUT.flush
 
-if  options.rhome == "" then
-	Win32::Registry::HKEY_LOCAL_MACHINE.open('Software\R-core\R') do |reg|
-		reg_type, options.rhome = reg.read('InstallPath')
-	end
-end
-raise FileNotFound, "no Rhome directory found" if options.rhome.empty?
-puts "R home directory: #{options.rhome}"
-r_exe = options.rhome ? "#{options.rhome}\\bin\\Rterm.exe" : nil 
 if options.npp_config_dir == "" then 
 	options.npp_config_dir = "#{ENV['APPDATA']}\\Notepad++"
 end
@@ -115,6 +106,17 @@ libraries={
 'recommended' => Array.new(),
 'other' => Array.new()
 }
+
+
+if options.base or options.recommended or options.other and not options.include.empty? then
+if  options.rhome == "" then
+	Win32::Registry::HKEY_LOCAL_MACHINE.open('Software\R-core\R') do |reg|
+		reg_type, options.rhome = reg.read('InstallPath')
+	end
+end
+raise FileNotFound, "no Rhome directory found" if options.rhome.empty?
+puts "R home directory: #{options.rhome}"
+r_exe = options.rhome ? "#{options.rhome}\\bin\\Rterm.exe" : nil 
 
 puts "finding R libraries"
 thisR=RinRuby.new(echo=false,interactive=false,executable=r_exe)
@@ -185,6 +187,7 @@ if (r_pkgs.length > 0) then
 else puts 'no packages found/selected'
 end 
 STDOUT.flush
+end
 
 options.filein  = "#{options.npp_config_dir}\\userDefineLang.xml" if options.filein.empty?
 options.fileout = options.filein if options.fileout.empty?

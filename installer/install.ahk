@@ -8,10 +8,10 @@
 ;	Template script (you can customize this template by editing "ShellNew\Template.ahk" in your Windows folder)
 ;
 
+#NoTrayIcon
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
-#NoTrayIcon
 DetectHiddenWindows, On
 
 ;kill any current running copy
@@ -25,7 +25,7 @@ envget HOMEPATH, HOMEPATH
 envget HOMEDRIVE, HOMEDRIVE
 envget USERPROFILE, USERPROFILE
 
-RegRead, regRdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+; RegRead, regRdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
 RegRead, personalfolder, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Personal
 RegRead, startup_base, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Startup
 RegRead, start_menu_base, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders, Programs
@@ -49,9 +49,9 @@ Use Govorned by MIT license (See License.txt)
 GUI ,ADD, TEXT, xs w500, Install Directory
 GUI ,ADD, EDIT, wp vInstallDir
 GUICONTROL ,,InstallDir, %APPDATA%\NppToR\
-GUI ,ADD, TEXT, xs wp, R home directory (do not include \bin\)
-GUI ,ADD, EDIT, wp vRdir
-GUICONTROL ,,Rdir,%regRdir%
+; GUI ,ADD, TEXT, xs wp, R home directory (do not include \bin\)
+; GUI ,ADD, EDIT, wp vRdir
+; GUICONTROL ,,Rdir,%regRdir%
 GUI ,ADD, TEXT, wp, Notepad++ config directory (defaults to `%APPDATA`%\Notepad++)
 GUI ,ADD, EDIT, wp vNppConfig 
 GUICONTROL ,,NppConfig, %APPDATA%\Notepad++\
@@ -68,11 +68,11 @@ return
 doinstall:
 GUI Submit, NoHide
 GUICONTROL ,Disable, InstallDir
-GUICONTROL ,Disable, Rdir
+; GUICONTROL ,Disable, Rdir
 GUICONTROL ,Disable, NppConfig
-GUICONTROL ,Disable, doRconsole
-GUICONTROL ,Disable, doRprofile
-GUICONTROL ,Disable, chkSyntax
+; GUICONTROL ,Disable, doRconsole
+; GUICONTROL ,Disable, doRprofile
+; GUICONTROL ,Disable, chkSyntax
 GUICONTROL ,Disable, addStartup
 GUICONTROL ,Disable, BtnInstall
 GUICONTROL ,Disable, BtnCancel
@@ -101,8 +101,8 @@ FILEINSTALL ,..\License.txt,%INSTALLDIR%\License.txt,0
 GuiControl,, InstallProgress, +10
 
 ;write ini settings
-if Rdir<>regRdir
-  IniWrite, %Rdir%, %INSTALLDIR%\npptor.ini, executables, Rhome 
+; if Rdir<>regRdir
+  ; IniWrite, %Rdir%, %INSTALLDIR%\npptor.ini, executables, Rhome 
 
 ; if NppConfig<>%APPDATA%\Notepad++
 ; {
@@ -112,8 +112,8 @@ GuiControl,, InstallProgress, +10
 
 
 ;set R options to work with NppToR
-;if doRprofile
-; {
+;do Rprofile
+
 	optstring = options(editor="%INSTALLDIR%NppEditR.exe")
 	StringReplace options, optstring, \ , \\ , All
 	ifExist %INSTALLDIR%\Rprofile
@@ -123,8 +123,8 @@ GuiControl,, InstallProgress, +10
 			fileappend , %options%`n , %INSTALLDIR%\Rprofile
 	} ELSE 
 		fileappend , %options%`n , %INSTALLDIR%\Rprofile
-; }
-; if doRconsole
+
+; do Rconsole
 	ifExist %INSTALLDIR%\Rconsole
 	{
 		FileRead, RconsoleOld, %INSTALLDIR%\Rconsole
@@ -150,9 +150,9 @@ ifwinexist ahk_class Notepad++
 	winclose,,,15
 	restart_npp = true
 } else restart_npp = false
-RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe --rhome="%Rdir%" --npp-config="%NppConfig%",, UseErrorLevel
+RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe --npp-config="%NppConfig%",, UseErrorLevel
 if ErrorLevel = 2
-	msgbox ,48,Error: File not found, There were problems finding the R and Notepad++ folders, please check your settings and retry
+	msgbox ,48,Error: File not found, There were problems finding the Notepad++ folders, please check your settings and retry
 else if ErrorLevel = 3 
 	msgbox ,48,Error: Too many keywords, "The packages that you have installed result in too many keywords for Notepad to handle.  Please exclude some packages or narrow the packages list to only those you use regularly."
 else if ErrorLevel
