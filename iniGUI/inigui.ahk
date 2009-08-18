@@ -87,7 +87,7 @@ if (iniNppConfig="Error") || (iniNppConfig="")
 else
 	guiControl,4:, guitxtNppConfig, %iniNppConfig%
 
-Gui, 4:Show, x581 y147 h632 w474, NppToR: Settings
+Gui, 4:Show, , NppToR: Settings
 Return
 }
 guibtnBrowseRhome:
@@ -129,7 +129,7 @@ if restoreclipboard
 	restoreclipboard = true
 else 
 	restoreclipboard = false
-guiControl,appendnewline,4:, guichkappendnewline
+guiControlGet,appendnewline,4:, guichkappendnewline
 if appendnewline
 	appendnewline = true
 else

@@ -10,7 +10,7 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 1.11.0
+version = 2.0.0
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
