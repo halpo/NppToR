@@ -113,7 +113,7 @@ Rpaste:
 	; isblank := 
 	; msgbox %isblank%
 	; msgbox %ERRRORLEVEL%
-	if !regExMatch(clipboard, "DS)^`s*$")
+	; if !regExMatch(clipboard, "DS)^`s*$")
 	{
 		WinGet nppID, ID, A          ; save current window ID to return here later
 		RprocID:=RGetOrStart()
@@ -243,11 +243,12 @@ NppGetLineOrSelection:
 	oldclipboard = %clipboard%
 	clipboard = 
 	WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
-	clipwait .1
+	clipwait 1
 	if clipboard = 
 	{
 		sendevent {end}{home 2}+{end}+{right}
 		WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
+		clipwait 1
 		sendevent {right}
 	} 
 	else sendevent {right}
