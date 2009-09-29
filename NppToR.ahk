@@ -243,7 +243,7 @@ NppGetLineOrSelection:
 	oldclipboard = %clipboard%
 	clipboard = 
 	WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
-	clipwait 1
+	clipwait .1
 	if clipboard = 
 	{
 		sendevent {end}{home 2}+{end}+{right}
