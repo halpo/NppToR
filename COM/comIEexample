@@ -1,7 +1,0 @@
-
-
-COM_AtlAxWinInit()
-pwb := COM_CreateObject("InternetExplorer.Application");
-COM_Invoke(pwb,"Visible=", "True");
-url := "http://www.google.com"
-COM_invoke(pwb, "Navigate",url)

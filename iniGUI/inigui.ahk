@@ -1,6 +1,6 @@
 makeIniGui:
 {
-Gui, 4:Add, Picture, x6 y10 w70 h70 , %A_ScriptDir%\..\icons\NppToR.png
+Gui, 4:Add, Picture, x6 y10 w70 h70 , %A_ScriptDir%\icons\NppToR.png
 Gui, 4:Font, S14 CDefault, %NppToRHeadingFont%
 Gui, 4:Add, Text, x86 y10 w370 h30 , NppToR ~ Setting and Options
 Gui, 4:Font, S8 CDefault, %NppToRTextFont%
@@ -27,13 +27,13 @@ Gui, 4:Add, GroupBox,    	x16  y280 w210 h170 , Hotkeys
 	Gui, 4:Add, Text, 	x26  y390 w130 h30                , Batch process file
 	Gui, 4:Add, Edit, 	x156 y390 w60  h20 Vguitxtbatchrun, batchrun
 	Gui, 4:Add, Text,   x26 y420 w130 h30                 , R help
-	Gui, 4:Add, Edit,   x156 y420 w60 h20  Vguitxtrhelp   , Edit
-Gui, 4:Add, GroupBox, 	x236 y280 w220 h170 , PuTTy setting
+	Gui, 4:Add, Edit,   x156 y420 w60 h20  Vguitxtrhelp   , R help
+Gui, 4:Add, GroupBox, 	x236 y280 w220 h170 , Extra setting
 	Gui, 4:Add, CheckBox, x246 y300 w190 h20 vguichkactivateputty, Enable Putty HotKeys
-	Gui, 4:Add, Text, 	x246 y330 w140 h30                 , Pass line
-	Gui, 4:Add, Edit, 	x386 y330 w60  h20 Vguitxtputtyline, putty line
-	Gui, 4:Add, Text, 	x246 y360 w140 h30                 , Pass entire file at once
-	Gui, 4:Add, Edit, 	x386 y360 w60  h20 Vguitxtputtyfile, putty file
+	Gui, 4:Add, Text, 	x246 y320 w140 h20                 , Pass line
+	Gui, 4:Add, Edit, 	x386 y320 w60  h20 Vguitxtputtyline, putty line
+	Gui, 4:Add, Text, 	x246 y350 w140 h20                 , Pass entire file at once
+	Gui, 4:Add, Edit, 	x386 y350 w60  h20 Vguitxtputtyfile, putty file
 Gui, 4:Add, GroupBox,		x16  y460 w440 h150 , Performance Settings
 	Gui, 4:Add, Text, 	x26  y480 w350 h20                  , Miliseconds to wait time before restoring clipboard
 	Gui, 4:Add, Edit, 	x386 y480 w60  h20 Vguitxtrpastewait, RPasteWait
@@ -44,6 +44,11 @@ Gui, 4:Add, GroupBox,		x16  y460 w440 h150 , Performance Settings
 Gui, 4:Add, Text, 		x16  y620 w230 h30 , Hotkey Symbols: #=Win`, !=Alt`, ^=Control`, +=Shift
 Gui, 4:Add, Button,		x356 y620 w100 h30 gCancel, Cancel
 Gui, 4:Add, Button,		x256 y620 w100 h30 gguiIniSave, Save
+Gui, 4:Add, Text, x26 y420 w130 h30 , R help
+Gui, 4:Add, Edit, x156 y420 w60 h20 , Edit
+Gui, 4:Add, CheckBox, x246 y390 w200 h20 Vguichkenablesilent, Enable Silent Transfer
+Gui, 4:Add, Text, x246 y410 w140 h20 , Silent Transfer Hotkey
+Gui, 4:Add, Edit, x386 y410 w60 h20 Vguitxtsilentkey, Edit
 ; Generated using SmartGUI Creator 4.0
 return
 }
@@ -61,6 +66,8 @@ guiControl,4:, guitxtputtyline, %puttylinekey%
 guiControl,4:, guitxtputtyfile, %puttyfilekey%
 guiControl,4:, guitxtrpastewait, %rpastewait%
 guiControl,4:, guitxtrrunwait, %rrunwait%
+guiControl,4:, guichkenalbesilent, %enablesilent%
+guiControl,4:, guitxtslientkey, %silentkey%
 if restoreclipboard
 	guiControl,4:, guichkrestoreclipboard, 1
 else 
@@ -125,6 +132,7 @@ guiControlGet,puttyfilekey,4:, guitxtputtyfile
 guiControlGet,rpastewait,4:, guitxtrpastewait
 guiControlGet,rrunwait,4:, guitxtrrunwait
 guiControlGet,restoreclipboard, 4:, guichkrestoreclipboard
+guiControlGet,enablesilent, 4:, guichkenablesilent
 if restoreclipboard 
 	restoreclipboard = true
 else 
@@ -134,6 +142,11 @@ if appendnewline
 	appendnewline = true
 else
 	appendnewline = false
+guiControlGet,silentkey, 4:, guitxtsilentkey
+if enablesilent
+	enablesilent = true
+else
+	enablesilent = false
 	
 guiControlGet ,iniRhome,4:, guitxtRhome
 if(iniRhome="(read from registry)")
@@ -171,6 +184,9 @@ iniWrite ,%rhelpkey%,    %inifile%, hotkeys, rhelp
 iniWrite ,%activateputty%, %inifile%, putty, activateputty
 iniWrite ,%puttylinekey%,  %inifile%, putty, puttyline
 iniWrite ,%puttyfilekey%,  %inifile%, putty, puttyfile
+;silent
+iniWrite ,%enablesilent%, %inifile%, silent, enablesilent
+iniWrite ,%silentkey%,    %inifile%, silent, silentkey
 ;controls
 iniWrite ,%Rpastewait%,       %inifile%, controls, Rpastewait
 iniWrite ,%Rrunwait%,         %inifile%, controls, Rrunwait

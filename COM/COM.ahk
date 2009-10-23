@@ -270,7 +270,7 @@ COM_GetDefaultEvents(pdisp, LCID = 0)
 	DllCall(NumGet(NumGet(1*ptinf)+76), "Uint", ptinf, "Uint" , pattr)
 	DllCall(NumGet(NumGet(1*ptinf)+72), "Uint", ptinf, "UintP", ptlib, "UintP", idx)
 	DllCall(NumGet(NumGet(1*ptinf)+ 8), "Uint", ptinf)
-	Loop, %	DllCall(NumGet(NumGet(1*ptlib)+12), "Uint", ptlib)
+	Loop, %	DllCall(NumGet(NumGet(1*ptlib)+12), "Uint", ptlib) ;%
 	{
 		DllCall(NumGet(NumGet(1*ptlib)+20), "Uint", ptlib, "Uint", A_Index-1, "UintP", TKind)
 		If	TKind <> 5
@@ -279,7 +279,7 @@ COM_GetDefaultEvents(pdisp, LCID = 0)
 		DllCall(NumGet(NumGet(1*ptinf)+12), "Uint", ptinf, "UintP", pattr)
 		nCount:=NumGet(pattr+48,0,"Ushort")
 		DllCall(NumGet(NumGet(1*ptinf)+76), "Uint", ptinf, "Uint" , pattr)
-		Loop, %	nCount
+		Loop, %	nCount ;%
 		{
 			DllCall(NumGet(NumGet(1*ptinf)+36), "Uint", ptinf, "Uint", A_Index-1, "UintP", nFlags)
 			If	!(nFlags & 1)

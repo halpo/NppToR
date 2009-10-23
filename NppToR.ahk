@@ -66,6 +66,12 @@ gosub NppGetAll
 gosub Rpaste
 return
 }
+runSilent:
+{
+gosub NppGetLineOrSelection
+gosub sendSilent
+return
+}
 runtocursor:
 {
 gosub NppGetToPoint
@@ -164,6 +170,14 @@ RUpdateWD:
 	StringReplace , wd, currdir, \, /, All 
 	clipboard = setwd("%wd%")`n
 	gosub Rpaste
+	return
+}
+sendSilent:
+{
+	gosub sendByCOM
+	sleep %Rpastewait%
+	if restoreclipboard=true
+		clipboard = %oldclipboard%
 	return
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -366,6 +380,9 @@ IniRead ,passfilekey,    %inifile%, hotkeys, passfile,^F8
 IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
 IniRead ,batchrunkey,    %inifile%, hotkeys, batchrun,^!F8
 IniRead ,Rhelpkey,          %inifile%, hotkeys, rhelp,^F1
+;silent
+IniRead ,enablesilent, %inifile%, silent, enablesilent, false
+IniRead ,silentkey,  %inifile%, silent, silentkey, !F8
 ;putty
 IniRead ,activateputty, %inifile%, putty, activateputty, false
 IniRead ,puttylinekey,  %inifile%, putty, puttyline, F9
@@ -471,6 +488,12 @@ gosub iniget
 gosub iniDistill
 return
 
+ExitWithCOM:
+gosub stopCOM
+NppToRExit:
+ExitAPP
+return
+
 ;;;;;;;;;;;;;;;;;;;;
 makeMenus:
 {
@@ -502,6 +525,11 @@ if activateputty=true
 	hotkey , %puttylinekey% , puttyLineOrSelection
 	hotkey , %puttyfilekey% , puttyRunAll
 }
+if enablesilent=true
+{
+	gosub startCOM
+	hotkey , %silentkey% , runSilent
+}
 return
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -510,3 +538,5 @@ return
 #include %A_ScriptDir%\syntax\SyntaxGui.ahk
 #include %A_ScriptDir%\iniGUI\inigui.ahk
 #include %A_ScriptDir%\GetModuleFileName.ahk
+#include %A_ScriptDir%\COM\com4NppToR.ahk
+#include %A_ScriptDir%\COM\COM.ahk

@@ -1,13 +1,31 @@
-
 #include COM.ahk
 
+	COM_Unicode2Ansi(cmd, clipboard)
+	msgbox %cmd%
+  COM_Unicode4Ansi(cmd, clipboard)
+	msgbox %cmd%
+  COM_Ansi2Unicode(clipboard, cmd)
+	msgbox %cmd%
+  COM_Ansi4Unicode(cmd, clipboard)
+	msgbox %cmd%	
+ExitApp
+
+
+
+
+
+
+
 COM_init()
-myR := COM_CreateObject("RCOMServerLib.StatConnector")
-if myR <> 0 
+Rcom := COM_CreateObject("RCOMServerLib.StatConnector")
+if Rcom <> 0 
 {
-	msgbox %myR%
-	inputbox, command, Command to execute, Enter Command 
-	COM_invoke(myR, "EvaluateNoReturn", command)
+	inputbox , cmd , Command?
+	COM_invoke(Rcom, "EvaluateNoReturn", cmd)
 }
 else msgbox, Could not find RCOMServerLib
 COM_term()
+
+
+
+
