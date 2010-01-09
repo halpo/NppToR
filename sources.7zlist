@@ -5,6 +5,8 @@ NppEditsR\NppEditR.ahk
 syntax\*.rb
 syntax\*.ahk
 syntax\*.npx
+COM\com4NppToR.ahk
+COM\COM.ahk
 *.ahk
 *.txt
 *.npx
