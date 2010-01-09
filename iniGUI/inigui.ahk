@@ -27,7 +27,7 @@ Gui, 4:Add, GroupBox,    	x16  y280 w210 h170 , Hotkeys
 	Gui, 4:Add, Text, 	x26  y390 w130 h30                , Batch process file
 	Gui, 4:Add, Edit, 	x156 y390 w60  h20 Vguitxtbatchrun, batchrun
 	Gui, 4:Add, Text,   x26 y420 w130 h30                 , R help
-	Gui, 4:Add, Edit,   x156 y420 w60 h20  Vguitxtrhelp   , R help
+	Gui, 4:Add, Edit,   x156 y420 w60 h20  Vguitxtrhelp   , 
 Gui, 4:Add, GroupBox, 	x236 y280 w220 h170 , Extra setting
 	Gui, 4:Add, CheckBox, x246 y300 w190 h20 vguichkactivateputty, Enable Putty HotKeys
 	Gui, 4:Add, Text, 	x246 y320 w140 h20                 , Pass line
@@ -44,11 +44,9 @@ Gui, 4:Add, GroupBox,		x16  y460 w440 h150 , Performance Settings
 Gui, 4:Add, Text, 		x16  y620 w230 h30 , Hotkey Symbols: #=Win`, !=Alt`, ^=Control`, +=Shift
 Gui, 4:Add, Button,		x356 y620 w100 h30 gCancel, Cancel
 Gui, 4:Add, Button,		x256 y620 w100 h30 gguiIniSave, Save
-Gui, 4:Add, Text, x26 y420 w130 h30 , R help
-Gui, 4:Add, Edit, x156 y420 w60 h20 , Edit
 Gui, 4:Add, CheckBox, x246 y390 w200 h20 Vguichkenablesilent, Enable Silent Transfer
 Gui, 4:Add, Text, x246 y410 w140 h20 , Silent Transfer Hotkey
-Gui, 4:Add, Edit, x386 y410 w60 h20 Vguitxtsilentkey, Edit
+Gui, 4:Add, Edit, x386 y410 w60 h20 Vguitxtsilentkey, 
 ; Generated using SmartGUI Creator 4.0
 return
 }
@@ -56,18 +54,26 @@ showIniGui:
 {
 gosub IniGet
 
+msgbox %rhelpkey%
+
 guiControl,4:, guitxtpassline, %passlinekey%
 guiControl,4:, guitxtpassfile, %passfilekey%
 guiControl,4:, guitxtpasstopoint, %passtopointkey%
 guiControl,4:, guitxtbatchrun, %batchrunkey%
 guiControl,4:, guitxtrhelp, %rhelpkey%
-guiControl,4:, guichkactivateputty, %activateputty%
+if activateputty
+	guiControl,4:, guichkactivateputty, 1
+else 
+	guiControl,4:, guichkactivateputty, 0
 guiControl,4:, guitxtputtyline, %puttylinekey%
 guiControl,4:, guitxtputtyfile, %puttyfilekey%
 guiControl,4:, guitxtrpastewait, %rpastewait%
 guiControl,4:, guitxtrrunwait, %rrunwait%
-guiControl,4:, guichkenalbesilent, %enablesilent%
-guiControl,4:, guitxtslientkey, %silentkey%
+if enablesilent
+	guiControl,4:, guichkenablesilent, 1
+else 
+	guiControl,4:, guichkenablesilent, 0
+guiControl,4:, guitxtsilentkey, %silentkey%
 if restoreclipboard
 	guiControl,4:, guichkrestoreclipboard, 1
 else 

@@ -10,7 +10,7 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 2.0.0
+version = 2.1.0
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
@@ -56,21 +56,21 @@ return
 ;; run functions
 runline:
 {
-gosub NppGetLineOrSelection
-gosub Rpaste
-return
+	gosub NppGetLineOrSelection
+	gosub Rpaste
+	return
 }
 runall:
 {
-gosub NppGetAll
-gosub Rpaste
-return
+	gosub NppGetAll
+	gosub Rpaste
+	return
 }
 runSilent:
 {
-gosub NppGetLineOrSelection
-gosub sendSilent
-return
+	gosub NppGetLineOrSelection
+	gosub sendSilent
+	return
 }
 runtocursor:
 {
@@ -369,30 +369,30 @@ CheckForNewLine(var)
 ;INI file paramters
 IniGet:
 {
-;executables
-IniRead ,iniRhome,     %inifile%, executables, R,
-IniRead ,iniRcmdparms, %inifile%, executables, Rcmdparms,
-IniRead ,iniNppexe,    %inifile%, executables, Npp,
-IniRead ,iniNppConfig, %inifile%, executables, NppConfig,
-;hotkeys
-IniRead ,passlinekey,    %inifile%, hotkeys, passline,F8
-IniRead ,passfilekey,    %inifile%, hotkeys, passfile,^F8
-IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
-IniRead ,batchrunkey,    %inifile%, hotkeys, batchrun,^!F8
-IniRead ,Rhelpkey,          %inifile%, hotkeys, rhelp,^F1
-;silent
-IniRead ,enablesilent, %inifile%, silent, enablesilent, false
-IniRead ,silentkey,  %inifile%, silent, silentkey, !F8
-;putty
-IniRead ,activateputty, %inifile%, putty, activateputty, false
-IniRead ,puttylinekey,  %inifile%, putty, puttyline, F9
-IniRead ,puttyfilekey,  %inifile%, putty, puttyfile, ^F9
-;controls
-IniRead ,Rpastewait,       %inifile%, controls, Rpastewait, 50
-IniRead ,Rrunwait,         %inifile%, controls, Rrunwait, 10
-IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, true
-IniRead ,appendnewline,    %inifile%, controls, appendnewline, true
-debug=
+	;executables
+	IniRead ,iniRhome,     %inifile%, executables, R,
+	IniRead ,iniRcmdparms, %inifile%, executables, Rcmdparms,
+	IniRead ,iniNppexe,    %inifile%, executables, Npp,
+	IniRead ,iniNppConfig, %inifile%, executables, NppConfig,
+	;hotkeys
+	IniRead ,passlinekey,    %inifile%, hotkeys, passline,F8
+	IniRead ,passfilekey,    %inifile%, hotkeys, passfile,^F8
+	IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
+	IniRead ,batchrunkey,    %inifile%, hotkeys, batchrun,^!F8
+	IniRead ,Rhelpkey,          %inifile%, hotkeys, rhelp,^F1
+	;silent
+	IniRead ,enablesilent, %inifile%, silent, enablesilent, false
+	IniRead ,silentkey,  %inifile%, silent, silentkey, !F8
+	;putty
+	IniRead ,activateputty, %inifile%, putty, activateputty, false
+	IniRead ,puttylinekey,  %inifile%, putty, puttyline, F9
+	IniRead ,puttyfilekey,  %inifile%, putty, puttyfile, ^F9
+	;controls
+	IniRead ,Rpastewait,       %inifile%, controls, Rpastewait, 50
+	IniRead ,Rrunwait,         %inifile%, controls, Rrunwait, 10
+	IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, true
+	IniRead ,appendnewline,    %inifile%, controls, appendnewline, true
+	debug=
 }
 iniDistill:
 {

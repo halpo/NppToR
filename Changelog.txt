@@ -1,5 +1,24 @@
 NppToR CHANGELOG
 ----------------
+1/9/2010
+Version 2.1.0 release
+Added silent passing by COM is rcom is present.
+
+9/18/2009
+Update and fix passing by line
+
+8/18/2009
+Version 2.0.0 released
+
+8/17/2009
+Cleaned up installer and syntax
+
+8/11/2009
+Bug fix on portable variables
+
+7/16/2009
+Added support for a hotkey for R help.
+
 6/16/2009
 version 1.11.0
 removed nearly all debugging messages.
