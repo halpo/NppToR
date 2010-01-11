@@ -52,8 +52,8 @@ GUICONTROL ,,InstallDir, %APPDATA%\NppToR\
 ; GUI ,ADD, TEXT, xs wp, R home directory (do not include \bin\)
 ; GUI ,ADD, EDIT, wp vRdir
 ; GUICONTROL ,,Rdir,%regRdir%
-GUI ,ADD, TEXT, wp, Notepad++ config directory (defaults to `%APPDATA`%\Notepad++)
-GUI ,ADD, EDIT, wp vNppConfig 
+; GUI ,ADD, TEXT, wp, Notepad++ config directory (defaults to `%APPDATA`%\Notepad++)
+; GUI ,ADD, EDIT, wp vNppConfig 
 GUICONTROL ,,NppConfig, %APPDATA%\Notepad++\
 ; GUI	,ADD, CHECKBOX,wp vchkSyntax, Extract keywords for non-priority keywords from R-packages.
 GUI	,ADD, CHECKBOX,wp vaddStartup checked,launch at startup?.
@@ -68,11 +68,7 @@ return
 doinstall:
 GUI Submit, NoHide
 GUICONTROL ,Disable, InstallDir
-; GUICONTROL ,Disable, Rdir
 GUICONTROL ,Disable, NppConfig
-; GUICONTROL ,Disable, doRconsole
-; GUICONTROL ,Disable, doRprofile
-; GUICONTROL ,Disable, chkSyntax
 GUICONTROL ,Disable, addStartup
 GUICONTROL ,Disable, BtnInstall
 GUICONTROL ,Disable, BtnCancel
@@ -113,7 +109,6 @@ GuiControl,, InstallProgress, +10
 
 ;set R options to work with NppToR
 ;do Rprofile
-
 	optstring = options(editor="%INSTALLDIR%NppEditR.exe")
 	StringReplace options, optstring, \ , \\ , All
 	ifExist %INSTALLDIR%\Rprofile
@@ -145,26 +140,26 @@ if addStartup
 GuiControl,, InstallProgress, +10
 	
 ;generate syntax
-ifwinexist ahk_class Notepad++
-{
-	winclose,,,15
-	restart_npp = true
-} else restart_npp = false
-RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe --npp-config="%NppConfig%",, UseErrorLevel
-if ErrorLevel = 2
-	msgbox ,48,Error: File not found, There were problems finding the Notepad++ folders, please check your settings and retry
-else if ErrorLevel = 3 
-	msgbox ,48,Error: Too many keywords, "The packages that you have installed result in too many keywords for Notepad to handle.  Please exclude some packages or narrow the packages list to only those you use regularly."
-else if ErrorLevel
-	msgbox ,48,Error: Generic, Sorry. There was an error I couldn't predict generating the syntax. Perhaps try again with different options.
+; ifwinexist ahk_class Notepad++
+; {
+	; winclose,,,15
+	; restart_npp = true
+; } else restart_npp = false
+; RUNWAIT ,%INSTALLDIR%\GenerateSyntaxFiles.exe --npp-config="%NppConfig%",, UseErrorLevel
+; if ErrorLevel = 2
+	; msgbox ,48,Error: File not found, There were problems finding the Notepad++ folders, please check your settings and retry
+; else if ErrorLevel = 3 
+	; msgbox ,48,Error: Too many keywords, "The packages that you have installed result in too many keywords for Notepad to handle.  Please exclude some packages or narrow the packages list to only those you use regularly."
+; else if ErrorLevel
+	; msgbox ,48,Error: Generic, Sorry. There was an error I couldn't predict generating the syntax. Perhaps try again with different options.
 
 GuiControl,, InstallProgress, +50 
 
 ;runinstalled NppToR
-if %restart_npp%
-	RUN ,%INSTALLDIR%\NppToR.exe
-else
-	RUN ,%INSTALLDIR%\NppToR.exe -startup
+; if %restart_npp%
+	; RUN ,%INSTALLDIR%\NppToR.exe
+; else
+RUN ,%INSTALLDIR%\NppToR.exe -startup
 msgbox 0, Installation Finished, NppToR has been successfully setup for your user profile.,10
 ExitApp
 return

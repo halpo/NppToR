@@ -1,5 +1,10 @@
 NppToR CHANGELOG
 ----------------
+1/11/2010
+Version 2.1.1 release
+Installer does not generate syntax.
+removed extra debug dialog box.
+
 1/9/2010
 Version 2.1.0 release
 Added silent passing by COM is rcom is present.
