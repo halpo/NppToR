@@ -22,8 +22,8 @@ winget ,RID, ID, A  ;Assume R is active window retrieve ahk_id
 in1 = %1%
 
 inifile = npptor.ini
-IniRead ,Nppexe, %inifile%, executables, Npp,""
-if nppexe=""
+IniRead ,Nppexe, %inifile%, executables, Npp,%A_Space%
+if nppexe=
 {
 	regread, nppdir, hkey_local_machine, software\notepad++
 	nppexe = %nppdir%\notepad++.exe

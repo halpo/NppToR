@@ -1,5 +1,9 @@
 NppToR CHANGELOG
 ----------------
+2/19/2010
+Version 2.1.1 release
+Fixed some bugs with the NppEditR.exe scripts.
+
 1/11/2010
 Version 2.1.1 release
 Installer does not generate syntax.
