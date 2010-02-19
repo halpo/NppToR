@@ -4,7 +4,7 @@ Gui, 4:Add, Picture, x6 y10 w70 h70 , icons\NppToR.png ;%A_ScriptDir%\icons\NppT
 Gui, 4:Font, S14 CDefault, %NppToRHeadingFont%
 Gui, 4:Add, Text, x86 y10 w370 h30 , NppToR ~ Setting and Options
 Gui, 4:Font, S8 CDefault, %NppToRTextFont%
-Gui, 4:Add, Text, x86 y50 w370 h70 , Here you can configure your NppToR to work as you like. Leave entries blank to you defaults or to read from the system.  Use portable variables such as `%Drive`% or `%NppToRDir`% to make locations dynamic.
+Gui, 4:Add, Text, x86 y50 w370 h70 , Here you can configure your NppToR to work as you like. Leave entries blank to use defaults or to read from the system.  Use portable variables such as `%Drive`% or `%NppToRDir`% to make locations dynamic.
 Gui, 4:Add, GroupBox, x16 y120 w440 h150 , Executables and Paths
 	Gui, 4:Add, Text,   	x26  y140 w120 h30                   , R Home
 	Gui, 4:Add, Edit,   	x146 y140 w250 h20 vguitxtRhome      , (read from registry)
@@ -35,7 +35,7 @@ Gui, 4:Add, GroupBox, 	x236 y280 w220 h170 , Extra setting
 	Gui, 4:Add, Text, 	x246 y350 w140 h20                 , Pass entire file at once
 	Gui, 4:Add, Edit, 	x386 y350 w60  h20 Vguitxtputtyfile, putty file
 Gui, 4:Add, GroupBox,		x16  y460 w440 h150 , Performance Settings
-	Gui, 4:Add, Text, 	x26  y480 w350 h20                  , Miliseconds to wait time before restoring clipboard
+	Gui, 4:Add, Text, 	x26  y480 w350 h20                  , Milliseconds to wait time before restoring clipboard
 	Gui, 4:Add, Edit, 	x386 y480 w60  h20 Vguitxtrpastewait, RPasteWait
 	Gui, 4:Add, Text, 	x26  y510 w350 h20                , Maximum wait time in seconds for R to load
 	Gui, 4:Add, Edit, 	x386 y510 w60  h20 Vguitxtrrunwait, RRunWait

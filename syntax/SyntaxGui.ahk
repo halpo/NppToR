@@ -9,7 +9,7 @@ makeSyntaxGui:
 	GUI, 3:Add, CHECKBOX, vchkRecommended, Include all recommended packages?
 	GUI, 3:Add, CHECKBOX, vchkOther, Include all packages without a priority?
 	GUI, 3:Add, CHECKBOX, vchkRetain checked, Retain previous keywords (including customizations)?
-	GUI, 3:Add, CHECKBOX, vchkByContents, Infer keywords for packages with out a namespace?
+	GUI, 3:Add, CHECKBOX, vchkByContents, Infer keywords for packages without a namespace?
 	GUI, 3:Add, TEXT,,Include packages (separate with commas)
 	GUI, 3:Add, EDIT, r3 w300 veditInclude
 	GUI, 3:Add, TEXT,,Exclude packages
