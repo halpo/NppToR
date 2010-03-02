@@ -202,6 +202,7 @@ puttypaste:
 }
 puttyLineOrSelection:
 {
+msgbox puttyLine
 	gosub NppGetLineOrSelection
 	gosub puttypaste
 	return
@@ -520,6 +521,8 @@ hotkey ,%passtopointkey%,runtocursor
 hotkey ,%rhelpkey%, getRhelp
 #MaxThreadsPerHotkey 100
 hotkey ,%batchrunkey%,runbatch
+
+msgbox %activateputty%
 if activateputty=true
 {
 	#MaxThreadsPerHotkey 10

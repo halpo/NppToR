@@ -131,12 +131,16 @@ guiControlGet,passtopointkey,4:, guitxtpasstopoint
 guiControlGet,batchrunkey,4:, guitxtbatchrun
 guiControlGet,rhelpkey,4:, guitxtrhelp
 guiControlGet,activateputty,4:, guichkactivateputty
+if activateputty 
+	activateputty = true
+else 
+	activateputty = false
 guiControlGet,puttylinekey,4:, guitxtputtyline
 guiControlGet,puttyfilekey,4:, guitxtputtyfile
 guiControlGet,rpastewait,4:, guitxtrpastewait
 guiControlGet,rrunwait,4:, guitxtrrunwait
+guiControlGet,silentkey, 4:, guitxtsilentkey
 guiControlGet,restoreclipboard, 4:, guichkrestoreclipboard
-guiControlGet,enablesilent, 4:, guichkenablesilent
 if restoreclipboard 
 	restoreclipboard = true
 else 
@@ -146,7 +150,7 @@ if appendnewline
 	appendnewline = true
 else
 	appendnewline = false
-guiControlGet,silentkey, 4:, guitxtsilentkey
+guiControlGet,enablesilent, 4:, guichkenablesilent
 if enablesilent
 	enablesilent = true
 else
