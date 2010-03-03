@@ -10,7 +10,7 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 2.1.2
+version = 2.2.0
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
@@ -28,7 +28,7 @@ Loop, %0%  ; For each parameter:
 {
     param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
 	if param = -startup
-		startup = true
+		startup = 1
 }
 
 ;ini settings
@@ -105,7 +105,7 @@ getRhelp:
 		clipboard = ?%match%`n
 		gosub Rpaste
 	} else {
-		if restoreclipboard=true
+		if restoreclipboard
 		{
 			clipboard = %oldclipboard%
 		}
@@ -118,8 +118,6 @@ Rpaste:
 {
 ;	if clipboard<>
 	; isblank := 
-	; msgbox %isblank%
-	; msgbox %ERRRORLEVEL%
 	; if !regExMatch(clipboard, "DS)^`s*$")
 	{
 		WinGet nppID, ID, A          ; save current window ID to return here later
@@ -137,7 +135,7 @@ Rpaste:
 		WinActivate ahk_id %nppID%    ; go back to the original window if moved
 	} 
 	sleep %Rpastewait%
-	if restoreclipboard=true
+	if restoreclipboard
 	{
 		clipboard = %oldclipboard%
 	}
@@ -177,7 +175,7 @@ sendSilent:
 {
 	gosub sendByCOM
 	sleep %Rpastewait%
-	if restoreclipboard=true
+	if restoreclipboard
 		clipboard = %oldclipboard%
 	return
 }
@@ -193,7 +191,7 @@ puttypaste:
 			ControlClick , x4 y30,,, right
 		}
 		WinActivate ahk_id %nppID%    ; go back to the original window
-		if restoreclipboard=true
+		if restoreclipboard
 		{
 			clipboard = %oldclipboard%
 		}
@@ -202,7 +200,6 @@ puttypaste:
 }
 puttyLineOrSelection:
 {
-msgbox puttyLine
 	gosub NppGetLineOrSelection
 	gosub puttypaste
 	return
@@ -383,21 +380,31 @@ IniGet:
 	IniRead ,batchrunkey,    %inifile%, hotkeys, batchrun,^!F8
 	IniRead ,Rhelpkey,          %inifile%, hotkeys, rhelp,^F1
 	;silent
-	IniRead ,enablesilent, %inifile%, silent, enablesilent, false
+	IniRead ,enablesilent, %inifile%, silent, enablesilent, 0
 	IniRead ,silentkey,  %inifile%, silent, silentkey, !F8
 	;putty
-	IniRead ,activateputty, %inifile%, putty, activateputty, false
+	IniRead ,activateputty, %inifile%, putty, activateputty, 0
 	IniRead ,puttylinekey,  %inifile%, putty, puttyline, F9
 	IniRead ,puttyfilekey,  %inifile%, putty, puttyfile, ^F9
 	;controls
 	IniRead ,Rpastewait,       %inifile%, controls, Rpastewait, 50
 	IniRead ,Rrunwait,         %inifile%, controls, Rrunwait, 10
-	IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, true
-	IniRead ,appendnewline,    %inifile%, controls, appendnewline, true
+	IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, 1
+	IniRead ,appendnewline,    %inifile%, controls, appendnewline, 1
 	debug=
 }
 iniDistill:
 {
+	if restoreclipboard = false
+		restoreclipboard = 0
+	if appendnewline = false
+		appendnewline = 0
+	if enablesilent = false
+		enablesilent = 0
+	if activateputty = false
+		activateputty = 0
+		
+
 	if (ininppexe="ERROR") || (ininppexe="")
 	{
 		regread, nppdir, hkey_local_machine, software\notepad++
@@ -515,26 +522,37 @@ makeHotkeys:
 if NOT makeglobal
 	hotkey , IfWinActive, ahk_class Notepad++
 #MaxThreadsPerHotkey 10
-hotkey ,%passlinekey%,runline
-hotkey ,%passfilekey%,runall
-hotkey ,%passtopointkey%,runtocursor
-hotkey ,%rhelpkey%, getRhelp
+hotkey ,%passlinekey%,runline, On
+hotkey ,%passfilekey%,runall, On
+hotkey ,%passtopointkey%,runtocursor, On
+hotkey ,%rhelpkey%, getRhelp, On
 #MaxThreadsPerHotkey 100
-hotkey ,%batchrunkey%,runbatch
+hotkey ,%batchrunkey%,runbatch, On
 
-msgbox %activateputty%
-if activateputty=true
+if activateputty
 {
 	#MaxThreadsPerHotkey 10
-	hotkey , %puttylinekey% , puttyLineOrSelection
-	hotkey , %puttyfilekey% , puttyRunAll
+	hotkey , %puttylinekey% , puttyLineOrSelection, On
+	hotkey , %puttyfilekey% , puttyRunAll, On
 }
-if enablesilent=true
+if enablesilent
 {
 	gosub startCOM
-	hotkey , %silentkey% , runSilent
+	hotkey , %silentkey% , runSilent, On
 }
 return
+}
+undoHotkeys:
+{
+	hotkey ,%passlinekey%,runline, Off
+	hotkey ,%passfilekey%,runall, Off
+	hotkey ,%passtopointkey%,runtocursor, Off
+	hotkey ,%rhelpkey%, getRhelp, Off
+	hotkey ,%batchrunkey%,runbatch, Off
+	hotkey , %puttylinekey% , puttyLineOrSelection, Off
+	hotkey , %puttyfilekey% , puttyRunAll, Off
+	hotkey , %silentkey% , runSilent, Off
+	return
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Includes

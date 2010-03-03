@@ -1,7 +1,7 @@
 // builddistro.npx
 // builds the files for a new version release.
 
-set version = 2.1.2
+set version = 2.2.0
 // also needs to be changed in NppToR.ahk:13
 npp_exec build.npx
 

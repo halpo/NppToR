@@ -1,5 +1,11 @@
 NppToR CHANGELOG
 ----------------
+3/2/2010
+Releasing as 2.2.0 due to the change in the ini file. 
+Changed the format the ini file saves check marks
+Changes the way that boolean values are handled internally. They are handled in the native manner with 0 being false and 1 being true
+Added backwards compatibility code for the use of false as a ini setting
+
 2/19/2010
 Version 2.1.1 release
 Fixed some bugs with the NppEditR.exe scripts.

@@ -125,36 +125,23 @@ guibtnBrowseNppConfig:
 guiIniSave:
 {
 gui 4:Submit
+gosub undoHotkeys
+
 guiControlGet,passlinekey,4:, guitxtpassline
 guiControlGet,passfilekey,4:, guitxtpassfile
 guiControlGet,passtopointkey,4:, guitxtpasstopoint
 guiControlGet,batchrunkey,4:, guitxtbatchrun
 guiControlGet,rhelpkey,4:, guitxtrhelp
 guiControlGet,activateputty,4:, guichkactivateputty
-if activateputty 
-	activateputty = true
-else 
-	activateputty = false
 guiControlGet,puttylinekey,4:, guitxtputtyline
 guiControlGet,puttyfilekey,4:, guitxtputtyfile
 guiControlGet,rpastewait,4:, guitxtrpastewait
 guiControlGet,rrunwait,4:, guitxtrrunwait
 guiControlGet,silentkey, 4:, guitxtsilentkey
 guiControlGet,restoreclipboard, 4:, guichkrestoreclipboard
-if restoreclipboard 
-	restoreclipboard = true
-else 
-	restoreclipboard = false
 guiControlGet,appendnewline,4:, guichkappendnewline
-if appendnewline
-	appendnewline = true
-else
-	appendnewline = false
 guiControlGet,enablesilent, 4:, guichkenablesilent
-if enablesilent
-	enablesilent = true
-else
-	enablesilent = false
+
 	
 guiControlGet ,iniRhome,4:, guitxtRhome
 if(iniRhome="(read from registry)")
@@ -172,7 +159,7 @@ if(iniNppConfig="`%AppData`%\Notepad++")
 
 gosub iniWriteSettingsToFile
 gosub iniDistill
-	
+gosub makeHotkeys
 return
 }
 iniWriteSettingsToFile:
