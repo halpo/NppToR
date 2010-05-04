@@ -85,8 +85,8 @@ runbatch:
 	WinMenuSelectItem ,A,,File,Save
 	NppGetCurrFileDir(file, dir, ext, Name)
 	SetWorkingDir %dir%
-	RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-	command = CMD /C %Rdir%\bin\Rcmd.exe BATCH -q "%file%"
+	; RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+	command = CMD /C %Rhome%\bin\Rcmd.exe BATCH -q "%file%"
 	run %command%, %dir%, hide, RprocID
 	WinWait ,ahk_pid %RprocID%,,.5
 	addProc(RprocID,File, "Local")
@@ -407,7 +407,10 @@ iniDistill:
 
 	if (ininppexe="ERROR") || (ininppexe="")
 	{
-		regread, nppdir, hkey_local_machine, software\notepad++
+		; regread, nppdir, hkey_local_machine, software\notepad++
+		RegRead, nppdir, HKEY_LOCAL_MACHINE, SOFTWARE\Notepad++
+		if nppdir= 
+			nppdir := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\Notepad++")
 		nppexe = %nppdir%\notepad++.exe
 	}
 	else
@@ -425,7 +428,10 @@ iniDistill:
 	if (iniRhome="ERROR") || (iniRhome="")
 	{	
 		RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-		Rhome = %Rdir%
+		Rhome= %Rdir%
+		if Rdir= 
+			Rdir := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\R-core\R", "InstallPath")
+		Rhome= %Rdir%
 	}
 	else 
 		Rhome := replaceEnvVariables(iniRhome)
@@ -562,3 +568,4 @@ undoHotkeys:
 #include %A_ScriptDir%\GetModuleFileName.ahk
 #include %A_ScriptDir%\COM\com4NppToR.ahk
 #include %A_ScriptDir%\COM\COM.ahk
+#include %A_ScriptDir%\_reg64.ahk
