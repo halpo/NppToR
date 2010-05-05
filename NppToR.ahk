@@ -10,7 +10,8 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 2.2.0
+version = 2.3.0
+year = 2010
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
@@ -107,7 +108,7 @@ getRhelp:
 	} else {
 		if restoreclipboard
 		{
-			clipboard = %oldclipboard%
+			clipboard := oldclipboard
 		}
 	}
 	return
@@ -137,7 +138,7 @@ Rpaste:
 	sleep %Rpastewait%
 	if restoreclipboard
 	{
-		clipboard = %oldclipboard%
+		clipboard := oldclipboard
 	}
 	return
 }
@@ -163,7 +164,7 @@ RGetOrStart()
 }
 RUpdateWD:
 {
-	oldclipboard = %clipboard%
+	oldclipboard := ClipboardAll
 	WinActivate ahk_class Notepad++
 	currdir:=NppGetCurrFileDir()
 	StringReplace , wd, currdir, \, /, All 
@@ -176,7 +177,7 @@ sendSilent:
 	gosub sendByCOM
 	sleep %Rpastewait%
 	if restoreclipboard
-		clipboard = %oldclipboard%
+		clipboard := oldclipboard
 	return
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -193,7 +194,7 @@ puttypaste:
 		WinActivate ahk_id %nppID%    ; go back to the original window
 		if restoreclipboard
 		{
-			clipboard = %oldclipboard%
+			clipboard := oldclipboard
 		}
 	} else msgbox ,16,PuTTY not found, PuTTY was not found.  Launch PuTTY and start R on remote server.
 	return
@@ -253,7 +254,7 @@ NppGetCurrFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="",
 }
 NppGetLineOrSelection:
 {
-	oldclipboard = %clipboard%
+	oldclipboard := ClipboardAll
 	clipboard = 
 	WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
 	clipwait .1
@@ -265,8 +266,8 @@ NppGetLineOrSelection:
 		sendevent {right}
 	} 
 	else sendevent {right}
-	if clipboard<>"" AND appendnewline
-		clipboard := CheckForNewLine( clipboard )
+	if appendnewline
+		gosub CheckForNewLine
 	return
 }
 NppRun:
@@ -276,25 +277,25 @@ NppRun:
 }
 NppGetAll:
 {
-oldclipboard = %clipboard%
+oldclipboard := ClipboardAll
 WinMenuSelectItem ,A,,2&,8& ;Edit,Select All
 WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
 sendevent {right}
-clipboard := CheckForNewLine( clipboard )
+gosub CheckForNewLine
 return
 }
 NppGetToPoint:
 {
-oldclipboard = %clipboard%
+oldclipboard := ClipboardAll
 sendevent ^+{home}
 WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
 sendevent {right}
-clipboard := CheckForNewLine( clipboard )
+		gosub CheckForNewLine
 return
 }
 NppGetWord:
 {
-	oldclipboard = %clipboard%
+	oldclipboard := ClipboardAll
 	clipboard = 
 	WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
 	clipwait .1
@@ -305,8 +306,8 @@ NppGetWord:
 		sendevent {right}
 	} 
 	else sendevent {right}
-	if clipboard<>"" AND appendnewline
-		clipboard := CheckForNewLine( clipboard )
+	if appendnewline
+		gosub CheckForNewLine
 	return
 
 }
@@ -322,7 +323,7 @@ Gui, 2:Font, S8 CDefault, %NppToRTextFont%
 Gui, 2:Add, Text,, 
 (
 by Andrew Redd
-(c)2008
+(c)%year%
 version %version%
 use of this program or source files are governed by the MIT license. See License.txt.
 )
@@ -353,16 +354,19 @@ GuiEscape2:
 Gui 2:hide
 return
 
-CheckForNewLine(var)
+CheckForNewLine:
 {
+	Transform, var, Unicode
 	if var <>
 	{
-	stringright , right, var, 1 	;for long strings
-	found := regexmatch( right, "[`r`n]")
-	if !found
-		var = %var% `n
+		stringright , right, var, 1 	;for long strings
+		found := regexmatch( right, "[`r`n]")
+		if !found
+		{
+			Transform, clipboard, Unicode, %var%`r`n
+		}	; var = %var% `n
 	}
-	return %var%
+return
 }
 ;;;;;;;;;;;;;;;;;;;
 ;INI file paramters

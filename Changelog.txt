@@ -1,5 +1,10 @@
 NppToR CHANGELOG
 ----------------
+5/4/2010
+Updated to be able to read 64bit registry for Rhome.
+Using ClipboardAll for restoring the clipboard
+Fixed problem from appending newline to unicode.  Now works with unicode text.
+
 3/9/2010 
 Fixed a spelling error  on the settings dialog
 changed single instance option to ignore from force. The force was only to allow for opening Notepad++ with NppToR.  I believe that this is not necessary.
