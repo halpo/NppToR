@@ -135,9 +135,9 @@ Rpaste:
 		;WinMenuSelectItem ,ahk_id %RprocID%,,file,Print...
 		WinActivate ahk_id %nppID%    ; go back to the original window if moved
 	} 
-	sleep %Rpastewait%
 	if restoreclipboard
 	{
+		sleep %Rpastewait%
 		clipboard := oldclipboard
 	}
 	return
@@ -175,8 +175,8 @@ RUpdateWD:
 sendSilent:
 {
 	gosub sendByCOM
-	sleep %Rpastewait%
 	if restoreclipboard
+		sleep %Rpastewait%
 		clipboard := oldclipboard
 	return
 }
@@ -194,6 +194,7 @@ puttypaste:
 		WinActivate ahk_id %nppID%    ; go back to the original window
 		if restoreclipboard
 		{
+			sleep %Rpastewait%
 			clipboard := oldclipboard
 		}
 	} else msgbox ,16,PuTTY not found, PuTTY was not found.  Launch PuTTY and start R on remote server.
