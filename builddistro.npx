@@ -21,4 +21,7 @@ cd ..
 7z a -aoa -tzip NppToR-$(version).src.zip @sources.7zlist
 7z t NppToR-$(version).src.zip
 
+// build portable
+npp_exec buildportable.npx
+
 con_saveto $(FILE_NAME).log

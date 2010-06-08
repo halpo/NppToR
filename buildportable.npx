@@ -1,0 +1,17 @@
+// buildportable.npx
+// builds NppToRPortable distribution
+// 
+
+set exe7zip = $(SYS.PROGRAMFILES)\7-zip\7z.exe 
+set parms7z= a -sfx7z.sfx -mx9 
+set DirPortable = NppToRPortable
+set package = NppToRPortable-$(version).paf.exe
+
+// copy files
+xcopy "syntax\GenerateSyntaxFiles.exe" "$(DirPortable)\App\NppToR\GenerateSyntaxFiles.exe" /R /Y /V
+xcopy "NppEditsR\NppEditR.exe" "$(DirPortable)\App\NppToR\NppEditR.exe" /R /Y /V
+xcopy "NppToR.exe" "$(DirPortable)\App\NppToR\NppToR.exe" /R /V /Y
+
+$(exe7zip) $(parms7z) $(package) $(DirPortable)
+
+
