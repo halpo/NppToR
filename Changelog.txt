@@ -1,5 +1,13 @@
 NppToR CHANGELOG
 ----------------
+8/25/2010
+Version 2.4.0
+Updated Rcom silent passing option to use directly the clipboard and bypass AHK entirely.
+Updated install dialog to include a global option.
+Installer will now elevate for a global install.
+Added the R auto-completion generating script from Yihui Xie to add the Auto Completion files.
+Installer now triggers R Auto-completion if a global install is performed, gives a message if not.
+
 5/4/2010
 Updated to be able to read 64bit registry for Rhome.
 Using ClipboardAll for restoring the clipboard

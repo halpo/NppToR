@@ -10,7 +10,7 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 2.3.0
+version = 2.4.0
 year = 2010
 
 NppToRHeadingFont = Comic Sans MS
@@ -27,14 +27,22 @@ envset ,R_USER, %A_ScriptDir%
 ;CMD line Parameters
 Loop, %0%  ; For each parameter:
 {
-    param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
+  param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
 	if param = -startup
 		startup = 1
+	if param = -add-auto-complete
+		doAAC = 1
 }
 
 ;ini settings
 inifile = %A_ScriptDir%\npptor.ini
 gosub startupini
+
+if doAAC
+{
+ gosub generateRxml
+ exitapp
+}
 
 gosub makeMenus	
 gosub makeHotkeys
@@ -410,16 +418,16 @@ iniDistill:
 		activateputty = 0
 		
 
-	if (ininppexe="ERROR") || (ininppexe="")
+	if (ininpphome="ERROR") || (ininpphome="")
 	{
 		; regread, nppdir, hkey_local_machine, software\notepad++
 		RegRead, nppdir, HKEY_LOCAL_MACHINE, SOFTWARE\Notepad++
 		if nppdir= 
 			nppdir := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\Notepad++")
-		nppexe = %nppdir%\notepad++.exe
 	}
 	else
-		nppexe := replaceEnvVariables(ininppexe)
+		nppdir := replaceEnvVariables(ininppexe)
+	nppexe = %nppdir%\notepad++.exe
 
 		
 	if (ininppconfig="ERROR") || (ininppconfig="")
@@ -522,6 +530,8 @@ menu, tray, add ; separator
 menu, tray, add, Show Simulations, showCounter
 menu, tray, add, Start Notepad++, NppRun
 menu, tray, add, Reset R working directory, RUpdateWD
+menu, tray, add ; separator
+menu, tray, add, Add R Auto Completion (Requires Admin), generateRxml
 menu, tray, add, Regenerate R Syntax files, showSyntaxGui
 menu, tray, add ; separator
 Menu, tray, add, Settings, ShowIniGui
@@ -566,6 +576,37 @@ undoHotkeys:
 	return
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+generateRxml:
+{
+	ifWinExist ahk_class Notepad++
+	{
+		winGet , NppPID, PID
+		CurrNppExePath := GetModuleFileNameEx( NppPID )
+		StringReplace, NppPlugins, CurrNppExePath, notepad++.exe, plugins\APIs, All
+		msgbox ,4,Continue?, To update the auto-completion database Notepad++ must be closed.  It will be restarted. Auto-completion must also be turned on from within Notepad++ (Setting > Preferences > Backup/Auto-Completion). Remember to save your work. Continue?
+		ifmsgbox Yes
+			winclose
+	} 
+	if NppPlugins=
+	{
+		NppPlugins = %NppDir%\plugins\APIs
+	}
+	command = %Rhome%\bin\Rcmd.exe 
+	params  = BATCH -q "%A_ScriptDir%\make_R_xml.r"
+  DllCall("shell32\ShellExecuteA"
+		,uint, 0 ;hwnd a handle to the owner window (null implies not associated with a window)
+		,str, "RunAs"  ;operation
+		,str, command ;File
+		,str, params ;Parameters
+		,str, NppPlugins ;lpDirectory
+		,int, 1)  ; Last parameter: SW_SHOWNORMAL = 1
+	SetTitleMatchMode, 1
+	winwait, %command%,,1
+	winwaitclose, %command%,,500
+	Run %CurrNppExePath%
+	return
+}
+
 ; Includes
 #include %A_ScriptDir%\counter\counter.ahk
 #include %A_ScriptDir%\syntax\SyntaxGui.ahk

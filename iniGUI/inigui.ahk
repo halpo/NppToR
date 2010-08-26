@@ -11,8 +11,8 @@ Gui, 4:Add, GroupBox, x16 y120 w440 h150 , Executables and Paths
 	Gui, 4:Add, Button, 	x396 y140 w50  h20 gguibtnBrowseRhome, Browse
 	Gui, 4:Add, Text,   	x26  y170 w120 h30                , R cmd line parameters
 	Gui, 4:Add, Edit,   	x146 y170 w300 h20 vguitxtRcmdparms, 
-	Gui, 4:Add, Text,   	x26  y200 w120 h30                    , Notepad++ exe path
-	Gui, 4:Add, Edit, 	x146 y200 w250 h20 vguitxtNppExe      , (read from registry)
+	Gui, 4:Add, Text,   	x26  y200 w120 h30                    , Notepad++ Home
+	Gui, 4:Add, Edit, 	x146 y200 w250 h20 vguitxtNppHome      , (read from registry)
 	Gui, 4:Add, Button, 	x396 y200 w50  h20 gguibtnBrowseNppExe, Browse
 	Gui, 4:Add, Text,   	x26  y230 w120 h30                       , Notepad++ Config Directory
 	Gui, 4:Add, Edit,   	x146 y230 w250 h20 vguitxtNppConfig      , `%APPDATA`%\Notepad++
@@ -89,9 +89,9 @@ if (iniRcmdparms="Error") || (iniRcmdparms="")
 else
 	guicontrol,4:, guitxtRcmdparms, %iniRcmdparms%
 if (iniNppExe="Error") || (iniNppExe="")
-	guicontrol,4:, guitxtNppExe, (read from registry)
+	guicontrol,4:, guitxtNppHome, (read from registry)
 else
-	guicontrol,4:, guitxtNppExe, %iniNppExe%
+	guicontrol,4:, guitxtNppHome, %iniNppHome%
 	
 if (iniNppConfig="Error") || (iniNppConfig="")
 	guiControl,4:, guitxtNppConfig, `%AppData`%\Notepad++
@@ -149,9 +149,9 @@ if(iniRhome="(read from registry)")
 
 guicontrolget ,iniRcmdparms,4:, guitxtRcmdparms
 
-guicontrolget ,iniNppExe,4:, guitxtNppExe, %iniNppExe%
-if(iniNppExe="(read from registry)")
-	iniNppExe=
+guicontrolget ,iniNppHome,4:, guitxtNppHome, %iniNppHome%
+if(iniNppHome="(read from registry)")
+	iniNppHome=
 
 guiControlGet , iniNppConfig,4:, guitxtNppConfig, %iniNppConfig%
 if(iniNppConfig="`%AppData`%\Notepad++")
@@ -167,7 +167,7 @@ iniWriteSettingsToFile:
 ;executables
 iniWrite ,%iniRhome%,     %inifile%, executables, R
 iniWrite ,%iniRcmdparms%, %inifile%, executables, Rcmdparms
-iniWrite ,%iniNppexe%,    %inifile%, executables, Npp
+iniWrite ,%iniNppHome%,    %inifile%, executables, Npp
 iniWrite ,%iniNppConfig%, %inifile%, executables, NppConfig
 ;hotkeys
 iniWrite ,%passlinekey%,    %inifile%, hotkeys, passline

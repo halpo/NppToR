@@ -16,25 +16,46 @@ DetectHiddenWindows, On
 
 ; Command line
 silent = 0
+go = 0
 addStartup = 1
 Loop, %0%  ; For each parameter:
 {
   param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
 	if param = --silent
-		silent = 1
-	if param = -silent
-		silent = 1
-	if param = -s
-		silent = 1
-	if param = -no-startup
-		addStartup = 0
+			silent = 1
+	else if param = -silent
+			silent = 1
+	else if param = -s
+			silent = 1
+	else if param = -go
+			go = 1
+	else if param = -no-startup
+			addStartup = 0
+	else 
+		InstallDir = %param%
 }
 
-;kill any current running copy
-process, close, NpptoR.exe
-if %errorlevel%
-	winwaitclose ahk_pid %errorlevel%
+if silent
+{
+	if InstallDir = 
+	{
+		if A_IsAdmin
+			InstallDir= %APPDATA%\NppToR\
+		else
+			InstallDir= %APPDATA%\NppToR\
+	}
+	gosub doinstall
+	exitapp
+}
+if go
+{
+	gosub CreateGui
+	gosub Submit
+}
 
+
+
+	
 ;environment variables
 envget APPDATA, APPDATA
 envget HOMEPATH, HOMEPATH
@@ -49,7 +70,8 @@ stringreplace startup,startup_base, `%USERPROFILE`%, %USERPROFILE%
 stringreplace start_menu,start_menu_base, `%USERPROFILE`%, %USERPROFILE%
 stringreplace HOME,personalfolder, `%USERPROFILE`%, %USERPROFILE%
 
-if !silent
+
+CreateGui:
 {
 ;Gui Creation
 Gui, +OwnDialogs
@@ -63,122 +85,203 @@ GUI ,ADD, TEXT,,
 Use Govorned by MIT license (See License.txt)
 )
 
-GUI ,ADD, TEXT, xs w500, Install Directory
-GUI ,ADD, EDIT, wp vInstallDir
-GUICONTROL ,,InstallDir, %APPDATA%\NppToR\
-GUICONTROL ,,NppConfig, %APPDATA%\Notepad++\
-GUI	,ADD, CHECKBOX,wp vaddStartup checked,launch at startup?.
+GUI ,ADD, TEXT, xs w450, Install Directory
+GUI ,ADD, EDIT, section wp-65 vInstallDir
+GUI ,ADD, BUTTON, gdoBrowse x+5 w60 vBrowse, Browse
+if InstallDir = 
+{
+	if A_IsAdmin
+		GUICONTROL ,,InstallDir, %ProgramFiles%\NppToR\
+	else
+		GUICONTROL ,,InstallDir, %APPDATA%\NppToR\
+}
+else
+	GUICONTROL ,,InstallDir, %InstallDir%
+GUI	,ADD, CHECKBOX, xs w450 vaddStartup,launch at startup?.
+if addStartup
+	GuiControl,, addStartup, 1
+else 
+	GuiControl,, addStartup, 0
+GUI	,ADD, CHECKBOX, xs w450 vGlobal gdoGlobalCheck,Global Install (Requires Admin Privileges)
+if A_IsAdmin
+	GuiControl,, Global, 1
+else 
+	GuiControl,, Global, 0
 GUI ,ADD, PROGRESS, wp h20 cBlue vInstallProgress
-GUI ,ADD,BUTTON,section X+-155 Y+5 w75 gdoinstall default,&Install
-GUI ,ADD,BUTTON,gDoCancel xp+80 w75, &Cancel
+GUI ,ADD, BUTTON,section X+-155 Y+5 w75 gSubmit default vInstall,&Install
+GUI ,ADD, BUTTON,gDoCancel xp+80 w75 vCancel, &Cancel
 
 GUI SHOW
-}
-else {
-	NppConfig =  %APPDATA%\Notepad++\
-	InstallDir= %APPDATA%\NppToR\
-	gosub doinstall
-}
 return
- 
-
-doinstall:
-if !silent
-{
-GUI Submit, NoHide
-GUICONTROL ,Disable, InstallDir
-GUICONTROL ,Disable, NppConfig
-GUICONTROL ,Disable, addStartup
-GUICONTROL ,Disable, BtnInstall
-GUICONTROL ,Disable, BtnCancel
 }
-;install section
-ifnotexist %INSTALLDIR%
-	filecreatedir %INSTALLDIR%
-;executable files
-FILEINSTALL ,..\NppToR.exe, %INSTALLDIR%\NppToR.exe,1
-if %errorlevel%
-{
-	if silent
-		exitapp
-	msgbox  2 ,NppToR.exe could not be copied. Continue?,Could not be copied
-	ifmsgbox abort
-		exitapp
-}
-FILEINSTALL ,..\NppEditsR\NppEditR.exe, %INSTALLDIR%\NppEditR.exe,1
-FILEINSTALL ,..\syntax\GenerateSyntaxFiles.exe, %INSTALLDIR%\GenerateSyntaxFiles.exe,1
-IniWrite, http://npptor.sourceforge.net, %INSTALLDIR%\npptor.url, InternetShortcut, URL 
-;FILEINSTALL ,uninstall.exe,%INSTALLDIR%,1
-if !silent
-	GuiControl,, InstallProgress, +10
-
-;setting files
-FILEINSTALL ,..\npptor.ini, %INSTALLDIR%\npptor.ini,0
-
-;documentation files
-FILEINSTALL ,..\iniparameters.txt,%INSTALLDIR%\iniparameters.txt,0
-FILEINSTALL ,..\License.txt,%INSTALLDIR%\License.txt,0
-if !silent
-	GuiControl,, InstallProgress, +10
-
-;write ini settings
-; if Rdir<>regRdir
-  ; IniWrite, %Rdir%, %INSTALLDIR%\npptor.ini, executables, Rhome 
-
-; if NppConfig<>%APPDATA%\Notepad++
-; {
-  ; IniWrite, Value, %INSTALLDIR%\npptor.ini, executables, Npp 
-; }
-if !silent
-	GuiControl,, InstallProgress, +10
-
-
-;set R options to work with NppToR
-;do Rprofile
-	optstring = options(editor="%INSTALLDIR%NppEditR.exe")
-	StringReplace options, optstring, \ , \\ , All
-	ifExist %INSTALLDIR%\Rprofile
-	{
-		FileRead, RprofileOld, %INSTALLDIR%\Rprofile
-		ifNotInString RprofileOld, %options%
-			fileappend , %options%`n , %INSTALLDIR%\Rprofile
-	} ELSE 
-		fileappend , %options%`n , %INSTALLDIR%\Rprofile
-
-; do Rconsole
-	ifExist %INSTALLDIR%\Rconsole
-	{
-		FileRead, RconsoleOld, %INSTALLDIR%\Rconsole
-		ifNotInString RconsoleOld, MDI = no
-		fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
-	} ELSE
-		fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
-if !silent
-	GuiControl,, InstallProgress, +10
-
-;start menu entries
-ifnotexist %start_menu%\NppToR
-	filecreatedir %start_menu%\NppToR
-FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %start_menu%\NppToR\NpptoR.lnk ,,, Enables passing code from notepad++ to the R interpreter.
-FileCreateShortcut, %INSTALLDIR%\License.txt, %start_menu%\NppToR\License.txt.lnk
-FileCreateShortcut, %INSTALLDIR%\npptor.url, %start_menu%\NppToR\Website.lnk
-if addStartup
-	FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %Startup%\NpptoR.lnk ,, -startup, Enables passing code from notepad++ to the R interpreter.
-if !silent
-	GuiControl,, InstallProgress, +60
-
-;runinstalled NppToR
-; if %restart_npp%
-	; RUN ,%INSTALLDIR%\NppToR.exe
-; else
-if !silent
-{
-	RUN ,%INSTALLDIR%\NppToR.exe -startup
-	msgbox 0, Installation Finished, NppToR has been successfully setup for your user profile.,10
-}
-ExitApp
-return
 
 DoCancel:
 GuiClose:
 ExitApp
+
+doGlobalCheck:
+{
+	Gui Submit, NoHide 
+	if Global
+	{
+		if InstallDir = %APPDATA%\NppToR\
+			GUICONTROL ,,InstallDir, %ProgramFiles%\NppToR\
+	}
+	else
+	{
+		if InstallDir = %ProgramFiles%\NppToR\
+			GUICONTROL ,,InstallDir, %APPDATA%\NppToR\
+	}
+	return
+}
+
+doBrowse:
+{
+	FileSelectFolder, IFolder , *%A_APPDATA%\NppToR\,3,Select Install Directory
+	if IFolder <>
+		GUICONTROL ,,InstallDir, %IFolder%
+	return
+} 
+
+Submit:
+{
+	GUI Submit, NoHide
+	GUICONTROL ,Disable, InstallDir
+	GUICONTROL ,Disable, addStartup
+	GUICONTROL ,Disable, BtnInstall
+	GUICONTROL ,Disable, BtnCancel
+	GUICONTROL ,Disable, Global
+	GUICONTROL ,Disable, Install
+	GUICONTROL ,Disable, Cancel
+	GUICONTROL ,Disable, Browse
+	if Global
+	{
+		if not A_IsAdmin
+		{
+			cmd = -go
+			if !addStartup
+				cmd = %cmd% -no-startup
+			cmd = %cmd% "%InstallDir%\"
+			DllCall("shell32\ShellExecuteA"
+				, uint, 0
+				, str, "RunAs"
+				, str, A_ScriptFullPath
+				, str, cmd
+				, str, A_WorkingDir
+				, int, 1)  ; Last parameter: SW_SHOWNORMAL = 1
+			ExitApp
+		}
+		else 
+			gosub doinstall
+	}
+	else
+		gosub doinstall
+return
+}
+doinstall:
+{
+	;kill any current running copy
+	process, close, NppToR.exe
+	if %errorlevel%
+		winwaitclose ahk_pid %errorlevel%
+	;install section
+	ifnotexist %INSTALLDIR%
+		filecreatedir %INSTALLDIR%
+	if %errorlevel%
+	{
+		if silent
+			exitapp
+		msgbox  64 ,Install Error, Could not create %INSTALLDIR%. Aborting
+		exitapp
+	}
+	;executable files
+	FILEINSTALL ,..\NppToR.exe, %INSTALLDIR%\NppToR.exe,1
+	if %errorlevel%
+	{
+		if silent
+			exitapp
+		msgbox  64 ,Install Error, NppToR.exe could not be copied. Aborting
+		exitapp
+	}
+	FILEINSTALL ,..\NppEditsR\NppEditR.exe, %INSTALLDIR%\NppEditR.exe,1
+	FILEINSTALL ,..\syntax\GenerateSyntaxFiles.exe, %INSTALLDIR%\GenerateSyntaxFiles.exe,1
+	IniWrite, http://npptor.sourceforge.net, %INSTALLDIR%\npptor.url, InternetShortcut, URL 
+	;FILEINSTALL ,uninstall.exe,%INSTALLDIR%,1
+	if !silent
+
+	;setting files
+	FILEINSTALL ,..\npptor.ini, %INSTALLDIR%\npptor.ini,0
+
+	;documentation files
+	FILEINSTALL ,..\iniparameters.txt,%INSTALLDIR%\iniparameters.txt,0
+	FILEINSTALL ,..\License.txt,%INSTALLDIR%\License.txt,0
+	if !silent
+		
+	;Supporting R scripts
+	FILEINSTALL ,..\make_R_xml.r,%INSTALLDIR%\make_R_xml.r,0
+	if !silent
+		GuiControl,, InstallProgress, +10
+
+
+	;set R options to work with NppToR
+	;do Rprofile
+		optstring = options(editor="%INSTALLDIR%NppEditR.exe")
+		StringReplace options, optstring, \ , \\ , All
+		ifExist %INSTALLDIR%\Rprofile
+		{
+			FileRead, RprofileOld, %INSTALLDIR%\Rprofile
+			ifNotInString RprofileOld, %options%
+				fileappend , %options%`n , %INSTALLDIR%\Rprofile
+		} ELSE 
+			fileappend , %options%`n , %INSTALLDIR%\Rprofile
+
+	; do Rconsole
+		ifExist %INSTALLDIR%\Rconsole
+		{
+			FileRead, RconsoleOld, %INSTALLDIR%\Rconsole
+			ifNotInString RconsoleOld, MDI = no
+			fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
+		} ELSE
+			fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
+	if !silent
+		GuiControl,, InstallProgress, +10
+
+	;start menu entries
+	SM := (Global)
+		? A_StartMenuCommon
+		: A_StartMenu
+	SU := (Global)
+		? A_Startup
+		: A_StartupCommon
+	ifnotexist %SM%\NppToR
+		filecreatedir %SM%\NppToR
+	FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %SM%\NppToR\NpptoR.lnk ,,, Enables passing code from notepad++ to the R interpreter.
+	FileCreateShortcut, %INSTALLDIR%\License.txt, %SM%\NppToR\License.txt.lnk
+	FileCreateShortcut, %INSTALLDIR%\npptor.url, %SM%\NppToR\Website.lnk
+	if addStartup
+		FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %SU%\NpptoR.lnk ,, -startup, Enables passing code from notepad++ to the R interpreter.
+	if !silent
+		GuiControl,, InstallProgress, +60
+	
+	if Global
+	{
+		RUN ,%INSTALLDIR%\NppToR.exe -add-auto-complete,,,OutputVarPID
+		WinWait ahk_pid %OutputVarPID%
+		winwaitclose ahk_pid %OutputVarPID%
+	}
+	else
+		msgbox ,0, No Auto-Completion., The auto-completion database has not been generated as that might require administrator privileges.  That can be performed from the NppToR menu., 30
+	GuiControl,, InstallProgress, +20
+	;runinstalled NppToR
+	if !silent
+	{
+		RUN ,%INSTALLDIR%\NppToR.exe -startup
+		if Global
+			msgbox 0, Installation Finished, NppToR has been successfully setup on this computer.,10
+		else
+			msgbox 0, Installation Finished, NppToR has been successfully setup for your user profile.,10
+	}
+	ExitApp
+	return
+}
+

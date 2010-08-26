@@ -11,5 +11,6 @@ npp_exec build.npx
 xcopy "$(CURRENT_DIRECTORY)\syntax\GenerateSyntaxFiles.exe" "$(CURRENT_DIRECTORY)\test\GenerateSyntaxFiles.exe" /R /Y /V
 xcopy NppEditsR\NppEditR.exe test\NppEditR.exe /R /Y /V
 xcopy NppToR.exe test\NppToR.exe /R /V /Y
+xcopy make_R_xml.r test\make_R_xml.r /R /V /Y
 
 npp_run test\NppToR.exe

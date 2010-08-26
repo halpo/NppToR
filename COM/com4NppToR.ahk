@@ -15,8 +15,9 @@ sendByCOM:
 	Rcom := COM_CreateObject("RCOMServerLib.StatConnector")
 	if Rcom <> 0 
 	{
-		cmd := RegExReplace(clipboard, "im)\R+", "`;")
-		cmd2 = `{ %cmd% `}
+		; cmd := RegExReplace(clipboard, "im)\R+", "`;")
+		; cmd2 = `{ %cmd% `}
+		cmd2 = eval(parse(file="clipboard"))
 		COM_invoke(Rcom, "EvaluateNoReturn", cmd2)
 	}
 	else msgbox, Could not find RCOMServerLib
