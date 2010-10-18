@@ -31,6 +31,8 @@ Loop, %0%  ; For each parameter:
 			go = 1
 	else if param = -no-startup
 			addStartup = 0
+	else if param = -global
+			Global = 1
 	else 
 		InstallDir = %param%
 }
@@ -83,6 +85,7 @@ GUI ,ADD, TEXT,,
 (
 © 2010 Andrew Redd 
 Use Govorned by MIT license (See License.txt)
+
 )
 
 GUI ,ADD, TEXT, xs w450, Install Directory
@@ -102,7 +105,7 @@ if addStartup
 	GuiControl,, addStartup, 1
 else 
 	GuiControl,, addStartup, 0
-GUI	,ADD, CHECKBOX, xs w450 vGlobal gdoGlobalCheck,Global Install (Requires Admin Privileges)
+GUI	,ADD, CHECKBOX, xs w450 vGlobal gdoGlobalCheck,Install for all users? Will install to Program Files folder and will require admin priviledges.  Separate settings will be maintained for each user.
 if A_IsAdmin
 	GuiControl,, Global, 1
 else 
@@ -186,13 +189,20 @@ doinstall:
 		winwaitclose ahk_pid %errorlevel%
 	;install section
 	ifnotexist %INSTALLDIR%
-		filecreatedir %INSTALLDIR%
-	if %errorlevel%
 	{
-		if silent
+		filecreatedir %INSTALLDIR%
+		if %errorlevel%
+		{
+			if silent
+				exitapp
+			msgbox  64 ,Install Error, Could not create %INSTALLDIR%. Aborting
 			exitapp
-		msgbox  64 ,Install Error, Could not create %INSTALLDIR%. Aborting
-		exitapp
+		}
+	}
+	else
+	{
+		IfExist %INSTALLDIR%\NppToR.exe
+			FileSetAttrib , -R , %INSTALLDIR%\NppToR.exe	
 	}
 	;executable files
 	FILEINSTALL ,..\NppToR.exe, %INSTALLDIR%\NppToR.exe,1
@@ -203,19 +213,24 @@ doinstall:
 		msgbox  64 ,Install Error, NppToR.exe could not be copied. Aborting
 		exitapp
 	}
+	if Global
+	{
+		iniWrite , %Global%, %INSTALLDIR%\npptor.ini, install, global
+		FileSetAttrib , +R, %INSTALLDIR%\NppToR.exe
+	}
+	else
+		FileSetAttrib , -R, %INSTALLDIR%\NppToR.exe
 	FILEINSTALL ,..\NppEditsR\NppEditR.exe, %INSTALLDIR%\NppEditR.exe,1
-	FILEINSTALL ,..\syntax\GenerateSyntaxFiles.exe, %INSTALLDIR%\GenerateSyntaxFiles.exe,1
 	IniWrite, http://npptor.sourceforge.net, %INSTALLDIR%\npptor.url, InternetShortcut, URL 
-	;FILEINSTALL ,uninstall.exe,%INSTALLDIR%,1
-	if !silent
-
+	
+	FILEINSTALL ,uninstall.exe,%INSTALLDIR%\uninstall.exe,1
 	;setting files
-	FILEINSTALL ,..\npptor.ini, %INSTALLDIR%\npptor.ini,0
+	;FILEINSTALL ,..\npptor.ini, %INSTALLDIR%\npptor.ini,0
 
 	;documentation files
-	FILEINSTALL ,..\iniparameters.txt,%INSTALLDIR%\iniparameters.txt,0
+	;FILEINSTALL ,..\iniparameters.txt,%INSTALLDIR%\iniparameters.txt,0
 	FILEINSTALL ,..\License.txt,%INSTALLDIR%\License.txt,0
-	if !silent
+	;if !silent
 		
 	;Supporting R scripts
 	FILEINSTALL ,..\make_R_xml.r,%INSTALLDIR%\make_R_xml.r,0
@@ -225,24 +240,17 @@ doinstall:
 
 	;set R options to work with NppToR
 	;do Rprofile
-		optstring = options(editor="%INSTALLDIR%NppEditR.exe")
-		StringReplace options, optstring, \ , \\ , All
-		ifExist %INSTALLDIR%\Rprofile
-		{
-			FileRead, RprofileOld, %INSTALLDIR%\Rprofile
-			ifNotInString RprofileOld, %options%
-				fileappend , %options%`n , %INSTALLDIR%\Rprofile
-		} ELSE 
-			fileappend , %options%`n , %INSTALLDIR%\Rprofile
-
-	; do Rconsole
-		ifExist %INSTALLDIR%\Rconsole
-		{
-			FileRead, RconsoleOld, %INSTALLDIR%\Rconsole
-			ifNotInString RconsoleOld, MDI = no
-			fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
-		} ELSE
-			fileappend ,MDI = no`n, %INSTALLDIR%\Rconsole
+	FILEINSTALL ,..\Rprofile.base.R, %INSTALLDIR%\Rprofile.R
+		; optstring = options(editor="%INSTALLDIR%NppEditR.exe")
+		; StringReplace options, optstring, \ , \\ , All
+		; ifExist %INSTALLDIR%\Rprofile
+		; {
+			; FileRead, RprofileOld, %INSTALLDIR%\Rprofile
+			; ifNotInString RprofileOld, %options%
+				; fileappend , %options%`n , %INSTALLDIR%\Rprofile
+		; } ELSE 
+			; fileappend , %options%`n , %INSTALLDIR%\Rprofile
+	
 	if !silent
 		GuiControl,, InstallProgress, +10
 
@@ -251,8 +259,8 @@ doinstall:
 		? A_StartMenuCommon
 		: A_StartMenu
 	SU := (Global)
-		? A_Startup
-		: A_StartupCommon
+		? A_StartupCommon
+		: A_Startup
 	ifnotexist %SM%\NppToR
 		filecreatedir %SM%\NppToR
 	FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %SM%\NppToR\NpptoR.lnk ,,, Enables passing code from notepad++ to the R interpreter.
@@ -268,6 +276,7 @@ doinstall:
 		RUN ,%INSTALLDIR%\NppToR.exe -add-auto-complete,,,OutputVarPID
 		WinWait ahk_pid %OutputVarPID%
 		winwaitclose ahk_pid %OutputVarPID%
+		FileDelete %INSTALLDIR%\make_r_xml.r.Rout
 	}
 	else
 		msgbox ,0, No Auto-Completion., The auto-completion database has not been generated as that might require administrator privileges.  That can be performed from the NppToR menu., 30
