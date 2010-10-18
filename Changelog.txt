@@ -1,5 +1,19 @@
 NppToR CHANGELOG
 ----------------
+10/18/2010
+Added Support for 2.12.0
+Added an uninstaller
+
+10/6/2010
+Removed dependence on environment variabl R_USER_HOME.
+Added --sdi option as automatic when starting R Gui
+Changed NppToR Rprofile to also include the local and user Rprofile files to emulate the default R behavior.
+Removed Rconsole creation from install.ahk
+Removing Syntax Highlighter and menu options for the following reasons
+  * Builds fail with newest version of ruby
+  * Notepad++ now has built-in R
+  * Adds unnecessary complexity
+
 8/25/2010
 Version 2.4.0
 Updated Rcom silent passing option to use directly the clipboard and bypass AHK entirely.

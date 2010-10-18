@@ -2,7 +2,7 @@
 ; by Andrew Redd 2008 <halpo@users.sourceforge.net>
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
 
-; #NOENV
+#NOENV
 #SINGLEINSTANCE ignore
 #MaxThreads 10
 
@@ -10,18 +10,24 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 2.4.0
+version = 2.5.0
 year = 2010
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; test code
+; if A_IsAdmin {
+	; msgbox ,48, Ran as Administrator, I still have Admin Rights. 
+	; ExitApp
+; }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin Initial execution code
 
-;set environment variable for spawned R processes
+; set environment variable for spawned R processes
 envset ,R_PROFILE_USER, %A_ScriptDir%\Rprofile
-envset ,R_USER, %A_ScriptDir%
 
 ;;;;;;;;;;;;;;;;;;;;
 ;CMD line Parameters
@@ -36,8 +42,21 @@ Loop, %0%  ; For each parameter:
 
 ;ini settings
 inifile = %A_ScriptDir%\npptor.ini
+iniRead, Global, %inifile%, install, global, false
+if(Global)
+{
+	ifNotExist %A_AppData%\NppToR
+	{
+		FileCreateDir %A_AppData%\NppToR
+		if ErrorLevel
+		{
+			msgbox Error creating settings directory.
+			ExitApp
+		}
+	}
+	inifile = %A_AppData%\NppToR\npptor.ini
+}
 gosub startupini
-
 if doAAC
 {
  gosub generateRxml
@@ -49,7 +68,6 @@ gosub makeHotkeys
 
 gosub makeCounter
 gosub MakeAboutDialog
-gosub makeSyntaxGui
 gosub makeIniGui
 
 if  not startup
@@ -95,6 +113,20 @@ runbatch:
 	NppGetCurrFileDir(file, dir, ext, Name)
 	SetWorkingDir %dir%
 	; RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+	ifExist %Rhome%\bin\Rcmd.exe
+		rcmd = %Rhome%\bin\Rcmd.exe
+	else
+	IfExist %Rhome%\bin\x64\Rcmd.exe
+		rcmd = %Rhome%\bin\x64\Rcmd.exe
+	else
+	IfExist %Rhome%\bin\i386\Rcmd.exe
+		rcmd = %Rhome%\bin\i386\Rcmd.exe
+	else
+	{
+		msgbox ,32, Error: Rcmd.exe not found., Rcmd.exe could not be found. Aborting batch evaluation.
+		return
+	}
+	
 	command = CMD /C %Rhome%\bin\Rcmd.exe BATCH -q "%file%"
 	run %command%, %dir%, hide, RprocID
 	WinWait ,ahk_pid %RprocID%,,.5
@@ -164,7 +196,7 @@ RGetOrStart()
 		global Rcmdparms
 		NppGetCurrFileDir(File,dir)
 		setworkingdir %dir%
-		run %Rguiexe% %RcmdParms%,dir,,RprocID
+		run %Rguiexe% %RcmdParms% --sdi,dir,,RprocID
 		winwait ,R Console,, %Rrunwait%
 		WinGet RprocID, ID ;,A
 		return RprocID
@@ -338,8 +370,7 @@ use of this program or source files are governed by the MIT license. See License
 )
 Gui, 2:Add, Text,, 
 (
-This package enable syntax highlighting, code folding and auto-completion in notepad++.  
-This specific utility enables passing code from Notepad++ to the R Gui Window.  
+This utility enables passing code from Notepad++ to the R Gui Window.  
 
 The following are the keyboard shortcuts (can be modified from the setting in the main menu).
 
@@ -448,8 +479,20 @@ iniDistill:
 	}
 	else 
 		Rhome := replaceEnvVariables(iniRhome)
-	Rguiexe = %Rhome%\bin\Rgui.exe
-
+	
+	IfExist %Rhome%\bin\Rgui.exe
+		Rguiexe = %Rhome%\bin\Rgui.exe
+	else 
+	IfExist %Rhome%\bin\x64\Rgui.exe
+		Rguiexe = %Rhome%\bin\x64\Rgui.exe
+	else 
+	IfExist %Rhome%\bin\i386\Rgui.exe
+		Rguiexe = %Rhome%\bin\i386\Rgui.exe
+	else
+	{
+		msgBox ,32, Error: Rgui.exe not found, Could not find the Rgui.exe file. Aborting.
+		ExitApp
+	}
 	if (iniRcmdparms="ERROR")
 		Rcmdparms=
 	else 
@@ -532,7 +575,6 @@ menu, tray, add, Start Notepad++, NppRun
 menu, tray, add, Reset R working directory, RUpdateWD
 menu, tray, add ; separator
 menu, tray, add, Add R Auto Completion (Requires Admin), generateRxml
-menu, tray, add, Regenerate R Syntax files, showSyntaxGui
 menu, tray, add ; separator
 Menu, tray, add, Settings, ShowIniGui
 Menu, tray, add, About, ShowAbout 
@@ -583,9 +625,11 @@ generateRxml:
 		winGet , NppPID, PID
 		CurrNppExePath := GetModuleFileNameEx( NppPID )
 		StringReplace, NppPlugins, CurrNppExePath, notepad++.exe, plugins\APIs, All
-		msgbox ,4,Continue?, To update the auto-completion database Notepad++ must be closed.  It will be restarted. Auto-completion must also be turned on from within Notepad++ (Setting > Preferences > Backup/Auto-Completion). Remember to save your work. Continue?
+		msgbox ,4,Continue?, To update the auto-completion database Notepad++ must be closed.  It will be restarted. Auto-completion must also be turned on from within Notepad++ (Setting > Preferences > Backup/Auto-Completion). Save your work now, now before continuing. Continue?
 		ifmsgbox Yes
-			winclose
+			winkill
+		ifmsgbox No
+			return
 	} 
 	if NppPlugins=
 	{
@@ -609,7 +653,6 @@ generateRxml:
 
 ; Includes
 #include %A_ScriptDir%\counter\counter.ahk
-#include %A_ScriptDir%\syntax\SyntaxGui.ahk
 #include %A_ScriptDir%\iniGUI\inigui.ahk
 #include %A_ScriptDir%\GetModuleFileName.ahk
 #include %A_ScriptDir%\COM\com4NppToR.ahk

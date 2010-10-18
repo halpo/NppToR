@@ -1,11 +1,12 @@
 // builddistro.npx
 // builds the files for a new version release.
 
-set version = 2.4.0
+set version = 2.5.0
 // also needs to be changed in NppToR.ahk:13
 npp_exec build.npx
 
 // compile install script
+$(AHK2EXE) /in installer\uninstall.ahk /out installer\uninstall.exe
 $(AHK2EXE) /in installer\install.ahk /out NppToR-$(version).exe /icon icons\NppToR.ico
 
 // Build independent zip folder

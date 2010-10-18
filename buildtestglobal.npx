@@ -8,9 +8,11 @@ taskkill /FI "windowtitle eq NppEditR.ahk" /f
 
 npp_exec build.npx
 
-xcopy NppEditsR\NppEditR.exe test\NppEditR.exe /R /Y /V /i
-xcopy NppToR.exe test\NppToR.exe /R /V /Y /i
-xcopy make_R_xml.r test\make_R_xml.r /R /V /Y /i
-xcopy Rprofile.base.R test\Rprofile /R /V /Y /i
+xcopy NppEditsR\NppEditR.exe testglobal\NppEditR.exe /R /Y /V /i
+xcopy NppToR.exe testglobal\NppToR.exe /R /V /Y /i
+xcopy make_R_xml.r testglobal\make_R_xml.r /R /V /Y /i
+xcopy Rprofile.base.R testglobal\Rprofile /R /V /Y /i
 
-npp_run test\NppToR.exe
+attrib +r testglobal\NppToR.exe
+
+npp_run testglobal\NppToR.exe

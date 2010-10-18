@@ -148,9 +148,12 @@ if (r_pkgs.length > 0) then
 		puts "priority=#{priority}" if $DEBUG
 		if not options.include.include?(pkg) then 
 			case priority
-			when "base": next if !options.base
-			when "recommended": next if !options.recommended
-			when "other": next if !options.other
+			when "base"
+				next if !options.base
+			when "recommended"
+				next if !options.recommended
+			when "other"
+				next if !options.other
 			else raise "unknown package priority for package #{pkg}"
 			end 
 		end 

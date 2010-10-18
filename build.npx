@@ -4,9 +4,10 @@
 set AHK2EXE = $(CURRENT_DIRECTORY)\buildtools\Ahk2exe.exe
 
 // build GenerateSyntaaxFiles.exe
-cd syntax
-ruby C:\Programs\ruby\lib\ruby\gems\1.8\gems\rubyscript2exe-0.5.3\realstuff.rb GenerateSyntaxFiles.rb --rubyscript2exe-ruby --rubyscript2exe-quiet
-cd ..
+// cd syntax
+// ruby C:\ruby187\lib\ruby\gems\1.8\gems\rubyscript2exe-0.5.3\realstuff.rb GenerateSyntaxFiles.rb --rubyscript2exe-ruby --rubyscript2exe-quiet
+// C:\Windows\System32\cmd.exe /E:ON /C "C:\Ruby192\bin\setrbvars.bat&ocra GenerateSyntaxFiles.rb"
+// cd ..
 
 // compile AHK scripts
 $(AHK2EXE) /in NppEditsR\NppEditR.ahk /out NppEditsR\NppEditR.exe /icon icons\NppToR.ico
