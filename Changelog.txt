@@ -1,5 +1,8 @@
 NppToR CHANGELOG
 ----------------
+12/14/2010
+Added option for selecting between 32 and 64 bit R.
+
 10/18/2010
 Added Support for 2.12.0
 Added an uninstaller

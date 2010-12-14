@@ -10,7 +10,7 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 2.5.0
+version = 2.5.1
 year = 2010
 
 NppToRHeadingFont = Comic Sans MS
@@ -116,17 +116,18 @@ runbatch:
 	ifExist %Rhome%\bin\Rcmd.exe
 		rcmd = %Rhome%\bin\Rcmd.exe
 	else
-	IfExist %Rhome%\bin\x64\Rcmd.exe
-		rcmd = %Rhome%\bin\x64\Rcmd.exe
-	else
-	IfExist %Rhome%\bin\i386\Rcmd.exe
+
+	rcmd = %Rhome%\bin\x64\Rcmd.exe
+	FE := FileExist(rcmd)
+	If (pref32) OR !(FE)
 		rcmd = %Rhome%\bin\i386\Rcmd.exe
-	else
-	{
-		msgbox ,32, Error: Rcmd.exe not found., Rcmd.exe could not be found. Aborting batch evaluation.
-		return
-	}
-	
+		FE := FileExist(rcmd)
+		If NOT FE
+		{
+			msgbox ,32, Error: Rcmd.exe not found., Rcmd.exe could not be found. Aborting batch evaluation.
+			return
+		}
+		
 	command = CMD /C %Rhome%\bin\Rcmd.exe BATCH -q "%file%"
 	run %command%, %dir%, hide, RprocID
 	WinWait ,ahk_pid %RprocID%,,.5
@@ -435,7 +436,9 @@ IniGet:
 	IniRead ,Rrunwait,         %inifile%, controls, Rrunwait, 10
 	IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, 1
 	IniRead ,appendnewline,    %inifile%, controls, appendnewline, 1
+	IniRead ,pref32,           %inifile%, controls, pref32, 0
 	debug=
+	;no return continues by design.
 }
 iniDistill:
 {
@@ -480,23 +483,23 @@ iniDistill:
 	else 
 		Rhome := replaceEnvVariables(iniRhome)
 	
-	IfExist %Rhome%\bin\Rgui.exe
-		Rguiexe = %Rhome%\bin\Rgui.exe
-	else 
-	IfExist %Rhome%\bin\x64\Rgui.exe
-		Rguiexe = %Rhome%\bin\x64\Rgui.exe
-	else 
-	IfExist %Rhome%\bin\i386\Rgui.exe
-		Rguiexe = %Rhome%\bin\i386\Rgui.exe
-	else
-	{
-		msgBox ,32, Error: Rgui.exe not found, Could not find the Rgui.exe file. Aborting.
-		ExitApp
-	}
 	if (iniRcmdparms="ERROR")
 		Rcmdparms=
 	else 
 		Rcmdparms = %iniRcmdparms%
+	IfExist %Rhome%\bin\Rgui.exe
+		Rguiexe = %Rhome%\bin\Rgui.exe
+	else 
+	Rguiexe = %Rhome%\bin\x64\Rgui.exe
+	FE := FileExist(Rguiexe)
+	If (pref32) OR !(FE)
+		Rguiexe = %Rhome%\bin\i386\Rgui.exe
+		FE := FileExist(Rguiexe)
+		If NOT FE
+		{
+			msgBox ,32, Error: Rgui.exe not found, Could not find the Rgui.exe file. Aborting.
+			ExitApp
+		}
 	return
 }
 replaceEnvVariables(string)
@@ -556,7 +559,6 @@ replaceEnvVariables(string)
 
 startupini:
 gosub iniget
-gosub iniDistill
 return
 
 ExitWithCOM:

@@ -34,20 +34,20 @@ Gui, 4:Add, GroupBox, 	x236 y280 w220 h170 , Extra setting
 	Gui, 4:Add, Edit, 	x386 y320 w60  h20 Vguitxtputtyline, putty line
 	Gui, 4:Add, Text, 	x246 y350 w140 h20                 , Pass entire file at once
 	Gui, 4:Add, Edit, 	x386 y350 w60  h20 Vguitxtputtyfile, putty file
-Gui, 4:Add, GroupBox,		x16  y460 w440 h150 , Performance Settings
+Gui, 4:Add, GroupBox,		x16  y460 w440 h153 , Performance Settings
 	Gui, 4:Add, Text, 	x26  y480 w350 h20                  , Milliseconds to wait time before restoring clipboard
 	Gui, 4:Add, Edit, 	x386 y480 w60  h20 Vguitxtrpastewait, RPasteWait
 	Gui, 4:Add, Text, 	x26  y510 w350 h20                , Maximum wait time in seconds for R to load
 	Gui, 4:Add, Edit, 	x386 y510 w60  h20 Vguitxtrrunwait, RRunWait
-	Gui, 4:Add, CheckBox, x26  y540 w420 h30 vguichkrestoreclipboard, Restore clipboard after pasting code into R
-	Gui, 4:Add, CheckBox, x26  y570 w420 h30 vguichkappendnewline   , Append new line to passed commands
+	Gui, 4:Add, CheckBox, x26  y530 w420 h30 vguichkrestoreclipboard, Restore clipboard after pasting code into R
+	Gui, 4:Add, CheckBox, x26  y555 w420 h30 vguichkappendnewline   , Append new line to passed commands
+	Gui, 4:Add, CheckBox, x26  y580 w420 h30 vguichkpref32   , Prefer 32-bit R over 64-bit
 Gui, 4:Add, Text, 		x16  y620 w230 h30 , Hotkey Symbols: #=Win`, !=Alt`, ^=Control`, +=Shift
 Gui, 4:Add, Button,		x356 y620 w100 h30 gCancel, Cancel
 Gui, 4:Add, Button,		x256 y620 w100 h30 gguiIniSave, Save
 Gui, 4:Add, CheckBox, x246 y390 w200 h20 Vguichkenablesilent, Enable Silent Transfer
 Gui, 4:Add, Text, x246 y410 w140 h20 , Silent Transfer Hotkey
 Gui, 4:Add, Edit, x386 y410 w60 h20 Vguitxtsilentkey, 
-; Generated using SmartGUI Creator 4.0
 return
 }
 showIniGui:
@@ -80,6 +80,11 @@ if appendnewline
 	guiControl,4:, guichkappendnewline, 1
 else
 	guiControl,4:, guichkappendnewline, 0
+if pref32
+	guiControl,4:, guichkpref32, 1
+else
+	guiControl,4:, guichkpref32, 0
+	
 if (iniRhome="Error") || (iniRhome="")
 	guicontrol,4:, guitxtRhome, (read from registry)
 else
@@ -140,6 +145,7 @@ guiControlGet,rrunwait,4:, guitxtrrunwait
 guiControlGet,silentkey, 4:, guitxtsilentkey
 guiControlGet,restoreclipboard, 4:, guichkrestoreclipboard
 guiControlGet,appendnewline,4:, guichkappendnewline
+guiControlGet,pref32,4:, guichkpref32
 guiControlGet,enablesilent, 4:, guichkenablesilent
 
 	
@@ -187,6 +193,7 @@ iniWrite ,%Rpastewait%,       %inifile%, controls, Rpastewait
 iniWrite ,%Rrunwait%,         %inifile%, controls, Rrunwait
 iniWrite ,%restoreclipboard%, %inifile%, controls, restoreclipboard
 iniWrite ,%appendnewline%,    %inifile%, controls, appendnewline
+iniWrite ,%pref32%,    %inifile%, controls, pref32
 
 return
 }
