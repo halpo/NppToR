@@ -1,5 +1,10 @@
+
 NppToR CHANGELOG
 ----------------
+12/20/2010
+Made finding R gui more robust by having it look for R in the program files folders.
+Removed the ExitApp that kicked the program out when it failed to find R.
+
 12/14/2010
 Added option for selecting between 32 and 64 bit R.
 

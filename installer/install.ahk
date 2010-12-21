@@ -240,7 +240,7 @@ doinstall:
 
 	;set R options to work with NppToR
 	;do Rprofile
-	FILEINSTALL ,..\Rprofile.base.R, %INSTALLDIR%\Rprofile.R
+	FILEINSTALL ,..\Rprofile.base.R, %INSTALLDIR%\Rprofile
 		; optstring = options(editor="%INSTALLDIR%NppEditR.exe")
 		; StringReplace options, optstring, \ , \\ , All
 		; ifExist %INSTALLDIR%\Rprofile

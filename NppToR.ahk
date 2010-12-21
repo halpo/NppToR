@@ -3,25 +3,19 @@
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
 
 #NOENV
-#SINGLEINSTANCE ignore
+#SINGLEINSTANCE force ;ignore
 #MaxThreads 10
 
 AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 2.5.1
+version = 2.5.2
 year = 2010
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; test code
-; if A_IsAdmin {
-	; msgbox ,48, Ran as Administrator, I still have Admin Rights. 
-	; ExitApp
-; }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin Initial execution code
@@ -50,8 +44,8 @@ if(Global)
 		FileCreateDir %A_AppData%\NppToR
 		if ErrorLevel
 		{
-			msgbox Error creating settings directory.
-			ExitApp
+			msgbox ,32,Error: Saving Settings, Error creating settings directory. Setting might not be saved between sessions.
+			;ExitApp
 		}
 	}
 	inifile = %A_AppData%\NppToR\npptor.ini
@@ -197,6 +191,7 @@ RGetOrStart()
 		global Rcmdparms
 		NppGetCurrFileDir(File,dir)
 		setworkingdir %dir%
+		EnvSet , R_ENVIRON_USER, %scriptdir%
 		run %Rguiexe% %RcmdParms% --sdi,dir,,RprocID
 		winwait ,R Console,, %Rrunwait%
 		WinGet RprocID, ID ;,A
@@ -487,6 +482,48 @@ iniDistill:
 		Rcmdparms=
 	else 
 		Rcmdparms = %iniRcmdparms%
+	
+	If Rhome =
+		FE = 0
+	else
+		FE := FileExist (Rhome)
+	If !(FE)
+	{
+		curfiletime = 0
+		Loop , C:\Program Files\R\* , 2, 0
+		{
+			FileGetTime , filetime, %A_LoopFileFullPath%, C
+			if(filetime>curtime)
+			{
+				curtime := filetime
+				Rhome= %A_LoopFileFullPath%
+			}
+		}
+	}
+	If Rhome =
+		FE = 0
+	else
+		FE := FileExist (Rhome)
+	If !(FE)
+	{
+		IfExist C:\Program Files (x86)
+		{
+			IfExist C:\Program Files(x86)\R
+			{
+				curfiletime = 0
+				Loop C:\Program Files(x86)\R\*
+				{
+					FileGetTime , filetime, %A_LoopFileFullPath%, C
+					if(curtime=  || filetime>curtime)
+					{
+						curtime := filetime
+						Rhome:= A_LoopFileFullPath
+					}
+				}
+			}
+		}
+	}
+	
 	IfExist %Rhome%\bin\Rgui.exe
 		Rguiexe = %Rhome%\bin\Rgui.exe
 	else 
@@ -497,8 +534,8 @@ iniDistill:
 		FE := FileExist(Rguiexe)
 		If NOT FE
 		{
-			msgBox ,32, Error: Rgui.exe not found, Could not find the Rgui.exe file. Aborting.
-			ExitApp
+			msgBox ,32, Error: Rgui.exe not found, Could not find the Rgui.exe file. Spawning R processes will not work.  R must be started manually.  After R has been started, passing commands should work as normal.
+			;ExitApp
 		}
 	return
 }
