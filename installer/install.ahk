@@ -84,7 +84,7 @@ GUI ,FONT, s10 normal Georgia
 GUI ,ADD, TEXT,,
 (
 © 2010 Andrew Redd 
-Use Govorned by MIT license (See License.txt)
+Use Governed by MIT license (See License.txt)
 
 )
 
