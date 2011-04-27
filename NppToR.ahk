@@ -1,5 +1,5 @@
 ; NppToR: R in Notepad++
-; by Andrew Redd 2008 <halpo@users.sourceforge.net>
+; by Andrew Redd 2011 <halpo@users.sourceforge.net>
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
 
 #NOENV
