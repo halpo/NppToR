@@ -1,9 +1,19 @@
 # this script will generate a file 'R.xml' for auto-completion
 # in Notepad++
+cat("Creating R Autocompletion for Notepad++\n")
 
-# load some packages to the search path:
-pkg <- installed.packages()[, 'Priority']
-sapply(names(pkg)[!is.na(pkg)], library, character.only = TRUE)
+{# load some packages to the search path:
+  cat("  Loading Base and Recommended Packages . . .\n")
+  pkgs <- installed.packages()[, 'Priority']
+  pkgs<-names(pkgs)[!is.na(pkgs)]
+  pb<-txtProgressBar(0,length(pkgs), style=3)
+  for(pkg in pkgs){
+    suppressPackageStartupMessages(library(pkg, character.only=T, quietly=T, verbose=F))
+    if(inherits(pb, "txtProgressBar"))
+      setTxtProgressBar(pb,getTxtProgressBar(pb)+1)
+  }  
+  close(pb)
+}
 # you may load any installed packages here
 # sapply(c('animation', 'ggplot2'), library, character.only = TRUE)
 
@@ -46,8 +56,8 @@ strNoFun <-
 '
 
 findfuns <- function(x) {
-    message(x)
-    flush.console()
+    #message(x)
+    #flush.console()
     env <- paste("package", x, sep = ":")
     nm <- ls(env, all.names = FALSE)
     idx <- grep("[<>&@:\\?\\{\\(\\)\\[\\^\\*\\$!%/\\|\\+=~\\-]", 
@@ -86,12 +96,20 @@ findfuns <- function(x) {
     # if (length(idx <- grep('Cairo', dll1))) {
     #     lapply(dll1[idx], dyn.unload)
     # }
+    if(inherits(pb, "txtProgressBar"))
+      setTxtProgressBar(pb,getTxtProgressBar(pb)+1)
     res
 }
 
 # Important! needs to sort in the 'C' locale
-Sys.setlocale(, "C")
+invisible(Sys.setlocale(, "C"))
+{
+cat("  finding function names . . .\n")
+pl<-.packages(all.available = FALSE)
+pb<-txtProgressBar(0,length(pl),style=3)
 z <- lapply(.packages(all.available = FALSE), findfuns)
+close(pb)
+}
 zz <- list()
 for (i in 1:length(z)) zz <- c(zz, z[[i]])
 nm <- sort(unique(names(zz)))
@@ -99,14 +117,18 @@ res <- list()
 for (i in nm) res[i] <- zz[i]
 res[["."]] <- NULL
 nm <- names(res)
+{ cat("  Writing to R.xml\n")
+pb <- txtProgressBar(0, length(res), style=3)
 for (i in 1:length(res)) {
     obj <- res[[i]]
     cat(if (length(obj) == 0) 
         sprintf(strNoFun, nm[i])
     else sprintf(strFun, nm[i], paste(sprintf("               <Param name=\"%s\" />", 
         obj), collapse = "\n")), file = "R.xml", append = TRUE)
+    setTxtProgressBar(pb, i)
 } 
-
+close(pb)
+}
 cat('   </AutoComplete>
 </NotepadPlus>
 ', file = 'R.xml', append = TRUE)

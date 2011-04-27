@@ -83,7 +83,7 @@ GUI ,ADD, TEXT,ym,NppToR ~ Install
 GUI ,FONT, s10 normal Georgia
 GUI ,ADD, TEXT,,
 (
-© 2010 Andrew Redd 
+© 2011 Andrew Redd 
 Use Governed by MIT license (See License.txt)
 
 )
@@ -113,7 +113,7 @@ else
 GUI ,ADD, PROGRESS, wp h20 cBlue vInstallProgress
 GUI ,ADD, BUTTON,section X+-155 Y+5 w75 gSubmit default vInstall,&Install
 GUI ,ADD, BUTTON,gDoCancel xp+80 w75 vCancel, &Cancel
-
+GUI ,ADD, StatusBar
 GUI SHOW
 return
 }
@@ -161,7 +161,8 @@ Submit:
 	{
 		if not A_IsAdmin
 		{
-			cmd = -go
+			SB_SetText("Restarting with admin privileges")
+      cmd = -go
 			if !addStartup
 				cmd = %cmd% -no-startup
 			cmd = %cmd% "%InstallDir%\"
@@ -184,12 +185,16 @@ return
 doinstall:
 {
 	;kill any current running copy
+  SB_SetText("Closing any running NppToR Instances.")
 	process, close, NppToR.exe
 	if %errorlevel%
 		winwaitclose ahk_pid %errorlevel%
+	GuiControl,, InstallProgress, +10
+  
 	;install section
 	ifnotexist %INSTALLDIR%
 	{
+    SB_SetText("Creating Install Directory")
 		filecreatedir %INSTALLDIR%
 		if %errorlevel%
 		{
@@ -205,6 +210,7 @@ doinstall:
 			FileSetAttrib , -R , %INSTALLDIR%\NppToR.exe	
 	}
 	;executable files
+  SB_SetText("Installing NppToR.exe")
 	FILEINSTALL ,..\NppToR.exe, %INSTALLDIR%\NppToR.exe,1
 	if %errorlevel%
 	{
@@ -213,26 +219,36 @@ doinstall:
 		msgbox  64 ,Install Error, NppToR.exe could not be copied. Aborting
 		exitapp
 	}
+  
 	if Global
 	{
+    SB_SetText("Setting global parameters")
 		iniWrite , %Global%, %INSTALLDIR%\npptor.ini, install, global
 		FileSetAttrib , +R, %INSTALLDIR%\NppToR.exe
 	}
 	else
+  {
+    SB_SetText("Setting file attributes")
 		FileSetAttrib , -R, %INSTALLDIR%\NppToR.exe
-	FILEINSTALL ,..\NppEditsR\NppEditR.exe, %INSTALLDIR%\NppEditR.exe,1
+	}
+  SB_SetText("Installing NppEditR.exe")
+  FILEINSTALL ,..\NppEditsR\NppEditR.exe, %INSTALLDIR%\NppEditR.exe,1
+  SB_SetText("Writing URL Shortcut")
 	IniWrite, http://npptor.sourceforge.net, %INSTALLDIR%\npptor.url, InternetShortcut, URL 
 	
+  SB_SetText("Copying uninstall.exe")
 	FILEINSTALL ,uninstall.exe,%INSTALLDIR%\uninstall.exe,1
 	;setting files
 	;FILEINSTALL ,..\npptor.ini, %INSTALLDIR%\npptor.ini,0
 
 	;documentation files
+  SB_SetText("Copying documentation")  
 	;FILEINSTALL ,..\iniparameters.txt,%INSTALLDIR%\iniparameters.txt,0
 	FILEINSTALL ,..\License.txt,%INSTALLDIR%\License.txt,0
 	;if !silent
 		
 	;Supporting R scripts
+  SB_SetText("Copying suport scripts")  
 	FILEINSTALL ,..\make_R_xml.r,%INSTALLDIR%\make_R_xml.r,0
 	if !silent
 		GuiControl,, InstallProgress, +10
@@ -240,6 +256,7 @@ doinstall:
 
 	;set R options to work with NppToR
 	;do Rprofile
+  SB_SetText("Copying RProfile")  
 	FILEINSTALL ,..\Rprofile.base.R, %INSTALLDIR%\Rprofile
 		; optstring = options(editor="%INSTALLDIR%NppEditR.exe")
 		; StringReplace options, optstring, \ , \\ , All
@@ -255,6 +272,7 @@ doinstall:
 		GuiControl,, InstallProgress, +10
 
 	;start menu entries
+  SB_SetText("Setting up start menu entries")  
 	SM := (Global)
 		? A_StartMenuCommon
 		: A_StartMenu
@@ -273,18 +291,24 @@ doinstall:
 	
 	if Global
 	{
+    SB_SetText("Adding auto-completion files to Notepad++")
 		RUN ,%INSTALLDIR%\NppToR.exe -add-auto-complete,,,OutputVarPID
 		WinWait ahk_pid %OutputVarPID%
 		winwaitclose ahk_pid %OutputVarPID%
 		FileDelete %INSTALLDIR%\make_r_xml.r.Rout
 	}
 	else
-		msgbox ,0, No Auto-Completion., The auto-completion database has not been generated as that might require administrator privileges.  That can be performed from the NppToR menu., 30
+  {
+    SB_SetText("")
+    msgbox ,0, No Auto-Completion., The auto-completion database has not been generated as that might require administrator privileges.  That can be performed from the NppToR menu., 30
+  }
 	GuiControl,, InstallProgress, +20
 	;runinstalled NppToR
 	if !silent
 	{
-		RUN ,%INSTALLDIR%\NppToR.exe -startup
+		SB_SetText("Running NppToR")
+    RUN ,%INSTALLDIR%\NppToR.exe -startup
+		SB_SetText("Installation Finished.")
 		if Global
 			msgbox 0, Installation Finished, NppToR has been successfully setup on this computer.,10
 		else

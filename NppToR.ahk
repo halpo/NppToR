@@ -10,7 +10,7 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 2.5.2
+version = 2.5.3.beta
 year = 2010
 
 NppToRHeadingFont = Comic Sans MS
@@ -36,9 +36,13 @@ Loop, %0%  ; For each parameter:
 
 ;ini settings
 inifile = %A_ScriptDir%\npptor.ini
-iniRead, Global, %inifile%, install, global, false
+msgbox ,64,inifile at first, %inifile%, 30
+iniRead, Global, %inifile%, install, global, 0 ;0=false
+msgbox ,64,Global Install?, %Global%, 30
+
 if(Global)
 {
+	msgbox ,16, in if(global), Why the fuck are you here?, 30
 	ifNotExist %A_AppData%\NppToR
 	{
 		FileCreateDir %A_AppData%\NppToR
@@ -50,6 +54,7 @@ if(Global)
 	}
 	inifile = %A_AppData%\NppToR\npptor.ini
 }
+msgbox ,64,inifile, %inifile%, 30
 gosub startupini
 if doAAC
 {
@@ -107,22 +112,14 @@ runbatch:
 	NppGetCurrFileDir(file, dir, ext, Name)
 	SetWorkingDir %dir%
 	; RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-	ifExist %Rhome%\bin\Rcmd.exe
-		rcmd = %Rhome%\bin\Rcmd.exe
-	else
-
-	rcmd = %Rhome%\bin\x64\Rcmd.exe
-	FE := FileExist(rcmd)
-	If (pref32) OR !(FE)
-		rcmd = %Rhome%\bin\i386\Rcmd.exe
-		FE := FileExist(rcmd)
-		If NOT FE
-		{
-			msgbox ,32, Error: Rcmd.exe not found., Rcmd.exe could not be found. Aborting batch evaluation.
-			return
-		}
+	rcmd := RGetCMD()
+  if rcmd=
+  {
+    msgbox ,32, Error: Rcmd.exe not found., Rcmd.exe could not be found. Aborting batch evaluation.
+    return
+  }
 		
-	command = CMD /C %Rhome%\bin\Rcmd.exe BATCH -q "%file%"
+	command = CMD /C %rcmd% BATCH -q "%file%"
 	run %command%, %dir%, hide, RprocID
 	WinWait ,ahk_pid %RprocID%,,.5
 	addProc(RprocID,File, "Local")
@@ -198,6 +195,44 @@ RGetOrStart()
 		return RprocID
 	}
 }
+RGetCMD()
+{
+  global Rhome
+  Rcmdexe = %Rhome%\bin\Rcmd.exe
+  IfExist %Rcmdexe%
+    return %Rcmdexe%
+	else 
+    Rcmdexe = %Rhome%\bin\x64\Rcmd.exe
+	FE := FileExist(Rcmdexe)
+	If (pref32) OR !(FE)
+	{
+    Rcmdexe = %Rhome%\bin\i386\Rcmd.exe
+		FE := FileExist(Rcmdexe)
+	}
+	If FE
+    return %Rcmdexe%
+  else
+    return
+}
+RGetRscript()
+{
+  global Rhome
+  Rscriptexe = %Rhome%\bin\Rscript.exe
+  IfExist %Rscriptexe%
+    return %Rscriptexe%
+	else 
+    Rscriptexe = %Rhome%\bin\x64\Rscript.exe
+	FE := FileExist(Rscriptexe)
+	If (pref32) OR !(FE)
+	{
+    Rscriptexe = %Rhome%\bin\i386\Rscript.exe
+		FE := FileExist(Rscriptexe)
+	}
+	If FE
+    return %Rscriptexe%
+  else
+    return
+}
 RUpdateWD:
 {
 	oldclipboard := ClipboardAll
@@ -215,6 +250,20 @@ sendSilent:
 		sleep %Rpastewait%
 		clipboard := oldclipboard
 	return
+}
+sendSource:
+{
+  oldclipboard = %clipboard%
+  cmd = source(file="clipboard")
+  NppGetCurrFileDir(file, currdir, ext)
+  StringReplace , wd, currdir, \, /, All 
+
+  clipboard = source(file="%wd%/%file%")`n
+  gosub Rpaste
+	if restoreclipboard
+		sleep %Rpastewait%
+		clipboard := oldclipboard
+return
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Putty interface functions
@@ -285,7 +334,7 @@ NppGetCurrFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="",
 	}
 		
 	clipwait
-	splitpath, clipboard,file,dir, ext, NameNoExt, Drive
+	splitpath, clipboard, file, dir, ext, NameNoExt, Drive
 	clipboard = %ocb%
 	return dir
 }
@@ -418,7 +467,8 @@ IniGet:
 	IniRead ,passfilekey,    %inifile%, hotkeys, passfile,^F8
 	IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
 	IniRead ,batchrunkey,    %inifile%, hotkeys, batchrun,^!F8
-	IniRead ,Rhelpkey,          %inifile%, hotkeys, rhelp,^F1
+	IniRead ,Rhelpkey,       %inifile%, hotkeys, rhelp,^F1
+	IniRead ,bysourcekey,    %inifile%, hotkeys, bysource, ^+F8
 	;silent
 	IniRead ,enablesilent, %inifile%, silent, enablesilent, 0
 	IniRead ,silentkey,  %inifile%, silent, silentkey, !F8
@@ -630,6 +680,10 @@ hotkey ,%passtopointkey%,runtocursor, On
 hotkey ,%rhelpkey%, getRhelp, On
 #MaxThreadsPerHotkey 100
 hotkey ,%batchrunkey%,runbatch, On
+hotkey ,%bysourcekey%, sendSource, On
+
+;; TESING CODE
+;;;;;;;;;;;;;;
 
 if activateputty
 {
@@ -659,35 +713,44 @@ undoHotkeys:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 generateRxml:
 {
-	ifWinExist ahk_class Notepad++
-	{
-		winGet , NppPID, PID
-		CurrNppExePath := GetModuleFileNameEx( NppPID )
-		StringReplace, NppPlugins, CurrNppExePath, notepad++.exe, plugins\APIs, All
-		msgbox ,4,Continue?, To update the auto-completion database Notepad++ must be closed.  It will be restarted. Auto-completion must also be turned on from within Notepad++ (Setting > Preferences > Backup/Auto-Completion). Save your work now, now before continuing. Continue?
-		ifmsgbox Yes
-			winkill
-		ifmsgbox No
-			return
-	} 
-	if NppPlugins=
-	{
-		NppPlugins = %NppDir%\plugins\APIs
-	}
-	command = %Rhome%\bin\Rcmd.exe 
-	params  = BATCH -q "%A_ScriptDir%\make_R_xml.r"
-  DllCall("shell32\ShellExecuteA"
-		,uint, 0 ;hwnd a handle to the owner window (null implies not associated with a window)
-		,str, "RunAs"  ;operation
-		,str, command ;File
-		,str, params ;Parameters
-		,str, NppPlugins ;lpDirectory
-		,int, 1)  ; Last parameter: SW_SHOWNORMAL = 1
-	SetTitleMatchMode, 1
-	winwait, %command%,,1
-	winwaitclose, %command%,,500
-	Run %CurrNppExePath%
-	return
+	Rscript := RGetRscript() 
+  msgbox %Rscript%
+  IfExist %Rscript%
+  {
+    ifWinExist ahk_class Notepad++
+    {
+      winGet , NppPID, PID
+      CurrNppExePath := GetModuleFileNameEx( NppPID )
+      StringReplace, NppPlugins, CurrNppExePath, notepad++.exe, plugins\APIs, All
+      msgbox ,4,Continue?, To update the auto-completion database Notepad++ must be closed.  It will be restarted. Auto-completion must also be turned on from within Notepad++ (Setting > Preferences > Backup/Auto-Completion). Save your work now, now before continuing. Continue?
+      ifmsgbox Yes
+        winkill
+      ifmsgbox No
+        return
+    } 
+    if NppPlugins=
+    {
+      NppPlugins = %NppDir%\plugins\APIs
+    }
+    params  = /C %Rscript% "%A_ScriptDir%\make_R_xml.r"
+    command = CMD 
+    DllCall("shell32\ShellExecuteA"
+      ,uint, 0 ;hwnd a handle to the owner window (null implies not associated with a window)
+      ,str, "RunAs"  ;operation
+      ,str, command ;File
+      ,str, params ;Parameters
+      ,str, NppPlugins ;lpDirectory
+      ,int, 1)  ; Last parameter: SW_SHOWNORMAL = 1
+    SetTitleMatchMode, 1
+    winwait, %command%,,1
+    winwaitclose, %command%,,500
+    Run %CurrNppExePath%
+  }
+  else
+  {
+    msgbox ,48, Could not find Rcmd.exe, Could not find the Rcmd.exe file for creating autocompletion list.  Please fix the R home directory in the setting and rerun from the menu., 30
+  }
+  return
 }
 
 ; Includes

@@ -1,6 +1,13 @@
-
 NppToR CHANGELOG
 ----------------
+4/25/2011
+bug fix for portable and non-global installs.
+
+4/15/2011
+added suport for the pass by source.
+Bug fix for newer versions of R (>=2.12) for batch eval
+Fixed bug for batch eval tracker.
+
 12/20/2010
 Made finding R gui more robust by having it look for R in the program files folders.
 Removed the ExitApp that kicked the program out when it failed to find R.

@@ -26,14 +26,19 @@ Gui, 4:Add, GroupBox,    	x16  y280 w210 h170 , Hotkeys
 	Gui, 4:Add, Edit, 	x156 y360 w60  h20 Vguitxtpasstopoint, passtopoint
 	Gui, 4:Add, Text, 	x26  y390 w130 h30                , Batch process file
 	Gui, 4:Add, Edit, 	x156 y390 w60  h20 Vguitxtbatchrun, batchrun
-	Gui, 4:Add, Text,   x26 y420 w130 h30                 , R help
-	Gui, 4:Add, Edit,   x156 y420 w60 h20  Vguitxtrhelp   , 
+	Gui, 4:Add, Text,   x26 y420 w130 h30                 , Pass by source
+	Gui, 4:Add, Edit,   x156 y420 w60 h20  Vguitxtbysource, 
 Gui, 4:Add, GroupBox, 	x236 y280 w220 h170 , Extra setting
 	Gui, 4:Add, CheckBox, x246 y300 w190 h20 vguichkactivateputty, Enable Putty HotKeys
 	Gui, 4:Add, Text, 	x246 y320 w140 h20                 , Pass line
 	Gui, 4:Add, Edit, 	x386 y320 w60  h20 Vguitxtputtyline, putty line
 	Gui, 4:Add, Text, 	x246 y350 w140 h20                 , Pass entire file at once
 	Gui, 4:Add, Edit, 	x386 y350 w60  h20 Vguitxtputtyfile, putty file
+	Gui, 4:Add, CheckBox, x246 y375 w200 h20 Vguichkenablesilent, Enable Silent Transfer
+	Gui, 4:Add, Text, x246 y395 w140 h20 , Silent Transfer Hotkey
+	Gui, 4:Add, Edit, x386 y395 w60 h20 Vguitxtsilentkey, 
+	Gui, 4:Add, Text,   x246 y420 w130 h30                 , R help
+	Gui, 4:Add, Edit,   x386 y420 w60 h20  Vguitxtrhelp   , 
 Gui, 4:Add, GroupBox,		x16  y460 w440 h153 , Performance Settings
 	Gui, 4:Add, Text, 	x26  y480 w350 h20                  , Milliseconds to wait time before restoring clipboard
 	Gui, 4:Add, Edit, 	x386 y480 w60  h20 Vguitxtrpastewait, RPasteWait
@@ -45,9 +50,6 @@ Gui, 4:Add, GroupBox,		x16  y460 w440 h153 , Performance Settings
 Gui, 4:Add, Text, 		x16  y620 w230 h30 , Hotkey Symbols: #=Win`, !=Alt`, ^=Control`, +=Shift
 Gui, 4:Add, Button,		x356 y620 w100 h30 gCancel, Cancel
 Gui, 4:Add, Button,		x256 y620 w100 h30 gguiIniSave, Save
-Gui, 4:Add, CheckBox, x246 y390 w200 h20 Vguichkenablesilent, Enable Silent Transfer
-Gui, 4:Add, Text, x246 y410 w140 h20 , Silent Transfer Hotkey
-Gui, 4:Add, Edit, x386 y410 w60 h20 Vguitxtsilentkey, 
 return
 }
 showIniGui:
@@ -58,6 +60,7 @@ guiControl,4:, guitxtpassline, %passlinekey%
 guiControl,4:, guitxtpassfile, %passfilekey%
 guiControl,4:, guitxtpasstopoint, %passtopointkey%
 guiControl,4:, guitxtbatchrun, %batchrunkey%
+guiControl,4:, guitxtbysource, %bysourcekey%
 guiControl,4:, guitxtrhelp, %rhelpkey%
 if activateputty
 	guiControl,4:, guichkactivateputty, 1
@@ -136,6 +139,7 @@ guiControlGet,passlinekey,4:, guitxtpassline
 guiControlGet,passfilekey,4:, guitxtpassfile
 guiControlGet,passtopointkey,4:, guitxtpasstopoint
 guiControlGet,batchrunkey,4:, guitxtbatchrun
+guiControlGet,bysourcekey,4:, guitxtbysource
 guiControlGet,rhelpkey,4:, guitxtrhelp
 guiControlGet,activateputty,4:, guichkactivateputty
 guiControlGet,puttylinekey,4:, guitxtputtyline
@@ -180,6 +184,7 @@ iniWrite ,%passlinekey%,    %inifile%, hotkeys, passline
 iniWrite ,%passfilekey%,    %inifile%, hotkeys, passfile
 iniWrite ,%passtopointkey%, %inifile%, hotkeys, evaltocursor
 iniWrite ,%batchrunkey%,    %inifile%, hotkeys, batchrun
+iniWrite ,%bysourcekey%,    %inifile%, hotkeys, bysource
 iniWrite ,%rhelpkey%,    %inifile%, hotkeys, rhelp
 ;putty
 iniWrite ,%activateputty%, %inifile%, putty, activateputty
