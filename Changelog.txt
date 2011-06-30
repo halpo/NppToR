@@ -1,5 +1,8 @@
 NppToR CHANGELOG
 ----------------
+6/30/2011
+Added QuickKeys addon
+
 6/5/2011
 Bug fix. Save before sending by source.
 

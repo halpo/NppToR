@@ -10,7 +10,7 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 2.5.4
+version = 2.6.0
 year = 2010
 
 NppToRHeadingFont = Comic Sans MS
@@ -36,7 +36,10 @@ Loop, %0%  ; For each parameter:
 
 ;ini settings
 inifile = %A_ScriptDir%\npptor.ini
+sgbox ,64,inifile at first, %inifile%, 30
 iniRead, Global, %inifile%, install, global, 0 ;0=false
+
+
 if(Global)
 {
 	ifNotExist %A_AppData%\NppToR
@@ -50,6 +53,7 @@ if(Global)
 	}
 	inifile = %A_AppData%\NppToR\npptor.ini
 }
+
 gosub startupini
 if doAAC
 {
@@ -59,6 +63,7 @@ if doAAC
 
 gosub makeMenus	
 gosub makeHotkeys
+gosub readQuickKeys
 
 gosub makeCounter
 gosub MakeAboutDialog
@@ -453,10 +458,10 @@ return
 IniGet:
 {
 	;executables
-	IniRead ,iniRhome,     %inifile%, executables, R,
-	IniRead ,iniRcmdparms, %inifile%, executables, Rcmdparms,
-	IniRead ,iniNppexe,    %inifile%, executables, Npp,
-	IniRead ,iniNppConfig, %inifile%, executables, NppConfig,
+	IniRead ,iniRhome,      %inifile%, executables, R,
+	IniRead ,iniRcmdparms,  %inifile%, executables, Rcmdparms,
+	IniRead ,iniNppexe,     %inifile%, executables, Npp,
+	IniRead ,iniNppConfig,  %inifile%, executables, NppConfig,
 	;hotkeys
 	IniRead ,passlinekey,    %inifile%, hotkeys, passline,F8
 	IniRead ,passfilekey,    %inifile%, hotkeys, passfile,^F8
@@ -465,8 +470,8 @@ IniGet:
 	IniRead ,Rhelpkey,       %inifile%, hotkeys, rhelp,^F1
 	IniRead ,bysourcekey,    %inifile%, hotkeys, bysource, ^+F8
 	;silent
-	IniRead ,enablesilent, %inifile%, silent, enablesilent, 0
-	IniRead ,silentkey,  %inifile%, silent, silentkey, !F8
+	IniRead ,enablesilent,   %inifile%, silent, enablesilent, 0
+	IniRead ,silentkey,      %inifile%, silent, silentkey, !F8
 	;putty
 	IniRead ,activateputty, %inifile%, putty, activateputty, 0
 	IniRead ,puttylinekey,  %inifile%, putty, puttyline, F9
@@ -660,6 +665,9 @@ menu, tray, add, Reset R working directory, RUpdateWD
 menu, tray, add ; separator
 menu, tray, add, Add R Auto Completion (Requires Admin), generateRxml
 menu, tray, add ; separator
+menu, tray, add, Edit Quick Keys, EditQuickKeys
+menu, tray, add, Refresh Quick Keys, readQuickKeys
+menu, tray, add ; separator
 Menu, tray, add, Settings, ShowIniGui
 Menu, tray, add, About, ShowAbout 
 return
@@ -754,3 +762,4 @@ generateRxml:
 #include %A_ScriptDir%\COM\com4NppToR.ahk
 #include %A_ScriptDir%\COM\COM.ahk
 #include %A_ScriptDir%\_reg64.ahk
+#include %A_ScriptDir%\QuickKeys.ahk

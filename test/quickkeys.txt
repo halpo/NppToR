@@ -1,0 +1,2 @@
+^!h=head($word$)
+^!t=tail($word$)
