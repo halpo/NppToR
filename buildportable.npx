@@ -2,7 +2,7 @@
 // builds NppToRPortable distribution
 // 
 
-set exe7zip = $(SYS.PROGRAMFILES)\7-zip\7z.exe 
+set exe7zip = 7z 
 set parms7z= a -sfx7z.sfx -mx9 
 set DirPortable = NppToRPortable
 set package = NppToRPortable-$(version).paf.exe
@@ -12,5 +12,5 @@ xcopy "NppEditsR\NppEditR.exe" "$(DirPortable)\App\NppToR\NppEditR.exe" /R /Y /V
 xcopy "NppToR.exe" "$(DirPortable)\App\NppToR\NppToR.exe" /R /Y /V /i
 
 $(exe7zip) $(parms7z) $(package) $(DirPortable)
-
+$(exe7zip) d $(package) *.svn -r
 

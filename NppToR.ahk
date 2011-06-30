@@ -10,7 +10,7 @@ AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
 
-version = 2.5.3.beta
+version = 2.5.4
 year = 2010
 
 NppToRHeadingFont = Comic Sans MS
@@ -36,13 +36,9 @@ Loop, %0%  ; For each parameter:
 
 ;ini settings
 inifile = %A_ScriptDir%\npptor.ini
-msgbox ,64,inifile at first, %inifile%, 30
 iniRead, Global, %inifile%, install, global, 0 ;0=false
-msgbox ,64,Global Install?, %Global%, 30
-
 if(Global)
 {
-	msgbox ,16, in if(global), Why the fuck are you here?, 30
 	ifNotExist %A_AppData%\NppToR
 	{
 		FileCreateDir %A_AppData%\NppToR
@@ -54,7 +50,6 @@ if(Global)
 	}
 	inifile = %A_AppData%\NppToR\npptor.ini
 }
-msgbox ,64,inifile, %inifile%, 30
 gosub startupini
 if doAAC
 {
@@ -253,8 +248,8 @@ sendSilent:
 }
 sendSource:
 {
+	WinMenuSelectItem ,A,,File,Save
   oldclipboard = %clipboard%
-  cmd = source(file="clipboard")
   NppGetCurrFileDir(file, currdir, ext)
   StringReplace , wd, currdir, \, /, All 
 
@@ -714,7 +709,6 @@ undoHotkeys:
 generateRxml:
 {
 	Rscript := RGetRscript() 
-  msgbox %Rscript%
   IfExist %Rscript%
   {
     ifWinExist ahk_class Notepad++

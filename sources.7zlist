@@ -2,6 +2,7 @@ counter\*.ahk
 icons\NppToR.*
 installer\install.ahk
 NppEditsR\NppEditR.ahk
+iniGUI\*.ahk
 COM\com4NppToR.ahk
 COM\COM.ahk
 *.ahk

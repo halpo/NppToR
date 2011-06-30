@@ -1,5 +1,8 @@
 NppToR CHANGELOG
 ----------------
+6/5/2011
+Bug fix. Save before sending by source.
+
 4/25/2011
 bug fix for portable and non-global installs.
 

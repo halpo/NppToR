@@ -1,7 +1,8 @@
+
 // builddistro.npx
 // builds the files for a new version release.
 
-set version = 2.5.3.beta
+set version = 2.5.4
 // also needs to be changed in NppToR.ahk:13
 npp_exec build.npx
 
