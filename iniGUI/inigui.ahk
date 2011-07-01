@@ -37,8 +37,8 @@ Gui, 4:Add, GroupBox, 	x236 y280 w220 h170 , Extra setting
 	Gui, 4:Add, CheckBox, x246 y375 w200 h20 Vguichkenablesilent, Enable Silent Transfer
 	Gui, 4:Add, Text, x246 y395 w140 h20 , Silent Transfer Hotkey
 	Gui, 4:Add, Edit, x386 y395 w60 h20 Vguitxtsilentkey, 
-	Gui, 4:Add, Text,   x246 y420 w130 h30                 , R help
-	Gui, 4:Add, Edit,   x386 y420 w60 h20  Vguitxtrhelp   , 
+	;Gui, 4:Add, Text,   x246 y420 w130 h30                 , R help
+	;Gui, 4:Add, Edit,   x386 y420 w60 h20  Vguitxtrhelp   , 
 Gui, 4:Add, GroupBox,		x16  y460 w440 h153 , Performance Settings
 	Gui, 4:Add, Text, 	x26  y480 w350 h20                  , Milliseconds to wait time before restoring clipboard
 	Gui, 4:Add, Edit, 	x386 y480 w60  h20 Vguitxtrpastewait, RPasteWait
@@ -61,7 +61,7 @@ guiControl,4:, guitxtpassfile, %passfilekey%
 guiControl,4:, guitxtpasstopoint, %passtopointkey%
 guiControl,4:, guitxtbatchrun, %batchrunkey%
 guiControl,4:, guitxtbysource, %bysourcekey%
-guiControl,4:, guitxtrhelp, %rhelpkey%
+;guiControl,4:, guitxtrhelp, %rhelpkey%
 if activateputty
 	guiControl,4:, guichkactivateputty, 1
 else 
@@ -140,7 +140,7 @@ guiControlGet,passfilekey,4:, guitxtpassfile
 guiControlGet,passtopointkey,4:, guitxtpasstopoint
 guiControlGet,batchrunkey,4:, guitxtbatchrun
 guiControlGet,bysourcekey,4:, guitxtbysource
-guiControlGet,rhelpkey,4:, guitxtrhelp
+;guiControlGet,rhelpkey,4:, guitxtrhelp
 guiControlGet,activateputty,4:, guichkactivateputty
 guiControlGet,puttylinekey,4:, guitxtputtyline
 guiControlGet,puttyfilekey,4:, guitxtputtyfile
@@ -185,7 +185,7 @@ iniWrite ,%passfilekey%,    %inifile%, hotkeys, passfile
 iniWrite ,%passtopointkey%, %inifile%, hotkeys, evaltocursor
 iniWrite ,%batchrunkey%,    %inifile%, hotkeys, batchrun
 iniWrite ,%bysourcekey%,    %inifile%, hotkeys, bysource
-iniWrite ,%rhelpkey%,    %inifile%, hotkeys, rhelp
+;iniWrite ,%rhelpkey%,    %inifile%, hotkeys, rhelp
 ;putty
 iniWrite ,%activateputty%, %inifile%, putty, activateputty
 iniWrite ,%puttylinekey%,  %inifile%, putty, puttyline

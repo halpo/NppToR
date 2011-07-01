@@ -1,6 +1,7 @@
 
 ; read replacements
 readQuickKeys:
+{
 	ifWinExist ahk_class Notepad++
 	ifWinExist
 	QuickKeysFile = %A_ScriptDir%\quickkeys.txt
@@ -10,7 +11,7 @@ readQuickKeys:
 			QuickKeysFile = %A_AppData%\NppToR\quickkeys.txt
 	}
 	ifNotExist %QuickKeysFile%
-		gosub createQuickKeyTxt
+		gosub makeQuickKeyTxt
 	Loop, Read, %QuickKeysFile%
 	{
 		StringLeft, first, A_LoopReadLine,1
@@ -22,6 +23,7 @@ readQuickKeys:
 	}
 	ifWinExist 
 return
+}
 doQuickKey:
 {
 	Key = %A_ThisHotkey%
@@ -58,10 +60,12 @@ return
 }	
 
 editQuickKeys:
+{
 Run %Nppexe% %QuickKeysFile%
 return
-
+}
 makeQuickKeyTxt:
-	if(global)
-		fileInstall, quickkeys.txt, %QuickKeysFile%
+{
+	fileInstall, quickkeys.txt, %QuickKeysFile%
 return
+}

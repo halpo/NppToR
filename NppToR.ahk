@@ -36,7 +36,6 @@ Loop, %0%  ; For each parameter:
 
 ;ini settings
 inifile = %A_ScriptDir%\npptor.ini
-sgbox ,64,inifile at first, %inifile%, 30
 iniRead, Global, %inifile%, install, global, 0 ;0=false
 
 
@@ -467,7 +466,7 @@ IniGet:
 	IniRead ,passfilekey,    %inifile%, hotkeys, passfile,^F8
 	IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
 	IniRead ,batchrunkey,    %inifile%, hotkeys, batchrun,^!F8
-	IniRead ,Rhelpkey,       %inifile%, hotkeys, rhelp,^F1
+	;IniRead ,Rhelpkey,       %inifile%, hotkeys, rhelp,^F1
 	IniRead ,bysourcekey,    %inifile%, hotkeys, bysource, ^+F8
 	;silent
 	IniRead ,enablesilent,   %inifile%, silent, enablesilent, 0
@@ -680,7 +679,7 @@ if NOT makeglobal
 hotkey ,%passlinekey%,runline, On
 hotkey ,%passfilekey%,runall, On
 hotkey ,%passtopointkey%,runtocursor, On
-hotkey ,%rhelpkey%, getRhelp, On
+;hotkey ,%rhelpkey%, getRhelp, On
 #MaxThreadsPerHotkey 100
 hotkey ,%batchrunkey%,runbatch, On
 hotkey ,%bysourcekey%, sendSource, On
