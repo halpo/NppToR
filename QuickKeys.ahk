@@ -12,14 +12,22 @@ readQuickKeys:
 	}
 	ifNotExist %QuickKeysFile%
 		gosub makeQuickKeyTxt
+  
+  QK_CMDS := Object()
+  QK_Index=0
 	Loop, Read, %QuickKeysFile%
 	{
 		StringLeft, first, A_LoopReadLine,1
 		if first = `;
 		  continue
-		StringSplit, _QK_%A_Index%_ , A_LoopReadLine, =, %A_Space%%A_Tab%
-		key = % _QK_%A_Index%_1
-		hotkey, %key%, doQuickKey
+    if A_LoopReadLine=
+      continue
+		StringSplit, _QK_Line_, A_LoopReadLine, =, %A_Space%%A_Tab%
+    QK_CMDS[_QK_LINE_1]:= _QK_LINE_2
+    hotkey, %_QK_LINE_1%, doQuickKey
+
+
+    continue ;early stop below is old code 
 	}
 	ifWinExist 
 return
@@ -27,16 +35,41 @@ return
 doQuickKey:
 {
 	Key = %A_ThisHotkey%
-; msgbox %Key%
+  cmd := QK_CMDS[key]
+  ifinstring ,cmd,$word$ 
+  {
+    word := NppGetWord()
+    StringReplace, cmd, cmd, $word$, %word%, All
+  }
+  ifinstring ,cmd,$line$
+  {
+    ;TODO
+  }
+	oldclipboard := ClipboardAll
+	clipboard = %cmd%`r`n
+  errorlevel:=0
+  gosub Rpaste
+	if restoreclipboard
+	{
+		sleep %Rpastewait%
+		clipboard := oldclipboard
+	}
+return
+
+
+
 	oldappendnewline = %appendnewline%
 	appendnewline = 
 	oldclipboard := ClipboardAll
-	gosub NppGetWord
-	word = %clipboard%
-	gosub NppGetLineOrSelection
-	line = %clipboard%
+  msgbox ,0, Word, %word%
+;	gosub NppGetLineOrSelection
+;	line = %clipboard%
+
+
+return
 	loop
 	{
+msgbox % _QK_%A_Index%_1
 		if _QK_%A_Index%_1 <>
 		{
 			if _QK_%A_Index%_1 = %Key%
@@ -44,11 +77,8 @@ doQuickKey:
 				tmp = % _QK_%A_Index%_2
 				StringReplace, cmd, tmp, $word$, %word%
 				tmp = %cmd%
-				StringReplace, cmd, tmp, $line$, %line%
-				clipboard = %cmd%
-				if oldappendnewline 
-					gosub CheckForNewLine
-; msgbox, 64, QuickText, %cmd%
+				clipboard = %cmd%`r`n
+msgbox, 64, QuickText, %cmd%
 				gosub Rpaste
 			}
 		}

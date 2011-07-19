@@ -3,7 +3,14 @@
 ; note the $ at the beginning and end
 ; one line per command fot he form `hotkey=command`
 ; a line beginning with ; is a comment
-;
+
 ; Key Symbols: #=win, !=alt, ^=control, +=shift
 ; example: "^!h=head($word$)" will assign control+alt+h call head on the current word uder the cursor in Notepad++
+
+; Quick Help
 ^F1=?$word$
+
+; Head
+^!h=head($word$)
+
+

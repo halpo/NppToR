@@ -6,16 +6,19 @@
 #SINGLEINSTANCE force ;ignore
 #MaxThreads 10
 
+;NppGetSelection()
+
 AUTOTRIM OFF
 sendmode event
 DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropriate window.
+SetTitleMatchMode, 1
+SetTitleMatchMode, Fast
 
 version = 2.6.0
-year = 2010
+year = 2011
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin Initial execution code
@@ -107,10 +110,9 @@ return
 runbatch:
 {
 	DetectHiddenWindows On
-	WinMenuSelectItem ,A,,File,Save
-	NppGetCurrFileDir(file, dir, ext, Name)
-	SetWorkingDir %dir%
-	; RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+	NppSave()
+  dir := NppGetCurrDir()
+  SetWorkingDir %dir%
 	rcmd := RGetCMD()
   if rcmd=
   {
@@ -145,126 +147,6 @@ getRhelp:
 	return
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; R interface functions
-Rpaste:
-{
-;	if clipboard<>
-	; isblank := 
-	; if !regExMatch(clipboard, "DS)^`s*$")
-	{
-		WinGet nppID, ID, A          ; save current window ID to return here later
-		RprocID:=RGetOrStart()
-		if ErrorLevel
-		{
-			IfWinExist , RGui
-				msgbox , 16 ,R in MDI Mode, R in running in MDI mode. Please switch to SDI mode for this utility to work.
-			else
-				msgbox , 16 ,Could not find R, Could not start or find R. Please check you installation or start R manually.
-			return
-		}
-		WinMenuSelectItem ,ahk_id %RprocID%,,2&,2& ;edit->paste
-		;WinMenuSelectItem ,ahk_id %RprocID%,,file,Print...
-		WinActivate ahk_id %nppID%    ; go back to the original window if moved
-	} 
-	if restoreclipboard
-	{
-		sleep %Rpastewait%
-		clipboard := oldclipboard
-	}
-	return
-}
-RGetOrStart()
-{
-	IfWinExist ,R Console
-	{
-		;WinActivate ; ahk_class RGui
-		WinGet RprocID, ID ;,A
-		return RprocID
-	} 
-	else
-	{
-		global Rguiexe
-		global Rcmdparms
-		NppGetCurrFileDir(File,dir)
-		setworkingdir %dir%
-		EnvSet , R_ENVIRON_USER, %scriptdir%
-		run %Rguiexe% %RcmdParms% --sdi,dir,,RprocID
-		winwait ,R Console,, %Rrunwait%
-		WinGet RprocID, ID ;,A
-		return RprocID
-	}
-}
-RGetCMD()
-{
-  global Rhome
-  Rcmdexe = %Rhome%\bin\Rcmd.exe
-  IfExist %Rcmdexe%
-    return %Rcmdexe%
-	else 
-    Rcmdexe = %Rhome%\bin\x64\Rcmd.exe
-	FE := FileExist(Rcmdexe)
-	If (pref32) OR !(FE)
-	{
-    Rcmdexe = %Rhome%\bin\i386\Rcmd.exe
-		FE := FileExist(Rcmdexe)
-	}
-	If FE
-    return %Rcmdexe%
-  else
-    return
-}
-RGetRscript()
-{
-  global Rhome
-  Rscriptexe = %Rhome%\bin\Rscript.exe
-  IfExist %Rscriptexe%
-    return %Rscriptexe%
-	else 
-    Rscriptexe = %Rhome%\bin\x64\Rscript.exe
-	FE := FileExist(Rscriptexe)
-	If (pref32) OR !(FE)
-	{
-    Rscriptexe = %Rhome%\bin\i386\Rscript.exe
-		FE := FileExist(Rscriptexe)
-	}
-	If FE
-    return %Rscriptexe%
-  else
-    return
-}
-RUpdateWD:
-{
-	oldclipboard := ClipboardAll
-	WinActivate ahk_class Notepad++
-	currdir:=NppGetCurrFileDir()
-	StringReplace , wd, currdir, \, /, All 
-	clipboard = setwd("%wd%")`n
-	gosub Rpaste
-	return
-}
-sendSilent:
-{
-	gosub sendByCOM
-	if restoreclipboard
-		sleep %Rpastewait%
-		clipboard := oldclipboard
-	return
-}
-sendSource:
-{
-	WinMenuSelectItem ,A,,File,Save
-  oldclipboard = %clipboard%
-  NppGetCurrFileDir(file, currdir, ext)
-  StringReplace , wd, currdir, \, /, All 
-
-  clipboard = source(file="%wd%/%file%")`n
-  gosub Rpaste
-	if restoreclipboard
-		sleep %Rpastewait%
-		clipboard := oldclipboard
-return
-}
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Putty interface functions
 puttypaste:
 {	
@@ -273,7 +155,8 @@ puttypaste:
 	{
 		if clipboard<>""
 		{
-			ControlClick , x4 y30,,, right
+      gosub CheckForNewLine
+      ControlClick , x4 y30,,, right
 		}
 		WinActivate ahk_id %nppID%    ; go back to the original window
 		if restoreclipboard
@@ -295,106 +178,6 @@ puttyRunAll:
 	gosub NppGetAll
 	gosub puttypaste
 	return
-}
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Notepad++ interface functions
-NppGetVersion(ByRef major, ByRef minor, ByRef bug, ByRef build)
-{	
-	ifWinExist ahk_class Notepad++
-	{
-		winGet , NppPID, PID
-		CurrNppExePath := GetModuleFileNameEx( NppPID )
-		FileGetVersion , NppVersion, %CurrNppExePath%
-		StringSplit, VersionNumbers, NppVersion , .
-		major := VersionNumbers1
-		minor := VersionNumbers2
-		bug   := VersionNumbers3
-		build := VersionNumbers4
-	}
-	return
-}
-NppGetCurrFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="", ByRef Drive="")
-{
-	; WinGetActiveTitle, title
-	; stringleft firstchar, title, 1
-	; if firstchar = *
-		; StringTrimLeft title, title, 1
-	; StringTrimRight title, title, 12
-	ocb = %clipboard%
-	clipboard =
-	NppGetVersion(major, minor, bug, build)
-	if(major>=5)&&(minor>=4)
-	{
-		WinMenuSelectItem ,A,,2&,10&,1& ; Edit,Copy to Clipboard, Current full file path to Clipboard
-	}
-	else 
-	{
-		WinMenuSelectItem ,A,,2&,10& ; Edit,Copy Current full file path to Clipboard
-	}
-		
-	clipwait
-	splitpath, clipboard, file, dir, ext, NameNoExt, Drive
-	clipboard = %ocb%
-	return dir
-}
-NppGetLineOrSelection:
-{
-	oldclipboard := ClipboardAll
-	clipboard = 
-	WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
-	clipwait .1
-	if clipboard = 
-	{
-		sendevent {end}{home 2}+{end}+{right}
-		WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
-		clipwait 1
-		sendevent {right}
-	} 
-	else sendevent {right}
-	if appendnewline
-		gosub CheckForNewLine
-	return
-}
-NppRun:
-{
-	Run %Nppexe%
-	return 
-}
-NppGetAll:
-{
-oldclipboard := ClipboardAll
-WinMenuSelectItem ,A,,2&,8& ;Edit,Select All
-WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
-sendevent {right}
-gosub CheckForNewLine
-return
-}
-NppGetToPoint:
-{
-oldclipboard := ClipboardAll
-sendevent ^+{home}
-WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
-sendevent {right}
-		gosub CheckForNewLine
-return
-}
-NppGetWord:
-{
-	oldclipboard := ClipboardAll
-	clipboard = 
-	WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
-	clipwait .1
-	if clipboard = 
-	{
-		sendevent {end}{home 2}+{end}+{right}
-		WinMenuSelectItem ,A,,2&,5& ;Edit,Copy
-		sendevent {right}
-	} 
-	else sendevent {right}
-	if appendnewline
-		gosub CheckForNewLine
-	return
-
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -438,20 +221,6 @@ GuiEscape2:
 Gui 2:hide
 return
 
-CheckForNewLine:
-{
-	Transform, var, Unicode
-	if var <>
-	{
-		stringright , right, var, 1 	;for long strings
-		found := regexmatch( right, "[`r`n]")
-		if !found
-		{
-			Transform, clipboard, Unicode, %var%`r`n
-		}	; var = %var% `n
-	}
-return
-}
 ;;;;;;;;;;;;;;;;;;;
 ;INI file paramters
 IniGet:
@@ -466,7 +235,6 @@ IniGet:
 	IniRead ,passfilekey,    %inifile%, hotkeys, passfile,^F8
 	IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
 	IniRead ,batchrunkey,    %inifile%, hotkeys, batchrun,^!F8
-	;IniRead ,Rhelpkey,       %inifile%, hotkeys, rhelp,^F1
 	IniRead ,bysourcekey,    %inifile%, hotkeys, bysource, ^+F8
 	;silent
 	IniRead ,enablesilent,   %inifile%, silent, enablesilent, 0
@@ -679,7 +447,6 @@ if NOT makeglobal
 hotkey ,%passlinekey%,runline, On
 hotkey ,%passfilekey%,runall, On
 hotkey ,%passtopointkey%,runtocursor, On
-;hotkey ,%rhelpkey%, getRhelp, On
 #MaxThreadsPerHotkey 100
 hotkey ,%batchrunkey%,runbatch, On
 hotkey ,%bysourcekey%, sendSource, On
@@ -705,7 +472,6 @@ undoHotkeys:
 	hotkey ,%passlinekey%,runline, Off
 	hotkey ,%passfilekey%,runall, Off
 	hotkey ,%passtopointkey%,runtocursor, Off
-	hotkey ,%rhelpkey%, getRhelp, Off
 	hotkey ,%batchrunkey%,runbatch, Off
 	hotkey , %puttylinekey% , puttyLineOrSelection, Off
 	hotkey , %puttyfilekey% , puttyRunAll, Off
@@ -742,7 +508,6 @@ generateRxml:
       ,str, params ;Parameters
       ,str, NppPlugins ;lpDirectory
       ,int, 1)  ; Last parameter: SW_SHOWNORMAL = 1
-    SetTitleMatchMode, 1
     winwait, %command%,,1
     winwaitclose, %command%,,500
     Run %CurrNppExePath%
@@ -754,11 +519,11 @@ generateRxml:
   return
 }
 
+
 ; Includes
+#include %A_ScriptDir%\Notepad++Interface.ahk
+#include %A_ScriptDir%\RInterface.ahk
 #include %A_ScriptDir%\counter\counter.ahk
 #include %A_ScriptDir%\iniGUI\inigui.ahk
-#include %A_ScriptDir%\GetModuleFileName.ahk
-#include %A_ScriptDir%\COM\com4NppToR.ahk
-#include %A_ScriptDir%\COM\COM.ahk
 #include %A_ScriptDir%\_reg64.ahk
 #include %A_ScriptDir%\QuickKeys.ahk

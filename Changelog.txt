@@ -1,5 +1,14 @@
 NppToR CHANGELOG
 ----------------
+7/14/2011
+Added More messages for interacting with notepad++ andscintilla component.
+This should solve problem of hidden menus/toolbars
+
+7/12/2011
+Fixed QuickKeys messages
+Added $word$ option
+Changed over to AutoHotKey_L (Unicode Version)
+
 6/30/2011
 Added QuickKeys addon
 
