@@ -1,4 +1,4 @@
-;
+﻿;
 ; AutoHotkey Version: 1.x
 ; Language:       English
 ; Platform:       Win9x/NT
@@ -10,6 +10,7 @@
 
 #NoTrayIcon
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+#SINGLEINSTANCE force ;ignore
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 DetectHiddenWindows, On
@@ -42,9 +43,9 @@ if silent
 	if InstallDir = 
 	{
 		if A_IsAdmin
-			InstallDir= %APPDATA%\NppToR\
+			InstallDir= %A_APPDATA%\NppToR\
 		else
-			InstallDir= %APPDATA%\NppToR\
+			InstallDir= %A_APPDATA%\NppToR\
 	}
 	gosub doinstall
 	exitapp
@@ -59,7 +60,7 @@ if go
 
 	
 ;environment variables
-envget APPDATA, APPDATA
+; envget A_APPDATA, A_APPDATA
 envget HOMEPATH, HOMEPATH
 envget HOMEDRIVE, HOMEDRIVE
 envget USERPROFILE, USERPROFILE
@@ -83,7 +84,7 @@ GUI ,ADD, TEXT,ym,NppToR ~ Install
 GUI ,FONT, s10 normal Georgia
 GUI ,ADD, TEXT,,
 (
-� 2011 Andrew Redd 
+© 2011 Andrew Redd 
 Use Governed by MIT license (See License.txt)
 
 )
@@ -94,9 +95,9 @@ GUI ,ADD, BUTTON, gdoBrowse x+5 w60 vBrowse, Browse
 if InstallDir = 
 {
 	if A_IsAdmin
-		GUICONTROL ,,InstallDir, %ProgramFiles%\NppToR\
+		GUICONTROL ,,InstallDir, %A_ProgramFiles%\NppToR\
 	else
-		GUICONTROL ,,InstallDir, %APPDATA%\NppToR\
+		GUICONTROL ,,InstallDir, %A_APPDATA%\NppToR\
 }
 else
 	GUICONTROL ,,InstallDir, %InstallDir%
@@ -127,13 +128,13 @@ doGlobalCheck:
 	Gui Submit, NoHide 
 	if Global
 	{
-		if InstallDir = %APPDATA%\NppToR\
-			GUICONTROL ,,InstallDir, %ProgramFiles%\NppToR\
+		if InstallDir = %A_APPDATA%\NppToR\
+			GUICONTROL ,,InstallDir, %A_ProgramFiles%\NppToR\
 	}
 	else
 	{
-		if InstallDir = %ProgramFiles%\NppToR\
-			GUICONTROL ,,InstallDir, %APPDATA%\NppToR\
+		if InstallDir = %A_ProgramFiles%\NppToR\
+			GUICONTROL ,,InstallDir, %A_APPDATA%\NppToR\
 	}
 	return
 }
@@ -162,19 +163,20 @@ Submit:
 		if not A_IsAdmin
 		{
 			SB_SetText("Restarting with admin privileges")
-      cmd = -go
+      params = -go
 			if !addStartup
-				cmd = %cmd% -no-startup
-			cmd = %cmd% "%InstallDir%\"
-			DllCall("shell32\ShellExecuteA"
-				, uint, 0
-				, str, "RunAs"
-				, str, A_ScriptFullPath
-				, str, cmd
-				, str, A_WorkingDir
-				, int, 1)  ; Last parameter: SW_SHOWNORMAL = 1
-			ExitApp
-		}
+				params = %params% -no-startup
+			params = %params% "%InstallDir%\"
+			; DllCall("shell32\ShellExecuteA"
+				; , uint, 0
+				; , str, "RunAs"
+				; , str, A_ScriptFullPath
+				; , str, params
+				; , str, A_WorkingDir
+				; , int, 1)  ; Last parameter: SW_SHOWNORMAL = 1
+			; ExitApp
+      gosub RunAsAdministrator  
+    }
 		else 
 			gosub doinstall
 	}
@@ -306,8 +308,9 @@ doinstall:
 	;runinstalled NppToR
 	if !silent
 	{
-		SB_SetText("Running NppToR")
-    RUN ,%INSTALLDIR%\NppToR.exe -startup
+		SB_SetText("Registering task to run NppToR")
+    npptorstartup = "%INSTALLDIR%NppToR.exe"
+    RunAsStdUser(npptorstartup, "-startup")
 		SB_SetText("Installation Finished.")
 		if Global
 			msgbox 0, Installation Finished, NppToR has been successfully setup on this computer.,10
@@ -318,3 +321,4 @@ doinstall:
 	return
 }
 
+#include %A_ScriptDir%\scheduler.ahk

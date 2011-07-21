@@ -127,7 +127,7 @@ if ErrorLevel || A_Last_Error
 pRB := DllCall("VirtualAllocEx"
     , "Uint", hProc
     , "Uint", 0
-    , "Uint", SIZE
+    , "Uint", 8       ; not sure why 8 is the magic number here but it appears that it is.
     , "Uint", 0x1000
     , "Uint", 0x4)
 if ErrorLevel || A_Last_Error
@@ -135,10 +135,10 @@ if ErrorLevel || A_Last_Error
   msgbox ,0,NppToR::Error VirtualAllocEx,   ErrorLevel = %ErrorLevel%`r`nA_LastError = %A_LastError%
 }
 
-SendMessage %NPPM%, SIZE, pRB,, ahk_pid %pidNpp%
-if ErrorLevel <> 0
+SendMessage %NPPM%,, pRB,, ahk_pid %pidNpp%
+if ErrorLevel<>1
 {
-  msg=
+msg=
 (
 ErrorLevel = %ErrorLevel%
 NPPM= %NPPM%
@@ -152,7 +152,7 @@ DllCall("ReadProcessMemory"
     ,"Uptr", hProc
     ,"Uptr", pRB
     ,"Uint*", rtn
-    ,"Uint", SIZE
+    ,"Uint", 1
     ,"Uint*", bread)
 if ErrorLevel
 {
@@ -169,6 +169,12 @@ DllCall("CloseHandle", "Uint", hProc)
 ErrorLevel=0
 return rtn
 }
+NppGetCurrView()
+{
+  view := NppGetByMessageInt(0x7EC)+1
+  return view
+}
+
 
 NppMenuCmd(menuID)
 {
@@ -229,7 +235,8 @@ NppGetPosition()
 {
 ; static SCI_GETCURRENTPOS := 2008
   WinGet , pidNpp, PID, ahk_class Notepad++
-  SendMessage 2008, 0, 0, Scintilla1, ahk_pid %pidNpp%
+  NN := NppGetCurrView()
+  SendMessage 2008, 0, 0, Scintilla%NN%, ahk_pid %pidNpp%
   if ErrorLevel<>FAIL
   {
   pos := ErrorLevel-1
@@ -240,17 +247,19 @@ NppGetPosition()
 }
 NppSetPosition(pos)
 {
+  NN := NppGetCurrView()
   WinGet , pidNpp, PID, ahk_class Notepad++
   ; SendMessage 2578, %pos%, 0, Scintilla1, ahk_pid %pidNpp%
-  SendMessage 2141, %pos%, %pos%, Scintilla1, ahk_pid %pidNpp%
-  SendMessage 2142, %pos%, %pos%, Scintilla1, ahk_pid %pidNpp%
+  SendMessage 2141, %pos%, %pos%, Scintilla%NN%, ahk_pid %pidNpp%
+  SendMessage 2142, %pos%, %pos%, Scintilla%NN%, ahk_pid %pidNpp%
   return
 }
 NppGetToPoint:
 {
   WinGet , pidNpp, PID, ahk_class Notepad++
   pos := NppGetPosition()
-  SendMessage 2141, 0, 0, Scintilla1, ahk_pid %pidNpp%
+  NN := NppGetCurrView()
+  SendMessage 2141, 0, 0, Scintilla%NN%, ahk_pid %pidNpp%
   NppCopy()
   NppSetPosition(pos+1)
 return
