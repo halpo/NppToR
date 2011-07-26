@@ -7,9 +7,20 @@
 ; RunAsStdUser(testscript)  
 ; gosub runasAdministrator
 ; Exit  
+
+if NOT A_IsAdmin
+  msgbox Do not have admin privileges
+ExitApp
+
   
 RunAsStdUser(program, args="")
 {
+if NOT A_IsAdmin
+{
+  RUN %program% %args%
+  return
+}
+
 ;; ACTION: Defines the type of actions that a task can perform.
   TASK_ACTION_EXEC           := 0
   TASK_ACTION_COM_HANDLER    := 5
@@ -130,6 +141,7 @@ settings.RestartInterval := "PT1M"
 settings.RestartCount := 10
 settings.MultipleInstances  := TASK_INSTANCES_STOP_EXISTING
 settings.Hidden := False
+settings.DeleteExpiredTaskAfter := "P1D"
 
 ;********************************************************
 ; Create a time-based trigger.

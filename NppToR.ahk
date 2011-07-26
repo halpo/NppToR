@@ -488,6 +488,8 @@ generateRxml:
     {
       winGet , NppPID, PID
       CurrNppExePath := GetModuleFileNameEx( NppPID )
+      ;NppGetRunningPath() 
+msgbox , %CurrNppExePath%
       StringReplace, NppPlugins, CurrNppExePath, notepad++.exe, plugins\APIs, All
       msgbox ,4,Continue?, To update the auto-completion database Notepad++ must be closed.  It will be restarted. Auto-completion must also be turned on from within Notepad++ (Setting > Preferences > Backup/Auto-Completion). Save your work now, now before continuing. Continue?
       ifmsgbox Yes
@@ -518,7 +520,6 @@ generateRxml:
   }
   return
 }
-
 
 ; Includes
 #include %A_ScriptDir%\Notepad++Interface.ahk

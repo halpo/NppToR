@@ -345,6 +345,20 @@ NppSetPosition(pos+1)
 return
 }
 
+NppGetRunningPath()
+{
+size := t_size(2048)
+VarSetCapacity(path, size, 32)
+WinGet , pidNpp, PID, ahk_class Notepad++
+hProc := DllCall("GetModuleFileName"
+    , "Uptr", pidNpp
+    , "Uint", 0
+    , "str", path
+    , "Uint", size)
+return path
+}
+
+
 NppGetWord()
 {
 WM_USER := 0x400

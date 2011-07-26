@@ -2,7 +2,7 @@
 // builddistro.npx
 // builds the files for a new version release.
 
-set version = 2.6.0.beta1
+set version = 2.6.0.beta2
 // also needs to be changed in NppToR.ahk:13
 npp_exec build.npx
 

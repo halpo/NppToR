@@ -13,32 +13,49 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 DetectHiddenWindows, On
+
+; msgbox %A_StartMenuCommon%
+; msgbox %A_StartupCommon%
+; msgbox %A_StartMenu%
+; msgbox %A_Startup%
+
+
+
 if A_IsCompiled
 {
+msgbox ,4,Uninstall NppToR?, This will uninstall all copies of NppToR, including all settings. Uninstall?
+ifmsgbox No
+  ExitApp
+  
 ;kill any current running copy
 process, close, NppToR.exe
 if %errorlevel%
 	winwaitclose ahk_pid %errorlevel%
 
 inifile = %A_ScriptDir%\npptor.ini
-iniRead, Global, %inifile%, install, global, false
+iniRead, Global, %inifile%, install, global, 0
 if Global
   gosub RunAsAdministrator
-FileDelete %A_StartupCommon%\NppToR.lnk
-FileDelete %A_StartMenuCommon%\NppToR\License.txt.lnk
-FileDelete %A_StartMenuCommon%\NppToR\NppToR.lnk
-FileDelete %A_StartMenuCommon%\NppToR\Website.lnk
-FileRemoveDir %A_StartMenuCommon%\NppToR
-FileDelete %A_StartupCommon%\NppToR.lnk
-FileDelete %A_StartMenu%\NppToR\License.txt.lnk
-FileDelete %A_StartMenu%\NppToR\NppToR.lnk
-FileDelete %A_StartMenu%\NppToR\Website.lnk
-FileRemoveDir %A_StartMenu%\NppToR
 
+if A_IsAdmin
+{
+FileDelete %A_StartupCommon%\NppToR*
+FileDelete %A_StartMenuCommon%\Programs\NppToR\*
+FileRemoveDir %A_StartMenuCommon%\Programs\NppToR
+}
+FileDelete %A_Startup%\NppToR*
+FileDelete %A_StartMenu%\Programs\NppToR\*
+FileRemoveDir %A_StartMenu%\Programs\NppToR
+; FileDelete %A_StartMenuCommon%\NppToR\License.txt.lnk
+; FileDelete %A_StartMenuCommon%\NppToR\NppToR.lnk
+; FileDelete %A_StartMenuCommon%\NppToR\Website.lnk
+; FileDelete %A_StartMenu%\NppToR\NppToR.lnk
+; FileDelete %A_StartMenu%\NppToR\Website.lnk
 
 FileSetAttrib , -R, %A_ScriptDir%\NppToR.exe
 FileDelete %A_ScriptDir%\*
 
+msgbox %A_ScriptFullPath%
 tmpfile = %A_TEMP%\npptor-uninstall.bat
 delscript = 
 (

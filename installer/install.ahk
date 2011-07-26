@@ -43,7 +43,7 @@ if silent
 	if InstallDir = 
 	{
 		if A_IsAdmin
-			InstallDir= %A_APPDATA%\NppToR\
+			InstallDir= %A_ProgramFile%\NppToR\
 		else
 			InstallDir= %A_APPDATA%\NppToR\
 	}
@@ -278,6 +278,7 @@ doinstall:
 	SM := (Global)
 		? A_StartMenuCommon
 		: A_StartMenu
+  SM = %SM%\Programs
 	SU := (Global)
 		? A_StartupCommon
 		: A_Startup
@@ -286,6 +287,7 @@ doinstall:
 	FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %SM%\NppToR\NpptoR.lnk ,,, Enables passing code from notepad++ to the R interpreter.
 	FileCreateShortcut, %INSTALLDIR%\License.txt, %SM%\NppToR\License.txt.lnk
 	FileCreateShortcut, %INSTALLDIR%\npptor.url, %SM%\NppToR\Website.lnk
+	FileCreateShortcut, %INSTALLDIR%\uninstall.exe, %SM%\NppToR\uninstall.lnk
 	if addStartup
 		FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %SU%\NpptoR.lnk ,, -startup, Enables passing code from notepad++ to the R interpreter.
 	if !silent
