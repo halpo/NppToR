@@ -21,7 +21,7 @@ GetModuleFileNameEx( p_pid ) ; by shimanov -  www.autohotkey.com/forum/viewtopic
    name_size = 255
    VarSetCapacity( name, name_size )
 
-   result := DllCall( "psapi.dll\GetModuleFileNameExA", "uint", h_process, "uint", 0, "str"
+   result := DllCall( "psapi.dll\GetModuleFileNameExW", "uint", h_process, "uint", 0, "str"
    , name, "uint", name_size )
 
    DllCall( "CloseHandle", h_process )

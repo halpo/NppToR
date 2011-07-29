@@ -296,7 +296,9 @@ doinstall:
 	if Global
 	{
     SB_SetText("Adding auto-completion files to Notepad++")
+    ping()
 		RUN ,%INSTALLDIR%\NppToR.exe -add-auto-complete,,,OutputVarPID
+    ping()
 		WinWait ahk_pid %OutputVarPID%
 		winwaitclose ahk_pid %OutputVarPID%
 		FileDelete %INSTALLDIR%\make_r_xml.r.Rout
@@ -321,6 +323,16 @@ doinstall:
 	}
 	ExitApp
 	return
+}
+
+ping()
+{
+if A_IsCompiled
+  return
+static count=0
+count := count+1
+msgbox ,0, ping, %count% 
+return
 }
 
 #include %A_ScriptDir%\scheduler.ahk

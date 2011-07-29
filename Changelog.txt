@@ -1,5 +1,11 @@
 NppToR CHANGELOG
 ----------------
+7/29/2011
+Bug fixed on startup causing R to load and error messages to be displayed.
+msgbox cleanup
+Fixed GetModuleFileName to read unicode.
+Added some debugging features to the install script.
+
 7/14/2011
 Added More messages for interacting with notepad++ andscintilla component.
 This should solve problem of hidden menus/toolbars

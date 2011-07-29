@@ -29,7 +29,6 @@ readQuickKeys:
 
     continue ;early stop below is old code 
 	}
-	ifWinExist 
 return
 }
 doQuickKey:
