@@ -222,6 +222,14 @@ doinstall:
 		exitapp
 	}
   
+  ;icons
+  ifnotexist %INSTALLDIR%\Icons
+	{
+    SB_SetText("Creating Install Directory")
+		filecreatedir %INSTALLDIR%\Icons
+  }
+  FILEINSTALL ,..\Icons\NppToR.png, %INSTALLDIR%\Icons\NppToR.png,1
+  
 	if Global
 	{
     SB_SetText("Setting global parameters")

@@ -1,6 +1,6 @@
 makeIniGui:
 {
-Gui, 4:Add, Picture, x6 y10 w70 h70 , icons\NppToR.png ;%A_ScriptDir%\icons\NppToR.png
+Gui, 4:Add, Picture, x6 y10 w70 h70 , %A_ScriptDir%\icons\NppToR.png
 Gui, 4:Font, S14 CDefault, %NppToRHeadingFont%
 Gui, 4:Add, Text, x86 y10 w370 h30 , NppToR ~ Settings and Options
 Gui, 4:Font, S8 CDefault, %NppToRTextFont%

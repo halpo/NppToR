@@ -12,5 +12,7 @@ xcopy NppEditsR\NppEditR.exe test\NppEditR.exe /R /Y /V /i
 xcopy NppToR.exe test\NppToR.exe /R /V /Y /i
 xcopy make_R_xml.r test\make_R_xml.r /R /V /Y /i
 xcopy Rprofile.base.R test\Rprofile /R /V /Y /i
+mkdir tests\Icons
+xcopy Icons\NppToR.png test\Icons\NppToR.png /R /V /Y /i
 
 npp_run test\NppToR.exe

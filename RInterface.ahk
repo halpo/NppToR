@@ -100,7 +100,7 @@ RUpdateWD:
 {
 	oldclipboard := ClipboardAll
 	WinActivate ahk_class Notepad++
-	currdir:=NppGetCurrFileDir()
+	currdir:=NppGetCurrDir()
 	StringReplace , wd, currdir, \, /, All 
 	clipboard = setwd("%wd%")`n
 	gosub Rpaste

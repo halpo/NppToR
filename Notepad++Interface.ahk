@@ -268,8 +268,10 @@ return
 
 NppGetCurrFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="", ByRef Drive="")
 {
+; this function has been deprecated and replaced by other NPPGet* functions
 msgbox This function is deprecated please report
 return
+
 	; WinGetActiveTitle, title
 	; stringleft firstchar, title, 1
 	; if firstchar = *

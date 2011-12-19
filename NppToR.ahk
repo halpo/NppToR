@@ -184,7 +184,7 @@ puttyRunAll:
 MakeAboutDialog:
 {
 ;Gui, -AlwaysOnTop -SysMenu +Owner ; +Owner avoids a taskbar button.
-Gui, 2:Add, Picture,,icons\NppToR.png
+Gui, 2:Add, Picture, x6 y10 w70 h70 , %A_ScriptDir%\icons\NppToR.png
 Gui, 2:Font, S14 CDefault, %NppToRHeadingFont%
 Gui, 2:Add, Text,x+10 ys , NppToR ~ About
 Gui, 2:Font, S8 CDefault, %NppToRTextFont%
