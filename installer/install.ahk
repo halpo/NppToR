@@ -14,7 +14,7 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 DetectHiddenWindows, On
-
+#include %A_ScriptDir%\..\NTRError.ahk
 ; Command line
 silent = 0
 go = 0
@@ -266,17 +266,22 @@ doinstall:
 
 	;set R options to work with NppToR
 	;do Rprofile
-  SB_SetText("Copying RProfile")  
-	FILEINSTALL ,..\Rprofile.base.R, %INSTALLDIR%\Rprofile
-		; optstring = options(editor="%INSTALLDIR%NppEditR.exe")
-		; StringReplace options, optstring, \ , \\ , All
-		; ifExist %INSTALLDIR%\Rprofile
-		; {
-			; FileRead, RprofileOld, %INSTALLDIR%\Rprofile
-			; ifNotInString RprofileOld, %options%
-				; fileappend , %options%`n , %INSTALLDIR%\Rprofile
-		; } ELSE 
-			; fileappend , %options%`n , %INSTALLDIR%\Rprofile
+  SB_SetText("Writing RProfile")  
+RprofileText = 
+(
+  message("\nThis is a session spawned by NppToR.\n\n")
+  if(file.exists(".Rprofile"))source(".Rprofile")  else 
+  if(file.exists(path.expand("~/Rprofile"))) source(path.expand("~/Rprofile"))
+  if(file.exists(path.expand("~/.Rprofile"))) source(path.expand("~/.Rprofile"))
+  if(file.exists(path.expand("~/Rprofile.R"))) source(path.expand("~/Rprofile.R"))
+  
+)
+  IfExist %INSTALLDIR%\Rprofile
+    FileDelete %INSTALLDIR%\Rprofile
+  FileAppend , %RprofileText% , %INSTALLDIR%\Rprofile
+  optstring = options(editor="%INSTALLDIR%NppEditR.exe")
+  StringReplace options, optstring, \ , \\ , All
+	FileAppend , %options%`n , %INSTALLDIR%\Rprofile
 	
 	if !silent
 		GuiControl,, InstallProgress, +10
@@ -304,9 +309,9 @@ doinstall:
 	if Global
 	{
     SB_SetText("Adding auto-completion files to Notepad++")
-    ping()
+    outputdebug % dstring
 		RUN ,%INSTALLDIR%\NppToR.exe -add-auto-complete,,,OutputVarPID
-    ping()
+    outputdebug % dstring
 		WinWait ahk_pid %OutputVarPID%
 		winwaitclose ahk_pid %OutputVarPID%
 		FileDelete %INSTALLDIR%\make_r_xml.r.Rout
@@ -333,14 +338,5 @@ doinstall:
 	return
 }
 
-ping()
-{
-if A_IsCompiled
-  return
-static count=0
-count := count+1
-msgbox ,0, ping, %count% 
-return
-}
 
 #include %A_ScriptDir%\scheduler.ahk

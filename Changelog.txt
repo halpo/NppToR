@@ -1,5 +1,8 @@
 NppToR CHANGELOG
 ----------------
+12/20/2011 10:13 AM MST
+Version 2.6.0 Finalized and Released
+
 12/20/2011
 Error Handling changes
   Errors now have an associated code with messages stored in 2 way array in NTRError.ahk
@@ -9,7 +12,8 @@ NppGetCurrFileDir removed entirely so all Notepad++ interaction happen through t
 Putty interface changed to the ^{Ins} rather that right click events.
 Added test_reg_uninstall which investigates what is necessary for a program to register an uninstaller.
   Feature was dropped.  Might in the future take up again with another installer that makes it simpler.
-
+Updated generation of Rprofile, done internally to install to allow for dynamic options setting.
+  
 7/29/2011
 Bug fixed on startup causing R to load and error messages to be displayed.
 msgbox cleanup
