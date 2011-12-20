@@ -7,6 +7,8 @@ Error Handling changes
   debugging notes added outputdebug used to output debugging messages.
 NppGetCurrFileDir removed entirely so all Notepad++ interaction happen through the message interface.
 Putty interface changed to the ^{Ins} rather that right click events.
+Added test_reg_uninstall which investigates what is necessary for a program to register an uninstaller.
+  Feature was dropped.  Might in the future take up again with another installer that makes it simpler.
 
 7/29/2011
 Bug fixed on startup causing R to load and error messages to be displayed.
