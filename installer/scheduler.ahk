@@ -182,10 +182,13 @@ RunAsAdministrator:
 ShellExecute := A_IsUnicode ? "shell32\ShellExecute":"shell32\ShellExecuteA"
 if not A_IsAdmin
 {
-    If A_IsCompiled
-       DllCall(ShellExecute, uint, 0, str, "RunAs", str, A_ScriptFullPath, str, params , str, A_WorkingDir, int, 1)
-    Else
-       DllCall(ShellExecute, uint, 0, str, "RunAs", str, A_AhkPath, str, """" . A_ScriptFullPath . """" . A_Space . params, str, A_WorkingDir, int, 1)
+    If A_IsCompiled {
+      outputdebug %A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%): restarting w/ Admin(compiled) %A_ScriptFullPath% 
+      DllCall(ShellExecute, uint, 0, str, "RunAs", str, A_ScriptFullPath, str, params , str, A_WorkingDir, int, 1)
+    } Else {
+      outputdebug %A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%): restarting w/ Admin(uncompiled) %A_ScriptFullPath% 
+      DllCall(ShellExecute, uint, 0, str, "RunAs", str, A_AhkPath, str, """" . A_ScriptFullPath . """" . A_Space . params, str, A_WorkingDir, int, 1)
+    }
     ExitApp
 }
 return
