@@ -4,18 +4,20 @@
 ;; R interface functions
 Rpaste:
 {
+  outputdebug % dstring . "entering" 
 ;	if clipboard<>
 	; isblank := 
 	; if !regExMatch(clipboard, "DS)^`s*$")
 	{
 		WinGet nppID, ID, A          ; save current window ID to return here later
 		RprocID:=RGetOrStart()
+    outputdebug % dstring . "RprocID=" . RprocID 
 		if ErrorLevel
 		{
 			IfWinExist , RGui
-				msgbox , 16 ,R in MDI Mode, R in running in MDI mode. Please switch to SDI mode for this utility to work.
+        NTRError(701)
 			else
-				msgbox , 16 ,Could not find R, Could not start or find R. Please check you installation or start R manually.
+        NTRError(702)
 			return
 		}
     gosub CheckForNewLine
@@ -31,22 +33,28 @@ Rpaste:
 }
 RGetOrStart()
 {
+  outputdebug % dstring . "entering" 
   SetTitleMatchMode, 1
   SetTitleMatchMode, Fast
 	IfWinExist ,R Console
 	{
+    outputdebug % dstring . "found R Console" 
 		;WinActivate ; ahk_class RGui
 		WinGet RprocID, ID ;,A
+    outputdebug % dstring . "exiting, RprocID=" . RprocID 
 		return RprocID
 	} 
   else IfWinExist ,R Console (64-bit)
 	{
+    outputdebug % dstring . " found R Console (64-bit)" 
 		;WinActivate ; ahk_class RGui
 		WinGet RprocID, ID ;,A
+    outputdebug % dstring . "exiting RprocID=" . RprocID 
 		return RprocID
 	} 
 	else
 	{
+    outputdebug % dstring . "R not found" 
 		global Rguiexe
 		global Rcmdparms
     dir := NppGetCurrDir()
@@ -55,6 +63,7 @@ RGetOrStart()
 		run %Rguiexe% %RcmdParms% --sdi,dir,,RprocID
 		winwait ,R Console,, %Rrunwait%
 		WinGet RprocID, ID ;,A
+    outputdebug % dstring . "Exiting, RprocID=" . RprocID 
 		return RprocID
 	}
 }
@@ -118,7 +127,8 @@ sendSource:
 {
 	WinMenuSelectItem ,A,,File,Save
   oldclipboard = %clipboard%
-  NppGetCurrFileDir(file, currdir, ext)
+  currdir := NppGetCurrDir()
+  file := NppGetFilename()
   StringReplace , wd, currdir, \, /, All 
 
   clipboard = source(file="%wd%/%file%")`n

@@ -6,7 +6,11 @@
 #SINGLEINSTANCE force ;ignore
 #MaxThreads 10
 
-;NppGetSelection()
+; Head includes
+; must be here to define error codes.
+; more includes at end of script
+#include %A_ScriptDir%\NTRError.ahk
+;NTRError(500, "hi There")
 
 AUTOTRIM OFF
 sendmode event
@@ -49,7 +53,7 @@ if(Global)
 		FileCreateDir %A_AppData%\NppToR
 		if ErrorLevel
 		{
-			msgbox ,32,Error: Saving Settings, Error creating settings directory. Setting might not be saved between sessions.
+      NTRError(501)
 			;ExitApp
 		}
 	}
@@ -84,8 +88,10 @@ return
 ;; run functions
 runline:
 {
+  outputdebug % dstring . "entered"
 	gosub NppGetLineOrSelection
 	gosub Rpaste
+  outputdebug % dstring . "exiting"
 	return
 }
 runall:
@@ -116,7 +122,7 @@ runbatch:
 	rcmd := RGetCMD()
   if rcmd=
   {
-    msgbox ,32, Error: Rcmd.exe not found., Rcmd.exe could not be found. Aborting batch evaluation.
+    NTRError(502)
     return
   }
 		
@@ -156,7 +162,8 @@ puttypaste:
 		if clipboard<>""
 		{
       gosub CheckForNewLine
-      ControlClick , x4 y30,,, right
+      ;ControlClick , x4 y30,,, right
+      controlSend , ahk_parent, +{Ins}
 		}
 		WinActivate ahk_id %nppID%    ; go back to the original window
 		if restoreclipboard
@@ -164,7 +171,7 @@ puttypaste:
 			sleep %Rpastewait%
 			clipboard := oldclipboard
 		}
-	} else msgbox ,16,PuTTY not found, PuTTY was not found.  Launch PuTTY and start R on remote server.
+	} else NTRMsg(101)
 	return
 }
 puttyLineOrSelection:
@@ -346,13 +353,13 @@ iniDistill:
 	else 
 	Rguiexe = %Rhome%\bin\x64\Rgui.exe
 	FE := FileExist(Rguiexe)
-	If (pref32) OR !(FE)
+	If (pref32) OR !(FE)-
 		Rguiexe = %Rhome%\bin\i386\Rgui.exe
 		FE := FileExist(Rguiexe)
 		If NOT FE
 		{
-			msgBox ,32, Error: Rgui.exe not found, Could not find the Rgui.exe file. Spawning R processes will not work.  R must be started manually.  After R has been started, passing commands should work as normal.
-			;ExitApp
+			NTRError(503)
+      ;ExitApp
 		}
 	return
 }
@@ -515,7 +522,7 @@ generateRxml:
   }
   else
   {
-    msgbox ,48, Could not find Rcmd.exe, Could not find the Rcmd.exe file for creating autocompletion list.  Please fix the R home directory in the setting and rerun from the menu., 30
+    NTRError(504)
   }
   return
 }

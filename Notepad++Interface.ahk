@@ -28,7 +28,7 @@ hProc := DllCall("OpenProcess"
     , "Uint", pidNpp)
 if ErrorLevel || A_Last_Error
 {
-  msgbox ,0,NppToR::Error Open Process, A_LastError=%A_LastError%`r`nErrorLevel=%ErrorLevel%
+  NTRError(602, A_LastError=%A_LastError%`r`nErrorLevel=%ErrorLevel%)
 }
 
 pRB := DllCall("VirtualAllocEx"
@@ -39,7 +39,7 @@ pRB := DllCall("VirtualAllocEx"
     , "Uint", 0x4)
 if ErrorLevel || A_Last_Error
 {
-  msgbox ,0,NppToR::Error VirtualAllocEx,   ErrorLevel = %ErrorLevel%`r`nA_LastError = %A_LastError%
+  NTRError(603, ErrorLevel = %ErrorLevel%`r`nA_LastError = %A_LastError%)
 }
 
 SendMessage %NPPM%, SIZE, pRB,, ahk_pid %pidNpp%
@@ -50,7 +50,7 @@ if ErrorLevel <> 1
 ErrorLevel = %ErrorLevel%
 NPPM= %NPPM%
 )
-  msgbox ,0,NppToR:: SendMessage Error, %msg%
+  NTRError(604, msg)
 }
 
 VarSetCapacity(bread,8,32)
@@ -64,8 +64,7 @@ DllCall("ReadProcessMemory"
 if ErrorLevel
 {
   bread2:=NumGet(bread)
-  msgbox ,0, ReadProcessMemory ErrorLevel, %ErrorLevel%
-  msgbox ,0,bread,%bread2%
+  outputdebug % dstring . "bread=" . bread2 
 }
 DllCall("VirtualFreeEx"
     , "Uint", hProc
@@ -121,7 +120,7 @@ hProc := DllCall("OpenProcess"
     , "Uint", pidNpp)
 if ErrorLevel || A_Last_Error
 {
-  msgbox ,0,NppToR::Error Open Process, A_LastError=%A_LastError%`r`nErrorLevel=%ErrorLevel%
+  NTRError(602, A_LastError=%A_LastError%`r`nErrorLevel=%ErrorLevel%)
 }
 
 pRB := DllCall("VirtualAllocEx"
@@ -132,7 +131,7 @@ pRB := DllCall("VirtualAllocEx"
     , "Uint", 0x4)
 if ErrorLevel || A_Last_Error
 {
-  msgbox ,0,NppToR::Error VirtualAllocEx,   ErrorLevel = %ErrorLevel%`r`nA_LastError = %A_LastError%
+  NTRError(603, ErrorLevel = %ErrorLevel%`r`nA_LastError = %A_LastError%)
 }
 
 SendMessage %NPPM%,, pRB,, ahk_pid %pidNpp%
@@ -143,7 +142,7 @@ msg=
 ErrorLevel = %ErrorLevel%
 NPPM= %NPPM%
 )
-  msgbox ,0,NppToR:: SendMessage Error, %msg%
+  NTRError(604, msg)
 }
 
 VarSetCapacity(bread,8,32)
@@ -157,8 +156,7 @@ DllCall("ReadProcessMemory"
 if ErrorLevel
 {
   bread2:=NumGet(bread)
-  msgbox ,0, ReadProcessMemory ErrorLevel, %ErrorLevel%
-  msgbox ,0,bread,%bread2%
+  outputdebug % dstring . "bread=" . bread2 
 }
 DllCall("VirtualFreeEx"
     , "Uint", hProc
@@ -207,12 +205,14 @@ NppMenuCmd(menuID)
     ; #define    IDM_EDIT_SELECTALL                   (IDM_EDIT + 7)
   WinGet , pidNpp, PID, ahk_class Notepad++
   SendMessage 0x818, 0, %menuID%,, ahk_pid %pidNpp%
+  outputdebug % dstring . "exiting" 
   errorlevel:=0
   return
 }
 NppCopy()
 {
   NppMenuCmd(42002)
+  outputdebug % dstring . "exiting" 
   return
 }
 NppSelectAll()
@@ -266,34 +266,6 @@ return
 }
 
 
-NppGetCurrFileDir(ByRef file="", ByRef dir="", ByRef ext="", ByRef NameNoExt="", ByRef Drive="")
-{
-; this function has been deprecated and replaced by other NPPGet* functions
-msgbox This function is deprecated please report
-return
-
-	; WinGetActiveTitle, title
-	; stringleft firstchar, title, 1
-	; if firstchar = *
-		; StringTrimLeft title, title, 1
-	; StringTrimRight title, title, 12
-	ocb = %clipboard%
-	clipboard =
-	NppGetVersion(major, minor, bug, build)
-	if(major>=5)&&(minor>=4)
-	{
-		WinMenuSelectItem ,A,,2&,10&,1& ; Edit,Copy to Clipboard, Current full file path to Clipboard
-	}
-	else 
-	{
-		WinMenuSelectItem ,A,,2&,10& ; Edit,Copy Current full file path to Clipboard
-	}
-		
-	clipwait
-	splitpath, clipboard, file, dir, ext, NameNoExt, Drive
-	clipboard = %ocb%
-	return dir
-}
 NppNTextSelected()
 {
 static SCI_GETSELTEXT:=2161
@@ -316,20 +288,28 @@ SendMessage %SCI_GETSELTEXT%, 0, 0, Scintilla1, ahk_pid %pidNpp%
 }
 NppGetLineOrSelection:
 {
+  outputdebug % dstring . "entering" 
 	oldclipboard := ClipboardAll
 	clipboard = 
 	NppCopy()
   clipwait .1
 	if clipboard = 
 	{
+    outputdebug % dstring . "clipboard was empty" 
 		sendevent {end}{home 2}+{end}+{right}
+    outputdebug % dstring . "post sendevent" 
 		NppCopy()
+    outputdebug % dstring 
     clipwait 1
+    if errorlevel
+      NTRError(601)
+    outputdebug % dstring 
 		sendevent {right}
 	} 
 	else sendevent {right}
 	; if appendnewline
 		; gosub CheckForNewLine
+  outputdebug % dstring . "exiting"
 	return
 }
 NppRun:
@@ -340,7 +320,7 @@ NppRun:
 NppGetAll:
 {
 oldclipboard := ClipboardAll
-pos := NppGetPosition() ;%
+pos := NppGetPosition() 
 NppSelectAll()
 NppCopy()
 NppSetPosition(pos+1)
@@ -373,7 +353,7 @@ hProc := DllCall("OpenProcess"
     , "Uint", pidNpp)
 if ErrorLevel || A_Last_Error
 {
-  msgbox ,0,NppToR::Error Open Process, A_LastError=%A_LastError%`r`nErrorLevel=%ErrorLevel%
+  NTRError(602, A_LastError=%A_LastError%`r`nErrorLevel=%ErrorLevel%)
 }
 
 pRB := DllCall("VirtualAllocEx"
@@ -384,7 +364,7 @@ pRB := DllCall("VirtualAllocEx"
     , "Uint", 0x4)
 if ErrorLevel || A_Last_Error
 {
-  msgbox ,0,NppToR::Error VirtualAllocEx,   ErrorLevel = %ErrorLevel%`r`nA_LastError = %A_LastError%
+  NTRError(603, ErrorLevel = %ErrorLevel%`r`nA_LastError = %A_LastError%)
 }
 
 SendMessage %NPPM_GETCURRENTWORD%, 64, pRB,, ahk_pid %pidNpp%
@@ -395,7 +375,7 @@ if ErrorLevel <> 1
 ErrorLevel = %ErrorLevel%
 NPPM_GETCURRENTWORD = %NPPM_GETCURRENTWORD%
 )
-  msgbox ,0,NppToR:: SendMessage Error, %msg%
+  NTRError(604, %msg%)
 }
 
 VarSetCapacity(bread,8,32)
@@ -409,8 +389,7 @@ DllCall("ReadProcessMemory"
 bread2:=NumGet(bread)
 if ErrorLevel
 {
-  msgbox ,0, ReadProcessMemory ErrorLevel, %ErrorLevel%
-  msgbox ,0,bread,%bread2%
+  outputdebug % dstring . "bread=" . bread2 
 }
 DllCall("VirtualFreeEx"
     , "Uint", hProc

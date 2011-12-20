@@ -10,8 +10,8 @@ GetModuleFileNameEx( p_pid ) ; by shimanov -  www.autohotkey.com/forum/viewtopic
    if A_OSVersion in WIN_95,WIN_98,WIN_ME
    {
       MsgBox, This Windows version (%A_OSVersion%) is not supported.
-	  ErrorLevel = 1
-      return
+      ErrorLevel = 1
+      exit
    }
 
    h_process := DllCall( "OpenProcess", "uint", 0x10|0x400, "int", false, "uint", p_pid )
