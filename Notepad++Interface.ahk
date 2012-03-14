@@ -64,7 +64,7 @@ DllCall("ReadProcessMemory"
 if ErrorLevel
 {
   bread2:=NumGet(bread)
-  outputdebug % dstring . "bread=" . bread2 
+  outputdebug % dstring . "bread=" . bread2 . "`n" ;%
 }
 DllCall("VirtualFreeEx"
     , "Uint", hProc
@@ -156,7 +156,7 @@ DllCall("ReadProcessMemory"
 if ErrorLevel
 {
   bread2:=NumGet(bread)
-  outputdebug % dstring . "bread=" . bread2 
+  outputdebug % dstring . "bread=" . bread2  . "`n" ;%
 }
 DllCall("VirtualFreeEx"
     , "Uint", hProc
@@ -205,14 +205,14 @@ NppMenuCmd(menuID)
     ; #define    IDM_EDIT_SELECTALL                   (IDM_EDIT + 7)
   WinGet , pidNpp, PID, ahk_class Notepad++
   SendMessage 0x818, 0, %menuID%,, ahk_pid %pidNpp%
-  outputdebug % dstring . "exiting" 
+  outputdebug % dstring . "exiting"  . "`n" ;%
   errorlevel:=0
   return
 }
 NppCopy()
 {
   NppMenuCmd(42002)
-  outputdebug % dstring . "exiting" 
+  outputdebug % dstring . "exiting"  . "`n" ;%
   return
 }
 NppSelectAll()
@@ -288,28 +288,28 @@ SendMessage %SCI_GETSELTEXT%, 0, 0, Scintilla1, ahk_pid %pidNpp%
 }
 NppGetLineOrSelection:
 {
-  outputdebug % dstring . "entering" 
+  outputdebug % dstring . "entering"  . "`n" ;%
 	oldclipboard := ClipboardAll
 	clipboard = 
 	NppCopy()
   clipwait .1
 	if clipboard = 
 	{
-    outputdebug % dstring . "clipboard was empty" 
+    outputdebug % dstring . "clipboard was empty"  . "`n" ;%
 		sendevent {end}{home 2}+{end}+{right}
-    outputdebug % dstring . "post sendevent" 
+    outputdebug % dstring . "post sendevent"  . "`n" ;%
 		NppCopy()
-    outputdebug % dstring 
+    outputdebug % dstring  . "`n" ;%
     clipwait 1
     if errorlevel
       NTRError(601)
-    outputdebug % dstring 
+    outputdebug % dstring  . "`n" ;%
 		sendevent {right}
 	} 
 	else sendevent {right}
 	; if appendnewline
 		; gosub CheckForNewLine
-  outputdebug % dstring . "exiting"
+  outputdebug % dstring . "exiting" . "`n" ;%
 	return
 }
 NppRun:
@@ -389,7 +389,7 @@ DllCall("ReadProcessMemory"
 bread2:=NumGet(bread)
 if ErrorLevel
 {
-  outputdebug % dstring . "bread=" . bread2 
+  outputdebug % dstring . "bread=" . bread2  . "`n" ;%
 }
 DllCall("VirtualFreeEx"
     , "Uint", hProc
