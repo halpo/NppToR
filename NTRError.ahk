@@ -11,6 +11,8 @@ dstring = NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%Er
 ;
 ; each error message must have a title and body.
 NTRErrorList := Object()
+NTRErrorList[100] := Object("title", "Test", "body", "Test Message.")
+NTRErrorList[101] := Object("title", "PuTTY not found", "body", "PuTTY was not found.  Launch PuTTY and start R on remote server.")
 ; NppToR.ahk errors start at 500
 NTRErrorList[500] := Object("title", "test", "body", "test error")
 NTRErrorList[501] := Object("title", "Saving Settings", "body", "Error creating settings directory. Setting might not be saved between sessions")
@@ -29,13 +31,6 @@ NTRErrorList[1] := Object("title", "", "body", "")
 ; General Message start at 800
 NTRErrorList[801] := Object("title", "Function Deprecated", "body", "This function is deprecated please report")
 
-; Messages
-; 
-; Contains messages that arenot necessarily errors
-NTRMsgList:=Object()
-NTRMsgList[100] := Object("title", "Test", "body", "Test Message.")
-NTRMsgList[101] := Object("title", "PuTTY not found", "body", "PuTTY was not found.  Launch PuTTY and start R on remote server.")
-
 ; Print error dialog messages
 ; 
 ; NTRError exits any current running thread after printing an error message.
@@ -52,9 +47,9 @@ NTRError(Num, xtra="")
 ; Evaluation continues after message printed.
 NTRMsg(Num, xtra="")
 {
-  global NTRMsgList
-  title := NTRMsgList[(Num)]["title"]
-  body  := NTRMsgList[(Num)]["body"]
+  global NTRErrorList
+  title := NTRErrorList[(Num)]["title"]
+  body  := NTRErrorList[(Num)]["body"]
   msgbox 32, Message(%Num%): %title%, %body%`n %xtra%
   return
 }
