@@ -4,14 +4,14 @@
 ;; R interface functions
 Rpaste:
 {
-  outputdebug % dstring . "entering" 
+  outputdebug % dstring . "entering"  . "`n" ;%
 ;	if clipboard<>
 	; isblank := 
 	; if !regExMatch(clipboard, "DS)^`s*$")
 	{
 		WinGet nppID, ID, A          ; save current window ID to return here later
 		RprocID:=RGetOrStart()
-    outputdebug % dstring . "RprocID=" . RprocID 
+    outputdebug % dstring . "RprocID=" . RprocID  . "`n" ;%
 		if ErrorLevel
 		{
 			IfWinExist , RGui
@@ -33,28 +33,28 @@ Rpaste:
 }
 RGetOrStart()
 {
-  outputdebug % dstring . "entering" 
+  outputdebug % dstring . "entering"  . "`n" ;%
   SetTitleMatchMode, 1
   SetTitleMatchMode, Fast
 	IfWinExist ,R Console
 	{
-    outputdebug % dstring . "found R Console" 
+    outputdebug % dstring . "found R Console"  . "`n" ;%
 		;WinActivate ; ahk_class RGui
 		WinGet RprocID, ID ;,A
-    outputdebug % dstring . "exiting, RprocID=" . RprocID 
+    outputdebug % dstring . "exiting, RprocID=" . RprocID  . "`n" ;%
 		return RprocID
 	} 
   else IfWinExist ,R Console (64-bit)
 	{
-    outputdebug % dstring . " found R Console (64-bit)" 
+    outputdebug % dstring . " found R Console (64-bit)"  . "`n" ;%
 		;WinActivate ; ahk_class RGui
 		WinGet RprocID, ID ;,A
-    outputdebug % dstring . "exiting RprocID=" . RprocID 
+    outputdebug % dstring . "exiting RprocID=" . RprocID  . "`n" ;%
 		return RprocID
 	} 
 	else
 	{
-    outputdebug % dstring . "R not found" 
+    outputdebug % dstring . "R not found"  . "`n" ;%
 		global Rguiexe
 		global Rcmdparms
     dir := NppGetCurrDir()
@@ -63,7 +63,7 @@ RGetOrStart()
 		run %Rguiexe% %RcmdParms% --sdi,dir,,RprocID
 		winwait ,R Console,, %Rrunwait%
 		WinGet RprocID, ID ;,A
-    outputdebug % dstring . "Exiting, RprocID=" . RprocID 
+    outputdebug % dstring . "Exiting, RprocID=" . RprocID . "`n" ;%
 		return RprocID
 	}
 }

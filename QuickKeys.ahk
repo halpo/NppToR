@@ -60,7 +60,7 @@ return
 	oldappendnewline = %appendnewline%
 	appendnewline = 
 	oldclipboard := ClipboardAll
-  outputdebug NppToR/QuickKeys.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%):  Word=%word%
+  outputdebug NppToR/QuickKeys.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%):  Word=%word% `n
 ;	gosub NppGetLineOrSelection
 ;	line = %clipboard%
 
@@ -68,16 +68,16 @@ return
 return
 	loop
 	{
-    outputdebug % dstring . _QK_%A_Index%_1
+    outputdebug % dstring . _QK_%A_Index%_1 . "`n" ;%
 		if _QK_%A_Index%_1 <>
 		{
 			if _QK_%A_Index%_1 = %Key%
 			{
-				tmp = % _QK_%A_Index%_2
+				tmp = % _QK_%A_Index%_2 ;%
 				StringReplace, cmd, tmp, $word$, %word%
 				tmp = %cmd%
 				clipboard = %cmd%`r`n
-        outputdebug % dstring . cmd
+        outputdebug % dstring . cmd . "`n" ;%
 				gosub Rpaste
 			}
 		}
