@@ -7,10 +7,9 @@
 ; Script Function:
 ;	Template script (you can customize this template by editing "ShellNew\Template.ahk" in your Windows folder)
 ;
-
 #NoTrayIcon
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-#SINGLEINSTANCE force ;ignore
+#SINGLEINSTANCE force
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 DetectHiddenWindows, On
@@ -73,6 +72,13 @@ stringreplace startup,startup_base, `%USERPROFILE`%, %USERPROFILE%
 stringreplace start_menu,start_menu_base, `%USERPROFILE`%, %USERPROFILE%
 stringreplace HOME,personalfolder, `%USERPROFILE`%, %USERPROFILE%
 
+; Tooltip  declarations
+InstallDir_TT := "Where to install?"
+addStartup_TT := "A link will be put in the startup folder of the start menu."
+Global_TT := "settings will be maintained for each user individually."
+ACCheck_TT := "Autocompletion files can be installed later from the system tray icon.  Notepad++ will need to be closed if open."
+Install_TT := "Yes press it! Install me!"
+Cancel_TT := "You really want to press the button to your left instead of me."
 
 CreateGui:
 {
@@ -84,7 +90,7 @@ GUI ,ADD, TEXT,ym,NppToR ~ Install
 GUI ,FONT, s10 normal Georgia
 GUI ,ADD, TEXT,,
 (
-© 2011 Andrew Redd 
+© 2012 Andrew Redd 
 Use Governed by MIT license (See License.txt)
 
 )
@@ -106,15 +112,17 @@ if addStartup
 	GuiControl,, addStartup, 1
 else 
 	GuiControl,, addStartup, 0
-GUI	,ADD, CHECKBOX, xs w450 vGlobal gdoGlobalCheck,Install for all users? Will install to Program Files folder and will require admin priviledges.  Separate settings will be maintained for each user.
+GUI	,ADD, CHECKBOX, xs w450 vGlobal gdoGlobalCheck,Install for all users? (Administrator rights required)
 if A_IsAdmin
 	GuiControl,, Global, 1
 else 
 	GuiControl,, Global, 0
+GUI	,ADD, CHECKBOX, xs w450 vACCheck gdoACCheck,Install Autocompletion file.
 GUI ,ADD, PROGRESS, wp h20 cBlue vInstallProgress
 GUI ,ADD, BUTTON,section X+-155 Y+5 w75 gSubmit default vInstall,&Install
 GUI ,ADD, BUTTON,gDoCancel xp+80 w75 vCancel, &Cancel
 GUI ,ADD, StatusBar
+OnMessage(0x200, "WM_MOUSEMOVE")
 GUI SHOW
 return
 }
@@ -138,7 +146,11 @@ doGlobalCheck:
 	}
 	return
 }
-
+doACCheck:
+{
+  outputdebug NppToR:Install:doACCcheck:ACCheck=%ACCheck%`n
+  return
+}
 doBrowse:
 {
 	FileSelectFolder, IFolder , *%A_APPDATA%\NppToR\,3,Select Install Directory
@@ -186,6 +198,7 @@ return
 }
 doinstall:
 {
+  OutputDebug NppToR:Install:doinstall: Starting Install.`n
 	;kill any current running copy
   SB_SetText("Closing any running NppToR Instances.")
 	process, close, NppToR.exe
@@ -213,12 +226,12 @@ doinstall:
 	}
 	;executable files
   SB_SetText("Installing NppToR.exe")
-	FILEINSTALL ,..\NppToR.exe, %INSTALLDIR%\NppToR.exe,1
+	FILEINSTALL , ..\build\NppToR.exe, %INSTALLDIR%\NppToR.exe, 1
 	if %errorlevel%
 	{
 		if silent
 			exitapp
-		msgbox  64 ,Install Error, NppToR.exe could not be copied. Aborting
+		msgbox  64, Install Error, NppToR.exe could not be copied. Aborting
 		exitapp
 	}
   
@@ -228,7 +241,7 @@ doinstall:
     SB_SetText("Creating Install Directory")
 		filecreatedir %INSTALLDIR%\Icons
   }
-  FILEINSTALL ,..\Icons\NppToR.png, %INSTALLDIR%\Icons\NppToR.png,1
+  FILEINSTALL , ..\icons\NppToR.png, %INSTALLDIR%\Icons\NppToR.png,1
   
 	if Global
 	{
@@ -242,27 +255,22 @@ doinstall:
 		FileSetAttrib , -R, %INSTALLDIR%\NppToR.exe
 	}
   SB_SetText("Installing NppEditR.exe")
-  FILEINSTALL ,..\NppEditsR\NppEditR.exe, %INSTALLDIR%\NppEditR.exe,1
+  FILEINSTALL , ..\build\NppEditR.exe, %INSTALLDIR%\NppEditR.exe,1
   SB_SetText("Writing URL Shortcut")
 	IniWrite, http://npptor.sourceforge.net, %INSTALLDIR%\npptor.url, InternetShortcut, URL 
 	
   SB_SetText("Copying uninstall.exe")
-	FILEINSTALL ,uninstall.exe,%INSTALLDIR%\uninstall.exe,1
-	;setting files
-	;FILEINSTALL ,..\npptor.ini, %INSTALLDIR%\npptor.ini,0
+	FILEINSTALL , ..\build\uninstall.exe, %INSTALLDIR%\uninstall.exe, 1
 
-	;documentation files
+	;Documentation files
   SB_SetText("Copying documentation")  
-	;FILEINSTALL ,..\iniparameters.txt,%INSTALLDIR%\iniparameters.txt,0
 	FILEINSTALL ,..\License.txt,%INSTALLDIR%\License.txt,0
-	;if !silent
 		
 	;Supporting R scripts
   SB_SetText("Copying suport scripts")  
 	FILEINSTALL ,..\make_R_xml.r,%INSTALLDIR%\make_R_xml.r,0
 	if !silent
 		GuiControl,, InstallProgress, +10
-
 
 	;set R options to work with NppToR
 	;do Rprofile
@@ -274,7 +282,7 @@ RprofileText =
   if(file.exists(path.expand("~/Rprofile"))) source(path.expand("~/Rprofile"))
   if(file.exists(path.expand("~/.Rprofile"))) source(path.expand("~/.Rprofile"))
   if(file.exists(path.expand("~/Rprofile.R"))) source(path.expand("~/Rprofile.R"))
-  
+  OutputDebug NppToR:Install:doinstall: Install Finished.`n
 )
   IfExist %INSTALLDIR%\Rprofile
     FileDelete %INSTALLDIR%\Rprofile
@@ -306,21 +314,9 @@ RprofileText =
 	if !silent
 		GuiControl,, InstallProgress, +60
 	
-	if Global
-	{
-    SB_SetText("Adding auto-completion files to Notepad++")
-    outputdebug % dstring
-		RUN ,%INSTALLDIR%\NppToR.exe -add-auto-complete,,,OutputVarPID
-    outputdebug % dstring
-		WinWait ahk_pid %OutputVarPID%
-		winwaitclose ahk_pid %OutputVarPID%
-		FileDelete %INSTALLDIR%\make_r_xml.r.Rout
-	}
-	else
-  {
-    SB_SetText("")
-    msgbox ,0, No Auto-Completion., The auto-completion database has not been generated as that might require administrator privileges.  That can be performed from the NppToR menu., 30
-  }
+  ;AutoCompletion
+  gosub addAC
+
 	GuiControl,, InstallProgress, +20
 	;runinstalled NppToR
 	if !silent
@@ -337,6 +333,53 @@ RprofileText =
 	ExitApp
 	return
 }
+AddAC:
+{
+  if silent
+    return
+  OutputDebug NppToR:Install:AddAC:ACCheck=%ACCheck% `n
+	if Global
+	{
+    SB_SetText("Adding auto-completion files to Notepad++")
+    outputdebug % dstring . "`n" ;%
+		RUN , %INSTALLDIR%\NppToR.exe -add-auto-complete,,,OutputVarPID
+    outputdebug % dstring . "`n" ;%
+		WinWait ahk_pid %OutputVarPID%
+		winwaitclose ahk_pid %OutputVarPID%
+		FileDelete %INSTALLDIR%\make_r_xml.r.Rout
+	}
+	else
+  {
+    SB_SetText("")
+    msgbox ,0, No Auto-Completion., The auto-completion database has not been generated as that might require administrator privileges.  That can be performed from the NppToR menu., 30
+  }
+  return
+}
+WM_MOUSEMOVE()
+{
+    static CurrControl, PrevControl, _TT  ; _TT is kept blank for use by the ToolTip command below.
+    CurrControl := A_GuiControl
+    ;outputdebug NppToR:Install:Current Control is %CurrControl%.`n
+    If (CurrControl <> PrevControl and not InStr(CurrControl, " "))
+    {
+        ToolTip  ; Turn off any previous tooltip.
+        SetTimer, DisplayToolTip, 1000
+        PrevControl := CurrControl
+    }
+    return
 
+    DisplayToolTip:
+    SetTimer, DisplayToolTip, Off
+    OutputDebug Tooltip names is:%CurrControl%_TT `n
+    OutputDebug % "Tooltip is:" . %CurrControl%_TT . "`n" ;%
+    ToolTip % %CurrControl%_TT  ;% The leading percent sign tell it to use an expression.
+    SetTimer, RemoveToolTip, 7000
+    return
+
+    RemoveToolTip:
+    SetTimer, RemoveToolTip, Off
+    ToolTip
+    return
+}
 
 #include %A_ScriptDir%\scheduler.ahk
