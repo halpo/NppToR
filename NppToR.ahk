@@ -10,7 +10,6 @@
 ; must be here to define error codes.
 ; more includes at end of script
 #include %A_ScriptDir%\NTRError.ahk
-;NTRError(500, "hi There")
 
 AUTOTRIM OFF
 sendmode event
@@ -18,56 +17,61 @@ DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropria
 SetTitleMatchMode, 1
 SetTitleMatchMode, Fast
 
-version = 2.6.0
-year = 2011
+version = 2.6.1
+year = 2012
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Begin Initial execution code
+OutputDebug , NppToR:Starting NppToR version %version% (%year%) `n
 
 ; set environment variable for spawned R processes
-envset ,R_PROFILE_USER, %A_ScriptDir%\Rprofile
+envset, R_PROFILE_USER, %A_ScriptDir%\Rprofile
 
 ;;;;;;;;;;;;;;;;;;;;
 ;CMD line Parameters
 Loop, %0%  ; For each parameter:
 {
   param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
-	if param = -startup
-		startup = 1
-	if param = -add-auto-complete
-		doAAC = 1
+  if param = -startup
+    startup = 1
+  if param = -add-auto-complete
+    doAAC = 1
 }
+OutputDebug NppToR:CMD:startup=%startup% doAAC=%doAAC% `n
 
 ;ini settings
 inifile = %A_ScriptDir%\npptor.ini
 iniRead, Global, %inifile%, install, global, 0 ;0=false
 
 
+OutputDebug NppToR:Startup:Global=%global% `n
 if(Global)
 {
-	ifNotExist %A_AppData%\NppToR
-	{
-		FileCreateDir %A_AppData%\NppToR
-		if ErrorLevel
-		{
+  ifNotExist %A_AppData%\NppToR
+  {
+    OutputDebug NppToR:Startup:%A_AppData%\NppToR does not exist, creating
+    FileCreateDir %A_AppData%\NppToR
+    if ErrorLevel
+    {
       NTRError(501)
-			;ExitApp
-		}
-	}
-	inifile = %A_AppData%\NppToR\npptor.ini
+      ;ExitApp
+    }
+  }
+  inifile = %A_AppData%\NppToR\npptor.ini
 }
 
 gosub startupini
 if doAAC
 {
- gosub generateRxml
- exitapp
+  OutputDebug NppToR:Startup:Doing AAC `n
+  gosub generateRxml
+  exit
 }
 
-gosub makeMenus	
+gosub makeMenus  
 gosub makeHotkeys
 gosub readQuickKeys
 
@@ -77,7 +81,8 @@ gosub makeIniGui
 
 if  not startup
 {
-	run %nppexe%
+  OutputDebug NppToR:Startup:Running Notepad++ `n
+  run %nppexe%
 }
 return
 ;End Executable potion
@@ -88,24 +93,26 @@ return
 ;; run functions
 runline:
 {
-  outputdebug % dstring . "entered"
-	gosub NppGetLineOrSelection
-	gosub Rpaste
-  outputdebug % dstring . "exiting"
-	return
+  outputdebug % dstring . "entered`n" ;%
+  gosub NppGetLineOrSelection
+  gosub Rpaste
+  outputdebug % dstring . "exiting`n" ;%
+  return
 }
 runall:
 {
-	gosub NppGetAll
-	gosub Rpaste
-	return
+  outputdebug % dstring . "entered`n" ;%
+  gosub NppGetAll
+  gosub Rpaste
+  return
 }
 runSilent:
 {
-	RGetOrStart()
-	gosub NppGetLineOrSelection
-	gosub sendSilent
-	return
+  outputdebug % dstring . "entered`n" ;%
+  RGetOrStart()
+  gosub NppGetLineOrSelection
+  gosub sendSilent
+  return
 }
 runtocursor:
 {
@@ -115,81 +122,84 @@ return
 }
 runbatch:
 {
-	DetectHiddenWindows On
-	NppSave()
+  outputdebug % dstring . "entered`n" ;%
+  DetectHiddenWindows On
+  NppSave()
   dir := NppGetCurrDir()
   SetWorkingDir %dir%
-	rcmd := RGetCMD()
+  rcmd := RGetCMD()
   if rcmd=
   {
     NTRError(502)
     return
   }
-		
-	command = CMD /C %rcmd% BATCH -q "%file%"
-	run %command%, %dir%, hide, RprocID
-	WinWait ,ahk_pid %RprocID%,,.5
-	addProc(RprocID,File, "Local")
-	WinWaitClose ahk_pid %RprocID%
-	run %nppexe% "%dir%\%Name%.Rout"
-	removeProc(RprocID)
-	DetectHiddenWindows Off
+    
+  command = CMD /C %rcmd% BATCH -q "%file%"
+  run %command%, %dir%, hide, RprocID
+  WinWait ,ahk_pid %RprocID%,,.5
+  addProc(RprocID,File, "Local")
+  WinWaitClose ahk_pid %RprocID%
+  run %nppexe% "%dir%\%Name%.Rout"
+  removeProc(RprocID)
+  DetectHiddenWindows Off
 return
 }
 getRhelp:
 {
-	gosub NppGetLineOrSelection
-	found := regexmatch(clipboard, "^[\w.]+\b",match)
-	if found
-	{
-		clipboard = ?%match%`n
-		gosub Rpaste
-	} else {
-		if restoreclipboard
-		{
-			clipboard := oldclipboard
-		}
-	}
-	return
+  outputdebug % dstring . "entered`n" ;%
+  gosub NppGetLineOrSelection
+  found := regexmatch(clipboard, "^[\w.]+\b",match)
+  if found
+  {
+    clipboard = ?%match%`n
+    gosub Rpaste
+  } else {
+    if restoreclipboard
+    {
+      clipboard := oldclipboard
+    }
+  }
+  return
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Putty interface functions
 puttypaste:
-{	
-	WinGet nppID, ID, A          ; save current window ID to return here later
-	IfWinExist , ahk_class PuTTY
-	{
-		if clipboard<>""
-		{
+{  
+  WinGet nppID, ID, A          ; save current window ID to return here later
+  IfWinExist , ahk_class PuTTY
+  {
+    if clipboard<>""
+    {
       gosub CheckForNewLine
       ;ControlClick , x4 y30,,, right
       controlSend , ahk_parent, +{Ins}
-		}
-		WinActivate ahk_id %nppID%    ; go back to the original window
-		if restoreclipboard
-		{
-			sleep %Rpastewait%
-			clipboard := oldclipboard
-		}
-	} else NTRMsg(101)
-	return
+    }
+    WinActivate ahk_id %nppID%    ; go back to the original window
+    if restoreclipboard
+    {
+      sleep %Rpastewait%
+      clipboard := oldclipboard
+    }
+  } else NTRMsg(101)
+  return
 }
 puttyLineOrSelection:
 {
-	gosub NppGetLineOrSelection
-	gosub puttypaste
-	return
+  gosub NppGetLineOrSelection
+  gosub puttypaste
+  return
 }
 puttyRunAll:
 {
-	gosub NppGetAll
-	gosub puttypaste
-	return
+  gosub NppGetAll
+  gosub puttypaste
+  return
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 MakeAboutDialog:
 {
+outputdebug % dstring . "entered`n" ;%
 ;Gui, -AlwaysOnTop -SysMenu +Owner ; +Owner avoids a taskbar button.
 Gui, 2:Add, Picture, x6 y10 w70 h70 , %A_ScriptDir%\icons\NppToR.png
 Gui, 2:Font, S14 CDefault, %NppToRHeadingFont%
@@ -208,10 +218,10 @@ This utility enables passing code from Notepad++ to the R Gui Window.
 
 The following are the keyboard shortcuts (can be modified from the setting in the main menu).
 
-	%passlinekey%: Passes a line or a selection to R.
-	%passfilekey%: Passes the entire file to R.
-	%passtopointkey%: Evaluates the file to the point of the cursor.
-	%batchrunkey%: Saves then evaluates the current script in batch mode then opens the results in notepad++.
+  %passlinekey%: Passes a line or a selection to R.
+  %passfilekey%: Passes the entire file to R.
+  %passtopointkey%: Evaluates the file to the point of the cursor.
+  %batchrunkey%: Saves then evaluates the current script in batch mode then opens the results in notepad++.
 
 (#=Win,!=Alt,^=Control,+=Shift)
 )
@@ -232,193 +242,197 @@ return
 ;INI file paramters
 IniGet:
 {
-	;executables
-	IniRead ,iniRhome,      %inifile%, executables, R,
-	IniRead ,iniRcmdparms,  %inifile%, executables, Rcmdparms,
-	IniRead ,iniNppexe,     %inifile%, executables, Npp,
-	IniRead ,iniNppConfig,  %inifile%, executables, NppConfig,
-	;hotkeys
-	IniRead ,passlinekey,    %inifile%, hotkeys, passline,F8
-	IniRead ,passfilekey,    %inifile%, hotkeys, passfile,^F8
-	IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
-	IniRead ,batchrunkey,    %inifile%, hotkeys, batchrun,^!F8
-	IniRead ,bysourcekey,    %inifile%, hotkeys, bysource, ^+F8
-	;silent
-	IniRead ,enablesilent,   %inifile%, silent, enablesilent, 0
-	IniRead ,silentkey,      %inifile%, silent, silentkey, !F8
-	;putty
-	IniRead ,activateputty, %inifile%, putty, activateputty, 0
-	IniRead ,puttylinekey,  %inifile%, putty, puttyline, F9
-	IniRead ,puttyfilekey,  %inifile%, putty, puttyfile, ^F9
-	;controls
-	IniRead ,Rpastewait,       %inifile%, controls, Rpastewait, 50
-	IniRead ,Rrunwait,         %inifile%, controls, Rrunwait, 10
-	IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, 1
-	IniRead ,appendnewline,    %inifile%, controls, appendnewline, 1
-	IniRead ,pref32,           %inifile%, controls, pref32, 0
-	debug=
-	;no return continues by design.
+  OutputDebug NppToR:ini:IniGet:entering
+  ;executables
+  IniRead ,iniRhome,      %inifile%, executables, R,
+  IniRead ,iniRcmdparms,  %inifile%, executables, Rcmdparms,
+  IniRead ,iniNppexe,     %inifile%, executables, Npp,
+  IniRead ,iniNppConfig,  %inifile%, executables, NppConfig,
+  ;hotkeys
+  IniRead ,passlinekey,    %inifile%, hotkeys, passline,F8
+  IniRead ,passfilekey,    %inifile%, hotkeys, passfile,^F8
+  IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
+  IniRead ,batchrunkey,    %inifile%, hotkeys, batchrun,^!F8
+  IniRead ,bysourcekey,    %inifile%, hotkeys, bysource, ^+F8
+  ;silent
+  IniRead ,enablesilent,   %inifile%, silent, enablesilent, 0
+  IniRead ,silentkey,      %inifile%, silent, silentkey, !F8
+  ;putty
+  IniRead ,activateputty, %inifile%, putty, activateputty, 0
+  IniRead ,puttylinekey,  %inifile%, putty, puttyline, F9
+  IniRead ,puttyfilekey,  %inifile%, putty, puttyfile, ^F9
+  ;controls
+  IniRead ,Rpastewait,       %inifile%, controls, Rpastewait, 50
+  IniRead ,Rrunwait,         %inifile%, controls, Rrunwait, 10
+  IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, 1
+  IniRead ,appendnewline,    %inifile%, controls, appendnewline, 1
+  IniRead ,pref32,           %inifile%, controls, pref32, 0
+  debug=
+  ;no return continues by design.
 }
 iniDistill:
 {
-	if restoreclipboard = false
-		restoreclipboard = 0
-	if appendnewline = false
-		appendnewline = 0
-	if enablesilent = false
-		enablesilent = 0
-	if activateputty = false
-		activateputty = 0
-		
+  OutputDebug NppToR:ini:iniDistill:entering
+  if restoreclipboard = false
+    restoreclipboard = 0
+  if appendnewline = false
+    appendnewline = 0
+  if enablesilent = false
+    enablesilent = 0
+  if activateputty = false
+    activateputty = 0
+    
 
-	if (ininpphome="ERROR") || (ininpphome="")
-	{
-		; regread, nppdir, hkey_local_machine, software\notepad++
-		RegRead, nppdir, HKEY_LOCAL_MACHINE, SOFTWARE\Notepad++
-		if nppdir= 
-			nppdir := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\Notepad++")
-	}
-	else
-		nppdir := replaceEnvVariables(ininppexe)
-	nppexe = %nppdir%\notepad++.exe
+  if (ininpphome="ERROR") || (ininpphome="")
+  {
+    ; regread, nppdir, hkey_local_machine, software\notepad++
+    RegRead, nppdir, HKEY_LOCAL_MACHINE, SOFTWARE\Notepad++
+    if nppdir= 
+      nppdir := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\Notepad++")
+  }
+  else
+    nppdir := replaceEnvVariables(ininppexe)
+  nppexe = %nppdir%\notepad++.exe
 
-		
-	if (ininppconfig="ERROR") || (ininppconfig="")
-	{
-		envget, appdata, appdata
-		nppconfig = %APPDATA%\notepad++
-	}
-	else
-		nppconfig := replaceEnvVariables(ininppconfig)
-		
-	if (iniRhome="ERROR") || (iniRhome="")
-	{	
-		RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-		Rhome= %Rdir%
-		if Rdir= 
-			Rdir := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\R-core\R", "InstallPath")
-		Rhome= %Rdir%
-	}
-	else 
-		Rhome := replaceEnvVariables(iniRhome)
-	
-	if (iniRcmdparms="ERROR")
-		Rcmdparms=
-	else 
-		Rcmdparms = %iniRcmdparms%
-	
-	If Rhome =
-		FE = 0
-	else
-		FE := FileExist (Rhome)
-	If !(FE)
-	{
-		curfiletime = 0
-		Loop , C:\Program Files\R\* , 2, 0
-		{
-			FileGetTime , filetime, %A_LoopFileFullPath%, C
-			if(filetime>curtime)
-			{
-				curtime := filetime
-				Rhome= %A_LoopFileFullPath%
-			}
-		}
-	}
-	If Rhome =
-		FE = 0
-	else
-		FE := FileExist (Rhome)
-	If !(FE)
-	{
-		IfExist C:\Program Files (x86)
-		{
-			IfExist C:\Program Files(x86)\R
-			{
-				curfiletime = 0
-				Loop C:\Program Files(x86)\R\*
-				{
-					FileGetTime , filetime, %A_LoopFileFullPath%, C
-					if(curtime=  || filetime>curtime)
-					{
-						curtime := filetime
-						Rhome:= A_LoopFileFullPath
-					}
-				}
-			}
-		}
-	}
-	
-	IfExist %Rhome%\bin\Rgui.exe
-		Rguiexe = %Rhome%\bin\Rgui.exe
-	else 
-	Rguiexe = %Rhome%\bin\x64\Rgui.exe
-	FE := FileExist(Rguiexe)
-	If (pref32) OR !(FE)-
-		Rguiexe = %Rhome%\bin\i386\Rgui.exe
-		FE := FileExist(Rguiexe)
-		If NOT FE
-		{
-			NTRError(503)
+    
+  if (ininppconfig="ERROR") || (ininppconfig="")
+  {
+    envget, appdata, appdata
+    nppconfig = %APPDATA%\notepad++
+  }
+  else
+    nppconfig := replaceEnvVariables(ininppconfig)
+    
+  if (iniRhome="ERROR") || (iniRhome="")
+  {  
+    RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+    Rhome= %Rdir%
+    if Rdir= 
+      Rdir := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\R-core\R", "InstallPath")
+    Rhome= %Rdir%
+  }
+  else 
+    Rhome := replaceEnvVariables(iniRhome)
+  
+  if (iniRcmdparms="ERROR")
+    Rcmdparms=
+  else 
+    Rcmdparms = %iniRcmdparms%
+  
+  If Rhome =
+    FE = 0
+  else
+    FE := FileExist (Rhome)
+  If !(FE)
+  {
+    curfiletime = 0
+    Loop , C:\Program Files\R\* , 2, 0
+    {
+      FileGetTime , filetime, %A_LoopFileFullPath%, C
+      if(filetime>curtime)
+      {
+        curtime := filetime
+        Rhome= %A_LoopFileFullPath%
+      }
+    }
+  }
+  If Rhome =
+    FE = 0
+  else
+    FE := FileExist (Rhome)
+  If !(FE)
+  {
+    IfExist C:\Program Files (x86)
+    {
+      IfExist C:\Program Files(x86)\R
+      {
+        curfiletime = 0
+        Loop C:\Program Files(x86)\R\*
+        {
+          FileGetTime , filetime, %A_LoopFileFullPath%, C
+          if(curtime=  || filetime>curtime)
+          {
+            curtime := filetime
+            Rhome:= A_LoopFileFullPath
+          }
+        }
+      }
+    }
+  }
+  
+  IfExist %Rhome%\bin\Rgui.exe
+    Rguiexe = %Rhome%\bin\Rgui.exe
+  else
+  Rguiexe = %Rhome%\bin\x64\Rgui.exe
+  FE := FileExist(Rguiexe)
+  If (pref32) OR !(FE)
+    Rguiexe = %Rhome%\bin\i386\Rgui.exe
+    FE := FileExist(Rguiexe)
+    If NOT FE
+    {
+      OutputDebug NppToR:iniDistill:Find R Gui: Rguiexe=%Rguiexe% `n
+      NTRMsg(503)
       ;ExitApp
-		}
-	return
+    }
+  return
 }
 replaceEnvVariables(string)
 {
-	envget ,a_allusersprofile, allusersprofile
-	envget ,a_commonprogramfiles, commonprogramfiles
-	envget ,a_homedrive, homedrive
-	envget ,a_homepath, homepath
-	envget ,a_localappdata, localappdata
-	envget ,a_logonserver, logonserver
-	envget ,a_programdata, programdata
-	envget ,a_public, public
-	envget ,a_systemdrive, systemdrive
-	envget ,a_systemroot, systemroot
-	envget a_userdomain, userdomain
-	envget a_userprofile, userprofile
-	tmp:=a_temp
-	splitpath, a_scriptdir,,cdir,,,cdrive
+  envget ,a_allusersprofile, allusersprofile
+  envget ,a_commonprogramfiles, commonprogramfiles
+  envget ,a_homedrive, homedrive
+  envget ,a_homepath, homepath
+  envget ,a_localappdata, localappdata
+  envget ,a_logonserver, logonserver
+  envget ,a_programdata, programdata
+  envget ,a_public, public
+  envget ,a_systemdrive, systemdrive
+  envget ,a_systemroot, systemroot
+  envget a_userdomain, userdomain
+  envget a_userprofile, userprofile
+  tmp:=a_temp
+  splitpath, a_scriptdir,,cdir,,,cdrive
 
-	stringreplace,string,string,`%npptordir`%,%cdir%
-	stringreplace,string,string,`%drive`%,%cdrive%
+  stringreplace,string,string,`%npptordir`%,%cdir%
+  stringreplace,string,string,`%drive`%,%cdrive%
 
-	stringreplace,string,string,`%allusersprofile`%,%a_allusersprofile%
-	stringreplace,string,string,`%commonprogramfiles`%,%a_commonprogramfiles%
-	stringreplace,string,string,`%computername`%,%a_computername%
-	stringreplace,string,string,`%homedrive`%,%a_homedrive%
-	stringreplace,string,string,`%homepath`%,%a_homepath%
-	stringreplace,string,string,`%localappdata`%,%a_localappdata%
-	stringreplace,string,string,`%logonserver`%,%a_logonserver%
-	stringreplace,string,string,`%programdata`%,%a_programdata%
-	stringreplace,string,string,`%public`%,%a_public%
-	stringreplace,string,string,`%systemdrive`%,%a_systemdrive%
-	stringreplace,string,string,`%systemroot`%,%a_systemroot%
-	stringreplace,string,string,`%temp`%,%a_temp%
-	stringreplace,string,string,`%tmp`%,%a_tmp%
-	stringreplace,string,string,`%userdomain`%,%a_userdomain%
-	stringreplace,string,string,`%userprofile`%,%a_userprofile%
+  stringreplace,string,string,`%allusersprofile`%,%a_allusersprofile%
+  stringreplace,string,string,`%commonprogramfiles`%,%a_commonprogramfiles%
+  stringreplace,string,string,`%computername`%,%a_computername%
+  stringreplace,string,string,`%homedrive`%,%a_homedrive%
+  stringreplace,string,string,`%homepath`%,%a_homepath%
+  stringreplace,string,string,`%localappdata`%,%a_localappdata%
+  stringreplace,string,string,`%logonserver`%,%a_logonserver%
+  stringreplace,string,string,`%programdata`%,%a_programdata%
+  stringreplace,string,string,`%public`%,%a_public%
+  stringreplace,string,string,`%systemdrive`%,%a_systemdrive%
+  stringreplace,string,string,`%systemroot`%,%a_systemroot%
+  stringreplace,string,string,`%temp`%,%a_temp%
+  stringreplace,string,string,`%tmp`%,%a_tmp%
+  stringreplace,string,string,`%userdomain`%,%a_userdomain%
+  stringreplace,string,string,`%userprofile`%,%a_userprofile%
 
-	stringreplace,string,string,`%language`%, %a_language%	;the system's default language, which is one of these 4-digit codes.
-	stringreplace,string,string,`%username`%,%a_username%	;the logon name of the user who launched this script.
-	stringreplace,string,string,`%windir`%,%a_windir%	;the windows directory. for example: c:\windows
-	stringreplace,string,string,`%programfiles`%,%a_programfiles% 	;the program files directory (e.g. c:\program files). in v1.0.43.08+, the a_ prefix may be omitted, which helps ease the transition to #noenv.
-	stringreplace,string,string,`%appdata`%,%a_appdata% ;[v1.0.43.09+]	the full path and name of the folder containing the current user's application-specific data. for example: c:\documents and settings\username\application data
-	stringreplace,string,string,`%appdatacommon`%,%a_appdatacommon% ;[v1.0.43.09+]	the full path and name of the folder containing the all-users application-specific data.
-	stringreplace,string,string,`%desktop`%,%a_desktop%	;the full path and name of the folder containing the current user's desktop files.
-	stringreplace,string,string,`%desktopcommon`%,%a_desktopcommon%	;the full path and name of the folder containing the all-users desktop files.
-	stringreplace,string,string,`%startmenu`%,%a_startmenu%	;the full path and name of the current user's start menu folder.
-	stringreplace,string,string,`%startmenucommon`%,%a_startmenucommon%	;the full path and name of the all-users start menu folder.
-	stringreplace,string,string,`%programs`%,%a_programs%	;the full path and name of the programs folder in the current user's start menu.
-	stringreplace,string,string,`%programscommon`%,%a_programscommon%	;the full path and name of the programs folder in the all-users start menu.
-	stringreplace,string,string,`%startup`%,%a_startup%	;the full path and name of the startup folder in the current user's start menu.
-	stringreplace,string,string,`%startupcommon`%,%a_startupcommon%	;the full path and name of the startup folder in the all-users start menu.
-	stringreplace,string,string,`%mydocuments`%,%a_mydocuments%	;the full path and name of the current user's "my documents" folder. unlike most of the similar variables, if the folder is the root of a drive, the final backslash is not included. for example, it would contain m: rather than m:\
-	
-	return string
+  stringreplace,string,string,`%language`%, %a_language%  ;the system's default language, which is one of these 4-digit codes.
+  stringreplace,string,string,`%username`%,%a_username%  ;the logon name of the user who launched this script.
+  stringreplace,string,string,`%windir`%,%a_windir%  ;the windows directory. for example: c:\windows
+  stringreplace,string,string,`%programfiles`%,%a_programfiles%   ;the program files directory (e.g. c:\program files). in v1.0.43.08+, the a_ prefix may be omitted, which helps ease the transition to #noenv.
+  stringreplace,string,string,`%appdata`%,%a_appdata% ;[v1.0.43.09+]  the full path and name of the folder containing the current user's application-specific data. for example: c:\documents and settings\username\application data
+  stringreplace,string,string,`%appdatacommon`%,%a_appdatacommon% ;[v1.0.43.09+]  the full path and name of the folder containing the all-users application-specific data.
+  stringreplace,string,string,`%desktop`%,%a_desktop%  ;the full path and name of the folder containing the current user's desktop files.
+  stringreplace,string,string,`%desktopcommon`%,%a_desktopcommon%  ;the full path and name of the folder containing the all-users desktop files.
+  stringreplace,string,string,`%startmenu`%,%a_startmenu%  ;the full path and name of the current user's start menu folder.
+  stringreplace,string,string,`%startmenucommon`%,%a_startmenucommon%  ;the full path and name of the all-users start menu folder.
+  stringreplace,string,string,`%programs`%,%a_programs%  ;the full path and name of the programs folder in the current user's start menu.
+  stringreplace,string,string,`%programscommon`%,%a_programscommon%  ;the full path and name of the programs folder in the all-users start menu.
+  stringreplace,string,string,`%startup`%,%a_startup%  ;the full path and name of the startup folder in the current user's start menu.
+  stringreplace,string,string,`%startupcommon`%,%a_startupcommon%  ;the full path and name of the startup folder in the all-users start menu.
+  stringreplace,string,string,`%mydocuments`%,%a_mydocuments%  ;the full path and name of the current user's "my documents" folder. unlike most of the similar variables, if the folder is the root of a drive, the final backslash is not included. for example, it would contain m: rather than m:\
+  
+  return string
 }
 
 startupini:
+OutputDebug NppToR:Startup:startupini
 gosub iniget
 return
 
@@ -431,6 +445,7 @@ return
 ;;;;;;;;;;;;;;;;;;;;
 makeMenus:
 {
+OutputDebug NppToR:makeMenues:Entering `n
 ;menu functions
 menu, tray, add ; separator
 menu, tray, add, Show Simulations, showCounter
@@ -444,12 +459,14 @@ menu, tray, add, Refresh Quick Keys, readQuickKeys
 menu, tray, add ; separator
 Menu, tray, add, Settings, ShowIniGui
 Menu, tray, add, About, ShowAbout 
+OutputDebug NppToR:makeMenues:leaving `n
 return
 }
 makeHotkeys:
 {
+OutputDebug NppToR:makeHotkeys:entering `n
 if NOT makeglobal
-	hotkey , IfWinActive, ahk_class Notepad++
+  hotkey , IfWinActive, ahk_class Notepad++
 #MaxThreadsPerHotkey 10
 hotkey ,%passlinekey%,runline, On
 hotkey ,%passfilekey%,runall, On
@@ -463,32 +480,38 @@ hotkey ,%bysourcekey%, sendSource, On
 
 if activateputty
 {
-	#MaxThreadsPerHotkey 10
-	hotkey , %puttylinekey% , puttyLineOrSelection, On
-	hotkey , %puttyfilekey% , puttyRunAll, On
+  OutputDebug NppToR:makeHotkeys:putty line=%puttylinekey%, file=%puttyfilekey% `n
+  #MaxThreadsPerHotkey 10
+  hotkey , %puttylinekey% , puttyLineOrSelection, On
+  hotkey , %puttyfilekey% , puttyRunAll, On
 }
 if enablesilent
 {
-	gosub startCOM
-	hotkey , %silentkey% , runSilent, On
+  OutputDebug NppToR:makeHotkeys:silentKey=%silentkey% `n
+  gosub startCOM
+  hotkey , %silentkey% , runSilent, On
 }
+OutputDebug NppToR:makeHotkeys:leaving `n
 return
 }
 undoHotkeys:
 {
-	hotkey ,%passlinekey%,runline, Off
-	hotkey ,%passfilekey%,runall, Off
-	hotkey ,%passtopointkey%,runtocursor, Off
-	hotkey ,%batchrunkey%,runbatch, Off
-	hotkey , %puttylinekey% , puttyLineOrSelection, Off
-	hotkey , %puttyfilekey% , puttyRunAll, Off
-	hotkey , %silentkey% , runSilent, Off
-	return
+  OutputDebug NppToR:undoHotkeys:entering `n
+  hotkey ,%passlinekey%,runline, Off
+  hotkey ,%passfilekey%,runall, Off
+  hotkey ,%passtopointkey%,runtocursor, Off
+  hotkey ,%batchrunkey%,runbatch, Off
+  hotkey , %puttylinekey% , puttyLineOrSelection, Off
+  hotkey , %puttyfilekey% , puttyRunAll, Off
+  hotkey , %silentkey% , runSilent, Off
+  OutputDebug NppToR:undoHotkeys:leaving `n 
+  return
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 generateRxml:
 {
-	Rscript := RGetRscript() 
+  OutputDebug NppToR:generateRxml:entering `n
+  Rscript := RGetRscript() 
   IfExist %Rscript%
   {
     ifWinExist ahk_class Notepad++
@@ -502,13 +525,15 @@ generateRxml:
         winkill
       ifmsgbox No
         return
-    } 
+    }
     if NppPlugins=
     {
       NppPlugins = %NppDir%\plugins\APIs
     }
     params  = /C %Rscript% "%A_ScriptDir%\make_R_xml.r"
     command = CMD 
+    OutputDebug NppToR:generateRxml:command="%command%" `n
+    OutputDebug NppToR:generateRxml:params="%params%" `n
     DllCall("shell32\ShellExecuteA"
       ,uint, 0 ;hwnd a handle to the owner window (null implies not associated with a window)
       ,str, "RunAs"  ;operation
@@ -518,12 +543,14 @@ generateRxml:
       ,int, 1)  ; Last parameter: SW_SHOWNORMAL = 1
     winwait, %command%,,1
     winwaitclose, %command%,,500
+    OutputDebug NppToR:generateRxml:Restarting Notepad++ `n
     Run %CurrNppExePath%
   }
   else
   {
     NTRError(504)
   }
+  OutputDebug NppToR:generateRxml:leaving`n
   return
 }
 
