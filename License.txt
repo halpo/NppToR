@@ -9,7 +9,7 @@ The Icon is licensed under the LGPL and is derived from the original R icon.
 -----------------
 The MIT License
 
-Copyright (c) 2008 Andrew Redd
+Copyright (c) 2008-2012 Andrew Redd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
