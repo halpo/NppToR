@@ -21,6 +21,7 @@ addStartup = 1
 Loop, %0%  ; For each parameter:
 {
   param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
+  OutputDebug NppToR:Install:Parameter Provided ``%param%`` `n
 	if param = --silent
 			silent = 1
 	else if param = -silent
@@ -33,30 +34,37 @@ Loop, %0%  ; For each parameter:
 			addStartup = 0
 	else if param = -global
 			Global = 1
+  else if param = -no-ac
+      noAC = 1
 	else 
-		InstallDir = %param%
+  {
+    Loop %param%, 1
+      InstallDir = %A_LoopFileFullPath%
+    OutputDebug NppToR:Install:Given install path is %InstallDir% `n
+  }
 }
 
 if silent
 {
+  OutputDebug NppToR:Install: Doing Silent Install (Global=%Global%)`n
 	if InstallDir = 
 	{
-		if A_IsAdmin
+		if A_IsAdmin {
 			InstallDir= %A_ProgramFile%\NppToR\
-		else
-			InstallDir= %A_APPDATA%\NppToR\
+      Global=1
+		} else {
+      InstallDir= %A_APPDATA%\NppToR\
+    }
 	}
 	gosub doinstall
 	exitapp
 }
 if go
 {
+  OutputDebug NppToR:Install: Received the go-ahead parameter.
 	gosub CreateGui
 	gosub Submit
 }
-
-
-
 	
 ;environment variables
 ; envget A_APPDATA, A_APPDATA
@@ -123,6 +131,14 @@ GUI ,ADD, BUTTON,section X+-155 Y+5 w75 gSubmit default vInstall,&Install
 GUI ,ADD, BUTTON,gDoCancel xp+80 w75 vCancel, &Cancel
 GUI ,ADD, StatusBar
 OnMessage(0x200, "WM_MOUSEMOVE")
+
+if Global {
+  GUICONTROL , ENABLE, ACCheck
+  if NOT noAC
+    guiControl ,, ACCheck, 1
+} else {
+  GUICONTROL , DISABLE, ACCheck
+}
 GUI SHOW
 return
 }
@@ -133,16 +149,21 @@ ExitApp
 
 doGlobalCheck:
 {
+  OutputDebug NppToR:Install:doGlobalCheck
 	Gui Submit, NoHide 
 	if Global
 	{
 		if InstallDir = %A_APPDATA%\NppToR\
 			GUICONTROL ,,InstallDir, %A_ProgramFiles%\NppToR\
+    GUICONTROL , ENABLE, ACCheck
+    GUICONTROL , , ACCheck, 1
 	}
 	else
 	{
 		if InstallDir = %A_ProgramFiles%\NppToR\
 			GUICONTROL ,,InstallDir, %A_APPDATA%\NppToR\
+    GUICONTROL , DISABLE, ACCheck
+    GUICONTROL , , ACCheck, 0
 	}
 	return
 }
@@ -153,6 +174,7 @@ doACCheck:
 }
 doBrowse:
 {
+  OutputDebug NppToR:Install:doBrowse
 	FileSelectFolder, IFolder , *%A_APPDATA%\NppToR\,3,Select Install Directory
 	if IFolder <>
 		GUICONTROL ,,InstallDir, %IFolder%
@@ -161,6 +183,7 @@ doBrowse:
 
 Submit:
 {
+  OutputDebug NppToR:Install:Submit
 	GUI Submit, NoHide
 	GUICONTROL ,Disable, InstallDir
 	GUICONTROL ,Disable, addStartup
@@ -170,14 +193,17 @@ Submit:
 	GUICONTROL ,Disable, Install
 	GUICONTROL ,Disable, Cancel
 	GUICONTROL ,Disable, Browse
+	GUICONTROL ,Disable, ACCheck
 	if Global
 	{
 		if not A_IsAdmin
 		{
 			SB_SetText("Restarting with admin privileges")
-      params = -go
+      params = -go -global
 			if !addStartup
 				params = %params% -no-startup
+			if !ACCheck
+				params = %params% -no-ac
 			params = %params% "%InstallDir%\"
 			; DllCall("shell32\ShellExecuteA"
 				; , uint, 0
@@ -209,6 +235,7 @@ doinstall:
 	;install section
 	ifnotexist %INSTALLDIR%
 	{
+    OutputDebug NppToR:Install:Creating install Directory (%INSTALLDIR%)`n
     SB_SetText("Creating Install Directory")
 		filecreatedir %INSTALLDIR%
 		if %errorlevel%
@@ -225,6 +252,7 @@ doinstall:
 			FileSetAttrib , -R , %INSTALLDIR%\NppToR.exe	
 	}
 	;executable files
+  OutputDebug NppToR:Install:Installing NppToR.exe `n
   SB_SetText("Installing NppToR.exe")
 	FILEINSTALL , ..\build\NppToR.exe, %INSTALLDIR%\NppToR.exe, 1
 	if %errorlevel%
@@ -236,37 +264,45 @@ doinstall:
 	}
   
   ;icons
+  OutputDebug NppToR:Install:Installing icons `n
+  SB_SetText("Installing icons")
   ifnotexist %INSTALLDIR%\Icons
 	{
-    SB_SetText("Creating Install Directory")
 		filecreatedir %INSTALLDIR%\Icons
   }
   FILEINSTALL , ..\icons\NppToR.png, %INSTALLDIR%\Icons\NppToR.png,1
   
 	if Global
 	{
+    OutputDebug NppToR:Install:Setting Global Parameters`n
     SB_SetText("Setting global parameters")
 		iniWrite , %Global%, %INSTALLDIR%\npptor.ini, install, global
 		FileSetAttrib , +R, %INSTALLDIR%\NppToR.exe
 	}
 	else
   {
+    OutputDebug NppToR:Install:Setting File attributes`n
     SB_SetText("Setting file attributes")
 		FileSetAttrib , -R, %INSTALLDIR%\NppToR.exe
 	}
+  OutputDebug NppToR:Install:installing NppEditR.exe`n
   SB_SetText("Installing NppEditR.exe")
   FILEINSTALL , ..\build\NppEditR.exe, %INSTALLDIR%\NppEditR.exe,1
+  OutputDebug NppToR:Install:Writing URL Shortcut`n
   SB_SetText("Writing URL Shortcut")
 	IniWrite, http://npptor.sourceforge.net, %INSTALLDIR%\npptor.url, InternetShortcut, URL 
 	
+  OutputDebug NppToR:Install:Copying uninstall.exe`n
   SB_SetText("Copying uninstall.exe")
 	FILEINSTALL , ..\build\uninstall.exe, %INSTALLDIR%\uninstall.exe, 1
 
 	;Documentation files
+  OutputDebug NppToR:Install:Copying documentation`n
   SB_SetText("Copying documentation")  
 	FILEINSTALL ,..\License.txt,%INSTALLDIR%\License.txt,0
 		
 	;Supporting R scripts
+  OutputDebug NppToR:Install:Copying suport scripts`n
   SB_SetText("Copying suport scripts")  
 	FILEINSTALL ,..\make_R_xml.r,%INSTALLDIR%\make_R_xml.r,0
 	if !silent
@@ -274,6 +310,7 @@ doinstall:
 
 	;set R options to work with NppToR
 	;do Rprofile
+  OutputDebug NppToR:Install:Writing RProfile`n
   SB_SetText("Writing RProfile")  
 RprofileText = 
 (
@@ -282,7 +319,6 @@ RprofileText =
   if(file.exists(path.expand("~/Rprofile"))) source(path.expand("~/Rprofile"))
   if(file.exists(path.expand("~/.Rprofile"))) source(path.expand("~/.Rprofile"))
   if(file.exists(path.expand("~/Rprofile.R"))) source(path.expand("~/Rprofile.R"))
-  OutputDebug NppToR:Install:doinstall: Install Finished.`n
 )
   IfExist %INSTALLDIR%\Rprofile
     FileDelete %INSTALLDIR%\Rprofile
@@ -295,6 +331,7 @@ RprofileText =
 		GuiControl,, InstallProgress, +10
 
 	;start menu entries
+  OutputDebug NppToR:Install:start menu entries
   SB_SetText("Setting up start menu entries")  
 	SM := (Global)
 		? A_StartMenuCommon
@@ -321,8 +358,9 @@ RprofileText =
 	;runinstalled NppToR
 	if !silent
 	{
+    OutputDebug NppToR:Install:Registering task
 		SB_SetText("Registering task to run NppToR")
-    npptorstartup = "%INSTALLDIR%NppToR.exe"
+    npptorstartup = "%INSTALLDIR%\NppToR.exe"
     RunAsStdUser(npptorstartup, "-startup")
 		SB_SetText("Installation Finished.")
 		if Global
@@ -330,16 +368,18 @@ RprofileText =
 		else
 			msgbox 0, Installation Finished, NppToR has been successfully setup for your user profile.,10
 	}
+  OutputDebug NppToR:Install:doinstall: Install Finished.`n
 	ExitApp
 	return
 }
 AddAC:
 {
+  OutputDebug NppToR:Install:AddAC:ACCheck=%ACCheck% `n
   if silent
     return
-  OutputDebug NppToR:Install:AddAC:ACCheck=%ACCheck% `n
-	if Global
+	if Global AND ACCheck
 	{
+    OutputDebug NppToR:Install:Adding Auto-Completion
     SB_SetText("Adding auto-completion files to Notepad++")
     outputdebug % dstring . "`n" ;%
 		RUN , %INSTALLDIR%\NppToR.exe -add-auto-complete,,,OutputVarPID
@@ -351,7 +391,7 @@ AddAC:
 	else
   {
     SB_SetText("")
-    msgbox ,0, No Auto-Completion., The auto-completion database has not been generated as that might require administrator privileges.  That can be performed from the NppToR menu., 30
+    ; msgbox ,0, No Auto-Completion., The auto-completion database has not been generated as that might require administrator privileges.  That can be performed from the NppToR menu., 30
   }
   return
 }

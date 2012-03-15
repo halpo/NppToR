@@ -52,7 +52,7 @@ if(Global)
 {
   ifNotExist %A_AppData%\NppToR
   {
-    OutputDebug NppToR:Startup:%A_AppData%\NppToR does not exist, creating
+    OutputDebug NppToR:Startup:%A_AppData%\NppToR does not exist, creating `n
     FileCreateDir %A_AppData%\NppToR
     if ErrorLevel
     {
@@ -242,7 +242,7 @@ return
 ;INI file paramters
 IniGet:
 {
-  OutputDebug NppToR:ini:IniGet:entering
+  OutputDebug NppToR:ini:IniGet:entering `n
   ;executables
   IniRead ,iniRhome,      %inifile%, executables, R,
   IniRead ,iniRcmdparms,  %inifile%, executables, Rcmdparms,
@@ -272,7 +272,7 @@ IniGet:
 }
 iniDistill:
 {
-  OutputDebug NppToR:ini:iniDistill:entering
+  OutputDebug NppToR:ini:iniDistill:entering `n
   if restoreclipboard = false
     restoreclipboard = 0
   if appendnewline = false
@@ -432,7 +432,7 @@ replaceEnvVariables(string)
 }
 
 startupini:
-OutputDebug NppToR:Startup:startupini
+OutputDebug NppToR:Startup:startupini `n
 gosub iniget
 return
 
@@ -552,6 +552,16 @@ generateRxml:
   }
   OutputDebug NppToR:generateRxml:leaving`n
   return
+}
+
+findInPath(string)
+{
+oldclipboard := CliboardAll
+clipboard = 
+runwait cmd /c "where %string% |clip"
+path := clipboard
+clipboard := oldclipboard
+return path
 }
 
 ; Includes
