@@ -73,6 +73,7 @@ install.exe: NppEditR.exe NppToR.exe uninstall.exe
 	$(AHK2EXE) /in $< /out $@ /icon $(ICON) /bin $(AHK_BIN)
 
 include distro.mak
+include test.mak
 
 clean:
 	-$(DEL) *.exe *.zip
