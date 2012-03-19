@@ -5,7 +5,7 @@
 # Build rules for distribution install.exe.
 
 
-.PHONEY: distro version install portable
+.PHONY: distro version install portable
 distro: NppToR-$(VERSION).exe NppToR-$(VERSION).zip NppToR-$(VERSION).src.zip 
 
 NppToR-$(VERSION).exe: install.exe

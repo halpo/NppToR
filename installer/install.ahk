@@ -325,7 +325,7 @@ RprofileText =
   FileAppend , %RprofileText% , %INSTALLDIR%\Rprofile
   optstring = options(editor="%INSTALLDIR%NppEditR.exe")
   StringReplace options, optstring, \ , \\ , All
-	FileAppend , %options%`n , %INSTALLDIR%\Rprofile
+	FileAppend , `n%options%`n , %INSTALLDIR%\Rprofile
 	
 	if !silent
 		GuiControl,, InstallProgress, +10

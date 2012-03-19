@@ -1,16 +1,15 @@
 
 CD = $(shell cd)
 
-.PHONEY:test testglobal
+.PHONY:test testglobal testinstall
 test: NppToR-$(VERSION).exe
-	./$< --silent ../test -no-startup
-	CMD /C "start ../test/NppToR.exe"
+	$< --silent "$(CD)/../test" -no-startup
+	CMD /C "start "NppToR" /B "$(CD)/../test/NppToR.exe" -no-ini -rhome "C:\\Programs\\R\\R-2.14.2""
 	
 testglobal: NppToR-$(VERSION).exe
 	./$< --silent -no-startup -global ../testglobal
-	CMD /C "start ../testglobal/NppToR.exe"
+	CMD /C "start "NppToR" /B "$(CD)/../testglobal/NppToR.exe""
 
 testinstall: NppToR-$(VERSION).exe
-	@echo $(CD)
 	CMD /C "start ./$< "$(CD)/../test""
 	

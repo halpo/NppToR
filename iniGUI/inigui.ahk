@@ -8,12 +8,12 @@ Gui, 4:Font, S8 CDefault , %NppToRTextFont%
 Gui, 4:Add , Text        , x86 y50 w370 h70  , Here you can configure your NppToR to work as you like. Leave entries blank to use defaults or to read from the system.  Use portable variables such as `%Drive`% or `%NppToRDir`% to make locations dynamic.
 Gui, 4:Add , GroupBox    , x16 y120 w440 h150, Executables and Paths
   Gui, 4:Add, Text    ,    x26  y140 w120 h30                     , R Home
-  Gui, 4:Add, Edit    ,    x146 y140 w250 h20 vguitxtRhome        , (read from registry)
+  Gui, 4:Add, Edit    ,    x146 y140 w250 h20 vguitxtRhome        , (Inferred)
   Gui, 4:Add, Button  ,  x396 y140 w50  h20 gguibtnBrowseRhome    , Browse
   Gui, 4:Add, Text    ,    x26  y170 w120 h30                     , R cmd line parameters
   Gui, 4:Add, Edit    ,    x146 y170 w300 h20 vguitxtRcmdparms    , 
   Gui, 4:Add, Text    ,    x26  y200 w120 h30                     , Notepad++ Home
-  Gui, 4:Add, Edit    ,  x146 y200 w250 h20 vguitxtNppHome        , (read from registry)
+  Gui, 4:Add, Edit    ,  x146 y200 w250 h20 vguitxtNppHome        , (Inferred)
   Gui, 4:Add, Button  ,  x396 y200 w50  h20 gguibtnBrowseNppExe   , Browse
   Gui, 4:Add, Text    ,    x26  y230 w120 h30                     , Notepad++ Config Directory
   Gui, 4:Add, Edit    ,    x146 y230 w250 h20 vguitxtNppConfig    , `%APPDATA`%\Notepad++
@@ -91,7 +91,7 @@ else
   guiControl,4:, guichkpref32, 0
   
 if (iniRhome="Error") || (iniRhome="")
-  guicontrol,4:, guitxtRhome, (read from registry)
+  guicontrol,4:, guitxtRhome, (Inferred)
 else
   guicontrol,4:, guitxtRhome, %iniRhome%
 if (iniRcmdparms="Error") || (iniRcmdparms="")
@@ -99,7 +99,7 @@ if (iniRcmdparms="Error") || (iniRcmdparms="")
 else
   guicontrol,4:, guitxtRcmdparms, %iniRcmdparms%
 if (iniNppExe="Error") || (iniNppExe="")
-  guicontrol,4:, guitxtNppHome, (read from registry)
+  guicontrol,4:, guitxtNppHome, (Inferred)
 else
   guicontrol,4:, guitxtNppHome, %iniNppHome%
   
@@ -158,13 +158,13 @@ guiControlGet , pref32          , 4:, guichkpref32
 guiControlGet , enablesilent    , 4:, guichkenablesilent
  
 guiControlGet , iniRhome        ,4: , guitxtRhome
-if(iniRhome="(read from registry)")
+if(iniRhome="(Inferred)")
   iniRhome=
 
 guicontrolget ,iniRcmdparms      ,4:, guitxtRcmdparms
 
 guicontrolget ,iniNppHome,4:, guitxtNppHome, %iniNppHome%
-if(iniNppHome="(read from registry)")
+if(iniNppHome="(Inferred)")
   iniNppHome=
 
 guiControlGet , iniNppConfig,4:, guitxtNppConfig, %iniNppConfig%

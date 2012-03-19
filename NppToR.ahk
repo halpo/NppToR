@@ -35,12 +35,31 @@ envset, R_PROFILE_USER, %A_ScriptDir%\Rprofile
 Loop, %0%  ; For each parameter:
 {
   param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
-  if param = -startup
+  OutputDebug NppToR:CMD:Received parameter '%param%' `n
+  if dorhome {
+    Rhome = %param%
+    dorhome =
+  } else if donppexe {
+    nppexe = %param%
+    donppexe =
+  } else if donppconfig {
+    nppconfig = %param%
+    donppconfig =
+  } else if param = -startup
     startup = 1
-  if param = -add-auto-complete
+  else if param = -add-auto-complete
     doAAC = 1
+  else if param = -no-ini
+    noIni = 0
+  else if param = -rhome
+    dorhome = 1
+  else if param = -npp
+    donppexe = 1 
+  else if param = -config
+    donppconfig = 1
 }
 OutputDebug NppToR:CMD:startup=%startup% doAAC=%doAAC% `n
+OutputDebug NppToR:CMD:Rhome=%Rhome% `n
 
 ;ini settings
 inifile = %A_ScriptDir%\npptor.ini
@@ -314,51 +333,9 @@ iniDistill:
   else 
     Rhome := replaceEnvVariables(iniRhome)
   
-  if (iniRcmdparms="ERROR")
-    Rcmdparms=
-  else 
-    Rcmdparms = %iniRcmdparms%
+  if Rhome = 
+    gosub findRHome
   
-  If Rhome =
-    FE = 0
-  else
-    FE := FileExist (Rhome)
-  If !(FE)
-  {
-    curfiletime = 0
-    Loop , C:\Program Files\R\* , 2, 0
-    {
-      FileGetTime , filetime, %A_LoopFileFullPath%, C
-      if(filetime>curtime)
-      {
-        curtime := filetime
-        Rhome= %A_LoopFileFullPath%
-      }
-    }
-  }
-  If Rhome =
-    FE = 0
-  else
-    FE := FileExist (Rhome)
-  If !(FE)
-  {
-    IfExist C:\Program Files (x86)
-    {
-      IfExist C:\Program Files(x86)\R
-      {
-        curfiletime = 0
-        Loop C:\Program Files(x86)\R\*
-        {
-          FileGetTime , filetime, %A_LoopFileFullPath%, C
-          if(curtime=  || filetime>curtime)
-          {
-            curtime := filetime
-            Rhome:= A_LoopFileFullPath
-          }
-        }
-      }
-    }
-  }
   
   IfExist %Rhome%\bin\Rgui.exe
     Rguiexe = %Rhome%\bin\Rgui.exe
@@ -554,14 +531,70 @@ generateRxml:
   return
 }
 
+
+cmdCapture(cmd)
+{
+  oldclipboard := CliboardAll
+  clipboard = 
+  runwait %comspec% /c "%cmd% |clip"
+  rtn := clipboard
+  clipboard := oldclipboard
+  return rtn  
+}
 findInPath(string)
 {
-oldclipboard := CliboardAll
-clipboard = 
-runwait cmd /c "where %string% |clip"
-path := clipboard
-clipboard := oldclipboard
-return path
+  path := cmdCapture("where " . string)
+}
+findRHome:
+{
+; 1. check command line
+; 2. check RHOME variable
+; 3. check path
+; 4. check registry
+; 5. check assumed locations 
+  if Rhome = 
+  {
+    EnvGet , Rhome, RHOME
+  }
+  if Rhome = 
+  {
+    Rscriptexe = findInPath("Rcript.exe")
+    if Rscriptexe <>
+      Rhome = cmdCapture(Rscriptexe . " --vanilla -e `"cat(R.home())`"")
+  }
+  if Rhome = 
+  {
+    RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
+    Rhome= %Rdir%
+    if Rdir= 
+      Rdir := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\R-core\R", "InstallPath")
+    Rhome= %Rdir%
+  }
+  if Rhome = 
+  {
+    curfiletime = 0
+    ifExist C:\Program Files (x86)\R
+      Loop , C:\Program Files (x86)\R\* , 2, 0
+      {
+        FileGetTime , filetime, %A_LoopFileFullPath%, C
+        if(filetime>curtime)
+        {
+          curtime := filetime
+          Rhome= %A_LoopFileFullPath%
+        }
+      }
+    ifExist C:\Program Files\R
+      Loop , C:\Program Files\R\* , 2, 0
+      {
+        FileGetTime , filetime, %A_LoopFileFullPath%, C
+        if(filetime>curtime)
+        {
+          curtime := filetime
+          Rhome= %A_LoopFileFullPath%
+        }
+      }
+  }
+  return 
 }
 
 ; Includes

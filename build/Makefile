@@ -65,7 +65,7 @@ vpath %.ico ../icons
 
 NppToR.exe: $(NPPTOR_SOURCES)
 NppEditR.exe:../NppEditsR/NppEditR.ahk
-.PHONEY: installer clean
+.PHONY: installer clean
 installer: install.exe
 install.exe: NppEditR.exe NppToR.exe uninstall.exe
 
