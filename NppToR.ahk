@@ -192,6 +192,7 @@ puttypaste:
       gosub CheckForNewLine
       ;ControlClick , x4 y30,,, right
       controlSend , ahk_parent, +{Ins}
+      PostMessage , 0x200 /* WM_MOUSEMOVE */
     }
     WinActivate ahk_id %nppID%    ; go back to the original window
     if restoreclipboard
