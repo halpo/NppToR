@@ -400,7 +400,7 @@ WM_MOUSEMOVE()
     static CurrControl, PrevControl, _TT  ; _TT is kept blank for use by the ToolTip command below.
     CurrControl := A_GuiControl
     ;outputdebug NppToR:Install:Current Control is %CurrControl%.`n
-    If (CurrControl <> PrevControl and not InStr(CurrControl, " "))
+    If (CurrControl <> PrevControl and not InStr(CurrControl, " ") and not InStr(CurrControl, "+"))
     {
         ToolTip  ; Turn off any previous tooltip.
         SetTimer, DisplayToolTip, 1000
