@@ -38,7 +38,7 @@ ALL_EXE_FILES = \
   NppToR.exe    \
   NppEditR.exe  \
   License.txt   \
-  Readme.md     \
+  ../Readme.md  \
   Changelog.txt
 
 PORTABLE_FILES = \
@@ -63,9 +63,10 @@ vpath %.r ..
 vpath %.md ..
 vpath %.ico ../icons
 
+.PHONY: installer clean all distro portable
+all: NppToR.exe NppEditR.exe install.exe
 NppToR.exe: $(NPPTOR_SOURCES)
 NppEditR.exe:../NppEditsR/NppEditR.ahk
-.PHONY: installer clean
 installer: install.exe
 install.exe: NppEditR.exe NppToR.exe uninstall.exe
 
