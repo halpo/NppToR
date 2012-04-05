@@ -17,7 +17,7 @@ DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropria
 SetTitleMatchMode, 1
 SetTitleMatchMode, Fast
 
-version = 2.6.1
+version = 2.6.2
 year = 2012
 
 NppToRHeadingFont = Comic Sans MS
