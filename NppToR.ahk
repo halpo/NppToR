@@ -1,7 +1,7 @@
 ; NppToR: R in Notepad++
 ; by Andrew Redd 2011 <halpo@users.sourceforge.net>
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
-
+;{ Header Declarations
 #NOENV
 #SINGLEINSTANCE force ;ignore
 #MaxThreads 10
@@ -22,9 +22,9 @@ year = 2012
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;Begin Initial execution code
+;}
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;{ Begin Initial execution code
 OutputDebug , NppToR:Starting NppToR version %version% (%year%) `n
 
 ; set environment variable for spawned R processes
@@ -104,12 +104,12 @@ if  not startup
   run %nppexe%
 }
 return
-;End Executable potion
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;Begin function declarations
+;} End Executable potion
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;{ Begin function declarations
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; run functions
+;{ run functions
 runline:
 {
   outputdebug % dstring . "entered`n" ;%
@@ -180,8 +180,8 @@ getRhelp:
   }
   return
 }
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Putty interface functions
+;} ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;{ Putty interface functions
 puttypaste:
 {  
   WinGet nppID, ID, A          ; save current window ID to return here later
@@ -215,8 +215,8 @@ puttyRunAll:
   gosub puttypaste
   return
 }
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;} ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;{ About
 MakeAboutDialog:
 {
 outputdebug % dstring . "entered`n" ;%
@@ -250,23 +250,23 @@ Gui, 2:Add, Button, Default gButtonOK2, OK
 return
 }
 ShowAbout:
+;{
 Gui , 2:Show,,NpptoR by Andrew Redd
 return
 ButtonOK2:
 GuiClose2:
 GuiEscape2:
 Gui 2:hide
-return
-
-;;;;;;;;;;;;;;;;;;;
-;INI file paramters
+return ;}
+;}
+;{ INI file paramters
 IniGet:
 {
   OutputDebug NppToR:ini:IniGet:entering `n
   ;executables
   IniRead ,iniRhome,      %inifile%, executables, R,
   IniRead ,iniRcmdparms,  %inifile%, executables, Rcmdparms,
-  IniRead ,iniNppexe,     %inifile%, executables, Npp,
+  IniRead ,iniNppHome,     %inifile%, executables, Npp,
   IniRead ,iniNppConfig,  %inifile%, executables, NppConfig,
   ;hotkeys
   IniRead ,passlinekey,    %inifile%, hotkeys, passline,F8
@@ -311,7 +311,7 @@ iniDistill:
       nppdir := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\Notepad++")
   }
   else
-    nppdir := replaceEnvVariables(ininppexe)
+    nppdir := replaceEnvVariables(iniNppHome)
   nppexe = %nppdir%\notepad++.exe
 
     
@@ -409,18 +409,18 @@ replaceEnvVariables(string)
   return string
 }
 
-startupini:
+startupini: ;{
 OutputDebug NppToR:Startup:startupini `n
 gosub iniget
-return
-
-ExitWithCOM:
+return ;}
+;} End ini parameters
+;{ Interface ;;;;;;;;;;;;;;;;;;;
+ExitWithCOM: ;{
 gosub stopCOM
 NppToRExit:
 ExitAPP
-return
+return ;}
 
-;;;;;;;;;;;;;;;;;;;;
 makeMenus:
 {
 OutputDebug NppToR:makeMenues:Entering `n
@@ -485,7 +485,8 @@ undoHotkeys:
   OutputDebug NppToR:undoHotkeys:leaving `n 
   return
 }
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;} End Interface section
+;{ Other Utilities
 generateRxml:
 {
   OutputDebug NppToR:generateRxml:entering `n
@@ -531,8 +532,6 @@ generateRxml:
   OutputDebug NppToR:generateRxml:leaving`n
   return
 }
-
-
 cmdCapture(cmd)
 {
   oldclipboard := CliboardAll
@@ -597,11 +596,13 @@ findRHome:
   }
   return 
 }
-
-; Includes
+;} End Utils 
+;} End Functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;{ Includes
 #include %A_ScriptDir%\Notepad++Interface.ahk
 #include %A_ScriptDir%\RInterface.ahk
 #include %A_ScriptDir%\counter\counter.ahk
 #include %A_ScriptDir%\iniGUI\inigui.ahk
 #include %A_ScriptDir%\_reg64.ahk
 #include %A_ScriptDir%\QuickKeys.ahk
+;}
