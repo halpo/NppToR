@@ -23,15 +23,14 @@ year = 2012
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
 ;}
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;{ Begin Initial execution code
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 OutputDebug , NppToR:Starting NppToR version %version% (%year%) `n
 
 ; set environment variable for spawned R processes
-envset, R_PROFILE_USER, %A_ScriptDir%\Rprofile
+EnvSet, R_PROFILE_USER, %A_ScriptDir%\Rprofile
 
-;;;;;;;;;;;;;;;;;;;;
-;CMD line Parameters
+;{ Read CMD line Parameters
 Loop, %0%  ; For each parameter:
 {
   param := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
@@ -60,36 +59,39 @@ Loop, %0%  ; For each parameter:
 }
 OutputDebug NppToR:CMD:startup=%startup% doAAC=%doAAC% `n
 OutputDebug NppToR:CMD:Rhome=%Rhome% `n
+;} End Read CMD line.
 
-;ini settings
+;{ ini settings
 inifile = %A_ScriptDir%\npptor.ini
 iniRead, Global, %inifile%, install, global, 0 ;0=false
 
-
-OutputDebug NppToR:Startup:Global=%global% `n
+OutputDebug NppToR:Init:Global=%global% `n
 if(Global)
 {
   ifNotExist %A_AppData%\NppToR
   {
-    OutputDebug NppToR:Startup:%A_AppData%\NppToR does not exist, creating `n
+    OutputDebug NppToR:Init:%A_AppData%\NppToR does not exist, creating `n
     FileCreateDir %A_AppData%\NppToR
     if ErrorLevel
     {
-      NTRError(501)
+      NTRMsg(501)
       ;ExitApp
     }
   }
   inifile = %A_AppData%\NppToR\npptor.ini
+  FileInstall , npptor.ini , %inifile% , 0
 }
-
 gosub startupini
+;}
+
 if doAAC
 {
-  OutputDebug NppToR:Startup:Doing AAC `n
+  OutputDebug NppToR:Init:Doing AAC `n
   gosub generateRxml
   exit
 }
 
+;{ Make Interface
 gosub makeMenus  
 gosub makeHotkeys
 gosub readQuickKeys
@@ -97,15 +99,17 @@ gosub readQuickKeys
 gosub makeCounter
 gosub MakeAboutDialog
 gosub makeIniGui
+;}
 
 if  not startup
 {
-  OutputDebug NppToR:Startup:Running Notepad++ `n
+  OutputDebug NppToR:Init:Running Notepad++ `n
   run %nppexe%
 }
+OutputDebug NppToR:Init: Finished`n
 return
-;} End Executable potion
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;} End Executable potion
 ;{ Begin function declarations
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -259,34 +263,34 @@ GuiEscape2:
 Gui 2:hide
 return ;}
 ;}
-;{ INI file paramters
+;{ INI file parameters
 IniGet:
 {
   OutputDebug NppToR:ini:IniGet:entering `n
   ;executables
-  IniRead ,iniRhome,      %inifile%, executables, R,
-  IniRead ,iniRcmdparms,  %inifile%, executables, Rcmdparms,
-  IniRead ,iniNppHome,     %inifile%, executables, Npp,
-  IniRead ,iniNppConfig,  %inifile%, executables, NppConfig,
+  IniRead ,iniRhome,         %inifile%, executables, R                ,
+  IniRead ,iniRcmdparms,     %inifile%, executables, Rcmdparms        ,
+  IniRead ,iniNppHome,       %inifile%, executables, Npp              ,
+  IniRead ,iniNppConfig,     %inifile%, executables, NppConfig        ,
   ;hotkeys
-  IniRead ,passlinekey,    %inifile%, hotkeys, passline,F8
-  IniRead ,passfilekey,    %inifile%, hotkeys, passfile,^F8
-  IniRead ,passtopointkey, %inifile%, hotkeys, evaltocursor, +F8
-  IniRead ,batchrunkey,    %inifile%, hotkeys, batchrun,^!F8
-  IniRead ,bysourcekey,    %inifile%, hotkeys, bysource, ^+F8
-  ;silent
-  IniRead ,enablesilent,   %inifile%, silent, enablesilent, 0
-  IniRead ,silentkey,      %inifile%, silent, silentkey, !F8
-  ;putty
-  IniRead ,activateputty, %inifile%, putty, activateputty, 0
-  IniRead ,puttylinekey,  %inifile%, putty, puttyline, F9
-  IniRead ,puttyfilekey,  %inifile%, putty, puttyfile, ^F9
-  ;controls
-  IniRead ,Rpastewait,       %inifile%, controls, Rpastewait, 50
-  IniRead ,Rrunwait,         %inifile%, controls, Rrunwait, 10
-  IniRead ,restoreclipboard, %inifile%, controls, restoreclipboard, 1
-  IniRead ,appendnewline,    %inifile%, controls, appendnewline, 1
-  IniRead ,pref32,           %inifile%, controls, pref32, 0
+  IniRead ,passlinekey,      %inifile%, hotkeys,     passline         , F8
+  IniRead ,passfilekey,      %inifile%, hotkeys,     passfile         , ^F8
+  IniRead ,passtopointkey,   %inifile%, hotkeys,     evaltocursor     , +F8
+  IniRead ,batchrunkey,      %inifile%, hotkeys,     batchrun         , ^!F8
+  IniRead ,bysourcekey,      %inifile%, hotkeys,     bysource         , ^+F8
+  ;silent                                                             
+  IniRead ,enablesilent,     %inifile%, silent,      enablesilent     , 0
+  IniRead ,silentkey,        %inifile%, silent,      silentkey        , !F8
+  ;putty                                                              
+  IniRead ,activateputty,    %inifile%, putty,       activateputty    , 0
+  IniRead ,puttylinekey,     %inifile%, putty,       puttyline        , F9
+  IniRead ,puttyfilekey,     %inifile%, putty,       puttyfile        , ^F9
+  ;controls                                                           
+  IniRead ,Rpastewait,       %inifile%, controls,    Rpastewait       , 50
+  IniRead ,Rrunwait,         %inifile%, controls,    Rrunwait         , 10
+  IniRead ,restoreclipboard, %inifile%, controls,    restoreclipboard , 1
+  IniRead ,appendnewline,    %inifile%, controls,    appendnewline    , 1
+  IniRead ,pref32,           %inifile%, controls,    pref32           , 0
   debug=
   ;no return continues by design.
 }

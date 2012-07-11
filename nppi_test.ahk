@@ -7,12 +7,12 @@ SetTitleMatchMode , 1
 SetTitleMatchMode , Fast
 AUTOTRIM OFF
 
-; msgbox % NppGetLine() ;%
-; msgbox % NppGetFullPath() ;%
-; msgbox % NppGetCurrDir() ;%
-; msgbox % NppGetFilename() ;%
-; msgbox % NppGetNamePart() ;%
-; msgbox % NppGetExtPart() ;%
+msgbox % NppGetLine() ;%
+msgbox % NppGetFullPath() ;%
+msgbox % NppGetCurrDir() ;%
+msgbox % NppGetFilename() ;%
+msgbox % NppGetNamePart() ;%
+msgbox % NppGetExtPart() ;%
 
 ; NppCopy()
 ; NppSelectAll()
@@ -30,7 +30,7 @@ AUTOTRIM OFF
 ; gosub NppGetToPoint
 ; msgbox %errorlevel%
 ; msgbox %clipboard%
-;gosub RPaste
+; gosub RPaste
 
 gosub NppGetLineOrSelection
 

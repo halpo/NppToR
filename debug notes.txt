@@ -1,13 +1,17 @@
 Debugging notes
+===============
 
 I use the outputdebug to post debugging info.
 Use DebugView (http://technet.microsoft.com/en-us/sysinternals/bb896647)
 to read logged messages.
 
 format for debugging lines are
+
+```
   outputdebug % dstring ;%
   outputdebug % dstring . "entering" ;%
   outputdebug % dstring . "exiting" ;%
   outputdebug % dstring . "otherinfo" ;%
+```
   
 dstring is defined in NTRError.ahk  

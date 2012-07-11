@@ -176,6 +176,7 @@ NppGetCurrView()
 
 NppMenuCmd(menuID)
 {
+;{ Notepad++ Menu Command IDs
 ; #define    IDM    40000
 ; #define    IDM_FILE    (IDM + 1000)
     ; #define    IDM_FILE_NEW                     (IDM_FILE + 1)
@@ -203,6 +204,7 @@ NppMenuCmd(menuID)
     ; #define    IDM_EDIT_PASTE                       (IDM_EDIT + 5)
     ; #define    IDM_EDIT_DELETE                      (IDM_EDIT + 6)
     ; #define    IDM_EDIT_SELECTALL                   (IDM_EDIT + 7)
+;}
   WinGet , pidNpp, PID, ahk_class Notepad++
   SendMessage 0x818, 0, %menuID%,, ahk_pid %pidNpp%
   outputdebug % dstring . "exiting"  . "`n" ;%
@@ -292,15 +294,15 @@ NppGetLineOrSelection:
 	oldclipboard := ClipboardAll
 	clipboard = 
 	NppCopy()
-  clipwait .1
+  clipwait 0
 	if clipboard = 
 	{
     outputdebug % dstring . "clipboard was empty"  . "`n" ;%
-		sendevent {end}{home 2}+{end}+{right}
+		sendevent {end}{home}{home}+{end}+{right}
     outputdebug % dstring . "post sendevent"  . "`n" ;%
 		NppCopy()
     outputdebug % dstring  . "`n" ;%
-    clipwait 1
+    clipwait 0
     if errorlevel
       NTRError(601)
     outputdebug % dstring  . "`n" ;%
@@ -409,3 +411,5 @@ t_char() {
 t_size(char_count=1) {
     return A_IsUnicode ? char_count : char_count*2
 }
+
+#include NTRError.ahk

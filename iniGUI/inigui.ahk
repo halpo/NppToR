@@ -98,7 +98,7 @@ if (iniRcmdparms="Error") || (iniRcmdparms="")
   guicontrol,4:, guitxtRcmdparms, 
 else
   guicontrol,4:, guitxtRcmdparms, %iniRcmdparms%
-if (iniNppExe="Error") || (iniNppExe="")
+if (iniNppHome="Error") || (iniNppHome="")
   guicontrol,4:, guitxtNppHome, (Inferred)
 else
   guicontrol,4:, guitxtNppHome, %iniNppHome%
@@ -122,7 +122,7 @@ guibtnBrowseRhome:
 guibtnBrowseNppExe:
 {
   OutputDebug NppToR:inigui:guibtnBrowseNppExe:entering
-  FileSelectFile , filegetNppExe, 3 , *::{20d04fe0-3aea-1069-a2d8-08002b30309d}, Select the Notepad++ Executable to use., *.exe
+  FileSelectFolder , filegetNppExe, *::{20d04fe0-3aea-1069-a2d8-08002b30309d}, 0, Select the Notepad++ Executable to use.
   if NOT ErrorLevel
     guiControl, 4:, guitxtNppExe, %filegetNppExe%
   return
@@ -158,17 +158,17 @@ guiControlGet , pref32          , 4:, guichkpref32
 guiControlGet , enablesilent    , 4:, guichkenablesilent
  
 guiControlGet , iniRhome        ,4: , guitxtRhome
-if(iniRhome="(Inferred)")
+if(iniRhome = "(Inferred)")
   iniRhome=
 
 guicontrolget ,iniRcmdparms      ,4:, guitxtRcmdparms
 
 guicontrolget ,iniNppHome,4:, guitxtNppHome, %iniNppHome%
-if(iniNppHome="(Inferred)")
+if(iniNppHome = "(Inferred)")
   iniNppHome=
 
 guiControlGet , iniNppConfig,4:, guitxtNppConfig, %iniNppConfig%
-if(iniNppConfig="`%AppData`%\Notepad++")
+if(iniNppConfig = "`%AppData`%\Notepad++")
   iniNppConfig =
 
 gosub iniWriteSettingsToFile
