@@ -116,32 +116,32 @@ return
 ;{ run functions
 runline:
 {
-  outputdebug % dstring . "entered`n" ;%
-  gosub NppGetLineOrSelection
-  gosub Rpaste
-  outputdebug % dstring . "exiting`n" ;%
-  return
+    outputdebug % dstring . "entered`n" ;%
+    gosub NppGetLineOrSelection
+    Rpaste(Func(NppGetCurrDir))
+    outputdebug % dstring . "exiting`n" ;%
+    return
 }
 runall:
 {
-  outputdebug % dstring . "entered`n" ;%
-  gosub NppGetAll
-  gosub Rpaste
-  return
+    outputdebug % dstring . "entered`n" ;%
+    gosub NppGetAll
+    Rpaste(Func(NppGetCurrDir))
+    return
 }
 runSilent:
 {
   outputdebug % dstring . "entered`n" ;%
-  RGetOrStart()
+  RGetOrStart(Func(NppGetCurrDir))
   gosub NppGetLineOrSelection
   gosub sendSilent
   return
 }
 runtocursor:
 {
-gosub NppGetToPoint
-gosub Rpaste
-return
+    gosub NppGetToPoint
+    Rpaste(Func(NppGetCurrDir))
+    return
 }
 runbatch:
 {
@@ -169,20 +169,18 @@ return
 }
 getRhelp:
 {
-  outputdebug % dstring . "entered`n" ;%
-  gosub NppGetLineOrSelection
-  found := regexmatch(clipboard, "^[\w.]+\b",match)
-  if found
-  {
-    clipboard = ?%match%`n
-    gosub Rpaste
-  } else {
-    if restoreclipboard
+    outputdebug % dstring . "entered`n" ;%
+    ClipSave()
+    gosub NppGetLineOrSelection
+    found := regexmatch(clipboard, "^[\w.]+\b", match)
+    if found
     {
-      clipboard := oldclipboard
+        clipboard = ?%match%`n
+        Rpaste(Func(NppGetCurrDir))
+    } else {
+        ClipRestore(0)
     }
-  }
-  return
+    return
 }
 ;} ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;{ Putty interface functions
@@ -199,22 +197,20 @@ puttypaste:
       PostMessage , 0x200 /* WM_MOUSEMOVE */
     }
     WinActivate ahk_id %nppID%    ; go back to the original window
-    if restoreclipboard
-    {
-      sleep %Rpastewait%
-      clipboard := oldclipboard
-    }
+    ClipRestore(Rpastewait)
   } else NTRMsg(101)
   return
 }
 puttyLineOrSelection:
 {
+  ClipSave()
   gosub NppGetLineOrSelection
   gosub puttypaste
   return
 }
 puttyRunAll:
 {
+  ClipSave()
   gosub NppGetAll
   gosub puttypaste
   return
@@ -295,8 +291,9 @@ IniGet:
   ;no return continues by design.
 }
 iniDistill:
-{
+{ ; continues from IniGet
   OutputDebug NppToR:ini:iniDistill:entering `n
+  ;{ checks: restoreclipboard, appendnewline, enablesilent, activateputty
   if restoreclipboard = false
     restoreclipboard = 0
   if appendnewline = false
@@ -305,8 +302,8 @@ iniDistill:
     enablesilent = 0
   if activateputty = false
     activateputty = 0
-    
-
+  ;} end checks
+  ;{ nppdir
   if (ininpphome="ERROR") || (ininpphome="")
   {
     ; regread, nppdir, hkey_local_machine, software\notepad++
@@ -316,9 +313,13 @@ iniDistill:
   }
   else
     nppdir := replaceEnvVariables(iniNppHome)
+  OutputDebug NppToR: iniDistill: nppdir = %nppdir%
+  ;} end nppdir
+  ;{ nppexe
   nppexe = %nppdir%\notepad++.exe
-
-    
+  OutputDebug NppToR: iniDistill: nppexe = %nppexe%
+  ;} end nppexe
+  ;{ nppconfig
   if (ininppconfig="ERROR") || (ininppconfig="")
   {
     envget, appdata, appdata
@@ -326,7 +327,9 @@ iniDistill:
   }
   else
     nppconfig := replaceEnvVariables(ininppconfig)
-    
+  OutputDebug NppToR: iniDistill: nppconfig = %nppconfig%
+  ;} end nppconfig
+  ;{ Rhome
   if (iniRhome="ERROR") || (iniRhome="")
   {  
     RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
@@ -337,11 +340,11 @@ iniDistill:
   }
   else 
     Rhome := replaceEnvVariables(iniRhome)
-  
   if Rhome = 
     gosub findRHome
-  
-  
+  OutputDebug NppToR: iniDistill: Rhome = %Rhome%
+  ;} end Rhome
+  ;{ Rguiexe
   IfExist %Rhome%\bin\Rgui.exe
     Rguiexe = %Rhome%\bin\Rgui.exe
   else
@@ -356,6 +359,12 @@ iniDistill:
       NTRMsg(503)
       ;ExitApp
     }
+  OutputDebug NppToR: iniDistill: Rguiexe = %Rguiexe%
+  ;} end Rguiexe
+  ;{ Rcmdparms
+    Rcmdparms := iniRcmdParms
+    OutputDebug NppToR: iniDistill: Rcmdparms = %Rcmdparms%
+  ;}
   return
 }
 replaceEnvVariables(string)
@@ -457,9 +466,6 @@ hotkey ,%passtopointkey%,runtocursor, On
 hotkey ,%batchrunkey%,runbatch, On
 hotkey ,%bysourcekey%, sendSource, On
 
-;; TESING CODE
-;;;;;;;;;;;;;;
-
 if activateputty
 {
   OutputDebug NppToR:makeHotkeys:putty line=%puttylinekey%, file=%puttyfilekey% `n
@@ -538,11 +544,11 @@ generateRxml:
 }
 cmdCapture(cmd)
 {
-  oldclipboard := CliboardAll
+  ClipSave()  
   clipboard = 
   runwait %comspec% /c "%cmd% |clip"
   rtn := clipboard
-  clipboard := oldclipboard
+  ClipRestore(0)
   return rtn  
 }
 findInPath(string)
@@ -600,6 +606,16 @@ findRHome:
   }
   return 
 }
+RUpdateWD:
+{
+	RSetWD(NppGetCurrDir(), Func(NppGetCurrDir))
+    return
+}
+sendSource:
+{
+    RSendSource(NppGetFullPath(), Func(NppGetCurrDir))
+    return
+}
 ;} End Utils 
 ;} End Functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;{ Includes
@@ -609,4 +625,4 @@ findRHome:
 #include %A_ScriptDir%\iniGUI\inigui.ahk
 #include %A_ScriptDir%\_reg64.ahk
 #include %A_ScriptDir%\QuickKeys.ahk
-;}
+;} End Includes

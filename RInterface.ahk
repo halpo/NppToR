@@ -1,37 +1,34 @@
-; NppToR: R in Notepad++
-; by Andrew Redd 2011 <halpo@users.sourceforge.net>
+;{ NppToR: R in Notepad++
+; by Andrew Redd 2012 <halpo@users.sourceforge.net>
 ; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
-;; R interface functions
-Rpaste:
+;
+; DESCRIPTION
+; ===========
+; Functions for interacting with R.
+;
+;}
+;{ ; R interface functions
+Rpaste(GetCurrDir)
 {
-  outputdebug % dstring . "entering"  . "`n" ;%
-;	if clipboard<>
-	; isblank := 
-	; if !regExMatch(clipboard, "DS)^`s*$")
-	{
-		WinGet nppID, ID, A          ; save current window ID to return here later
-		RprocID:=RGetOrStart()
+    outputdebug % dstring . "entering"  . "`n" ;%
+    WinGet currID, ID, A          ; save current window ID to return here later
+    RprocID:=RGetOrStart(GetCurrDir)
     outputdebug % dstring . "RprocID=" . RprocID  . "`n" ;%
-		if ErrorLevel
-		{
-			IfWinExist , RGui
-        NTRError(701)
-			else
-        NTRError(702)
-			return
-		}
+    if ErrorLevel
+    {
+        IfWinExist , RGui
+            NTRError(701)
+        else
+            NTRError(702)
+        return
+    }
     gosub CheckForNewLine
-		WinMenuSelectItem ,ahk_id %RprocID%,,2&,2& ;edit->paste
-		WinActivate ahk_id %nppID%    ; go back to the original window if moved
-	} 
-	if restoreclipboard
-	{
-		sleep %Rpastewait%
-		clipboard := oldclipboard
-	}
+    WinMenuSelectItem ,ahk_id %RprocID%,,2&,2& ;edit->paste
+    WinActivate ahk_id %currID%    ; go back to the original window if moved
+    ClipRestore(Rpastewait)
 	return
 }
-RGetOrStart()
+RGetOrStart(GetCurrDir)
 {
   outputdebug % dstring . "entering"  . "`n" ;%
   SetTitleMatchMode, 1
@@ -54,17 +51,18 @@ RGetOrStart()
 	} 
 	else
 	{
-    outputdebug % dstring . "R not found"  . "`n" ;%
+        outputdebug % dstring . "R not found"  . "`n" ;%
 		global Rguiexe
 		global Rcmdparms
-    dir := NppGetCurrDir()
-    setworkingdir %dir%
-		EnvSet , R_ENVIRON_USER, %scriptdir%
-		run %Rguiexe% %RcmdParms% --sdi,dir,,RprocID
-		winwait ,R Console,, %Rrunwait%
-		WinGet RprocID, ID ;,A
-    outputdebug % dstring . "Exiting, RprocID=" . RprocID . "`n" ;%
-		return RprocID
+        dir := GetCurrDir.()
+        setworkingdir %dir%
+        EnvSet , R_ENVIRON_USER, %scriptdir%
+        outputdebug % dstring . "Starting R(" . Rguiexe . " --sdi " . RcmdParms . "`n" ;%
+        run %Rguiexe% --sdi %RcmdParms% --sdi,dir,,RprocID
+        winwait ,R Console,, %Rrunwait%
+        WinGet RprocID, ID ;,A
+        outputdebug % dstring . "Exiting, RprocID=" . RprocID . "`n" ;%
+        return RprocID
 	}
 }
 RGetCMD()
@@ -105,55 +103,49 @@ RGetRscript()
   else
     return
 }
-RUpdateWD:
+RSetWD(currdir, GetFullPath)
 {
-	oldclipboard := ClipboardAll
 	WinActivate ahk_class Notepad++
-	currdir:=NppGetCurrDir()
 	StringReplace , wd, currdir, \, /, All 
+    ClipSave()
 	clipboard = setwd("%wd%")`n
-	gosub Rpaste
+    Rpaste(GetFullPath)
 	return
 }
 sendSilent:
 {
 	gosub sendByCOM
-	if restoreclipboard
-		sleep %Rpastewait%
-		clipboard := oldclipboard
+    ClipRestore(Rpastewait)
 	return
 }
-sendSource:
+RSendSource(fullpath, GetFullPath)
 {
 	WinMenuSelectItem ,A,,File,Save
-  oldclipboard = %clipboard%
-  currdir := NppGetCurrDir()
-  file := NppGetFilename()
-  StringReplace , wd, currdir, \, /, All 
+    StringReplace , file, fullpath, \, /, All 
 
-  clipboard = source(file="%wd%/%file%")`n
-  gosub Rpaste
-	if restoreclipboard
-		sleep %Rpastewait%
-		clipboard := oldclipboard
+    ClipSave()
+    clipboard = source(file="%file%")`n
+    Rpaste(GetFullPath)
 return
 }
 CheckForNewLine:
 {
 	;Transform, var, Unicode
-  var := clipboard
+    var := clipboard
 	if var <>
 	{
 		stringright , right, var, 1 	;for long strings
 		found := regexmatch( right, "[`r`n]")
 		if !found
 		{
-			;Transform, clipboard, Unicode, %var%`r`n
-      clipboard = %var%`r`n
-		}	; var = %var% `n
-	}
-return
+            clipboard = %var%`r`n
+		}
+    }
+    return
 }
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;} ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;{ Includes
 #include %A_ScriptDir%\COM\com4NppToR.ahk
 #include %A_ScriptDir%\COM\COM.ahk
+#include %A_ScriptDir%\clip.ahk
+;}

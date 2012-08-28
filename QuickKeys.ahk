@@ -34,35 +34,28 @@ return
 doQuickKey:
 {
 	Key = %A_ThisHotkey%
-  cmd := QK_CMDS[key]
-  ifinstring ,cmd,$word$ 
-  {
-    word := NppGetWord()
-    StringReplace, cmd, cmd, $word$, %word%, All
-  }
-  ifinstring ,cmd,$line$
-  {
-    ;TODO
-  }
-	oldclipboard := ClipboardAll
+    cmd := QK_CMDS[key]
+    ifinstring ,cmd,$word$ 
+    {
+        word := NppGetWord()
+        StringReplace, cmd, cmd, $word$, %word%, All
+    }
+    ifinstring ,cmd,$line$
+    {
+        ;TODO
+    }
+	ClipSave()
 	clipboard = %cmd%`r`n
-  errorlevel:=0
-  gosub Rpaste
-	if restoreclipboard
-	{
-		sleep %Rpastewait%
-		clipboard := oldclipboard
-	}
+    errorlevel:=0
+    Rpaste(Func(NppGetCurrDir))
 return
 
 
 
 	oldappendnewline = %appendnewline%
 	appendnewline = 
-	oldclipboard := ClipboardAll
+	ClipSave()
   outputdebug NppToR/QuickKeys.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%):  Word=%word% `n
-;	gosub NppGetLineOrSelection
-;	line = %clipboard%
 
 
 return
@@ -76,9 +69,10 @@ return
 				tmp = % _QK_%A_Index%_2 ;%
 				StringReplace, cmd, tmp, $word$, %word%
 				tmp = %cmd%
+                ClipSave()
 				clipboard = %cmd%`r`n
-        outputdebug % dstring . cmd . "`n" ;%
-				gosub Rpaste
+                outputdebug % dstring . cmd . "`n" ;%
+                Rpaste(Func(NppGetCurrDir))
 			}
 		}
 		else

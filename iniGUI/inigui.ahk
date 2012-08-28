@@ -161,9 +161,9 @@ guiControlGet , iniRhome        ,4: , guitxtRhome
 if(iniRhome = "(Inferred)")
   iniRhome=
 
-guicontrolget ,iniRcmdparms      ,4:, guitxtRcmdparms
+guicontrolget , iniRcmdparms      ,4:, guitxtRcmdparms
 
-guicontrolget ,iniNppHome,4:, guitxtNppHome, %iniNppHome%
+guicontrolget , iniNppHome,4:, guitxtNppHome, %iniNppHome%
 if(iniNppHome = "(Inferred)")
   iniNppHome=
 
