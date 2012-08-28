@@ -7,6 +7,10 @@
 ; debugging string
 dstring = NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%):
 
+;  NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%):
+;  NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%):
+
+
 ;{ Error Strings
 ;
 ; each error message must have a title and body.

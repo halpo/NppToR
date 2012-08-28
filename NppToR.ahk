@@ -22,6 +22,11 @@ year = 2012
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
+
+;{ Global Variables
+F_NppGetCurrDir := Func("NppGetCurrDir") 
+dstring = NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%):
+;}
 ;}
 ;{ Begin Initial execution code
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -118,7 +123,7 @@ runline:
 {
     outputdebug % dstring . "entered`n" ;%
     gosub NppGetLineOrSelection
-    Rpaste(Func(NppGetCurrDir))
+    Rpaste(F_NppGetCurrDir)
     outputdebug % dstring . "exiting`n" ;%
     return
 }
@@ -126,13 +131,13 @@ runall:
 {
     outputdebug % dstring . "entered`n" ;%
     gosub NppGetAll
-    Rpaste(Func(NppGetCurrDir))
+    Rpaste(F_NppGetCurrDir)
     return
 }
 runSilent:
 {
   outputdebug % dstring . "entered`n" ;%
-  RGetOrStart(Func(NppGetCurrDir))
+  RGetOrStart(F_NppGetCurrDir)
   gosub NppGetLineOrSelection
   gosub sendSilent
   return
@@ -140,7 +145,7 @@ runSilent:
 runtocursor:
 {
     gosub NppGetToPoint
-    Rpaste(Func(NppGetCurrDir))
+    Rpaste(F_NppGetCurrDir)
     return
 }
 runbatch:
@@ -176,7 +181,7 @@ getRhelp:
     if found
     {
         clipboard = ?%match%`n
-        Rpaste(Func(NppGetCurrDir))
+        Rpaste(F_NppGetCurrDir)
     } else {
         ClipRestore(0)
     }
@@ -436,64 +441,64 @@ return ;}
 
 makeMenus:
 {
-OutputDebug NppToR:makeMenues:Entering `n
-;menu functions
-menu, tray, add ; separator
-menu, tray, add, Show Simulations, showCounter
-menu, tray, add, Start Notepad++, NppRun
-menu, tray, add, Reset R working directory, RUpdateWD
-menu, tray, add ; separator
-menu, tray, add, Add R Auto Completion (Requires Admin), generateRxml
-menu, tray, add ; separator
-menu, tray, add, Edit Quick Keys, EditQuickKeys
-menu, tray, add, Refresh Quick Keys, readQuickKeys
-menu, tray, add ; separator
-Menu, tray, add, Settings, ShowIniGui
-Menu, tray, add, About, ShowAbout 
-OutputDebug NppToR:makeMenues:leaving `n
-return
+    OutputDebug NppToR:makeMenues:Entering `n
+    ;menu functions
+    Menu, tray, add ; separator
+    Menu, tray, add, Show Simulations, showCounter
+    Menu, tray, add, Start Notepad++, NppRun
+    Menu, tray, add, Reset R working directory, RUpdateWD
+    Menu, tray, add ; separator
+    Menu, tray, add, Add R Auto Completion (Requires Admin), generateRxml
+    Menu, tray, add ; separator
+    Menu, tray, add, Edit Quick Keys, EditQuickKeys
+    Menu, tray, add, Refresh Quick Keys, readQuickKeys
+    Menu, tray, add ; separator
+    Menu, tray, add, Settings, ShowIniGui
+    Menu, tray, add, About, ShowAbout 
+    OutputDebug NppToR:makeMenues:leaving `n
+    return
 }
 makeHotkeys:
 {
-OutputDebug NppToR:makeHotkeys:entering `n
-if NOT makeglobal
-  hotkey , IfWinActive, ahk_class Notepad++
-#MaxThreadsPerHotkey 10
-hotkey ,%passlinekey%,runline, On
-hotkey ,%passfilekey%,runall, On
-hotkey ,%passtopointkey%,runtocursor, On
-#MaxThreadsPerHotkey 100
-hotkey ,%batchrunkey%,runbatch, On
-hotkey ,%bysourcekey%, sendSource, On
+    OutputDebug NppToR:makeHotkeys:entering `n
+    if NOT makeglobal
+      hotkey , IfWinActive, ahk_class Notepad++
+    #MaxThreadsPerHotkey 10
+    hotkey ,%passlinekey%,runline, On
+    hotkey ,%passfilekey%,runall, On
+    hotkey ,%passtopointkey%,runtocursor, On
+    #MaxThreadsPerHotkey 100
+    hotkey ,%batchrunkey%,runbatch, On
+    hotkey ,%bysourcekey%, sendSource, On
 
-if activateputty
-{
-  OutputDebug NppToR:makeHotkeys:putty line=%puttylinekey%, file=%puttyfilekey% `n
-  #MaxThreadsPerHotkey 10
-  hotkey , %puttylinekey% , puttyLineOrSelection, On
-  hotkey , %puttyfilekey% , puttyRunAll, On
-}
-if enablesilent
-{
-  OutputDebug NppToR:makeHotkeys:silentKey=%silentkey% `n
-  gosub startCOM
-  hotkey , %silentkey% , runSilent, On
-}
-OutputDebug NppToR:makeHotkeys:leaving `n
-return
+    if activateputty
+    {
+        OutputDebug NppToR:makeHotkeys:putty line=%puttylinekey%, file=%puttyfilekey% `n
+        #MaxThreadsPerHotkey 10
+        hotkey , %puttylinekey% , puttyLineOrSelection, On
+        hotkey , %puttyfilekey% , puttyRunAll, On
+    }
+    if enablesilent
+    {
+        OutputDebug NppToR:makeHotkeys:silentKey=%silentkey% `n
+        gosub startCOM
+        hotkey , %silentkey% , runSilent, On
+    }
+    OutputDebug NppToR:makeHotkeys:leaving `n
+    return
 }
 undoHotkeys:
 {
-  OutputDebug NppToR:undoHotkeys:entering `n
-  hotkey ,%passlinekey%,runline, Off
-  hotkey ,%passfilekey%,runall, Off
-  hotkey ,%passtopointkey%,runtocursor, Off
-  hotkey ,%batchrunkey%,runbatch, Off
-  hotkey , %puttylinekey% , puttyLineOrSelection, Off
-  hotkey , %puttyfilekey% , puttyRunAll, Off
-  hotkey , %silentkey% , runSilent, Off
-  OutputDebug NppToR:undoHotkeys:leaving `n 
-  return
+    OutputDebug NppToR:undoHotkeys:entering `n
+    hotkey, %passlinekey%    , runline              , Off
+    hotkey, %passfilekey%    , runall               , Off
+    hotkey, %passtopointkey% , runtocursor          , Off
+    hotkey, %batchrunkey%    , runbatch             , Off
+    hotkey, %puttylinekey%   , puttyLineOrSelection , Off
+    hotkey, %puttyfilekey%   , puttyRunAll          , Off
+    hotkey, %silentkey%      , runSilent            , Off
+    OutputDebug NppToR:undoHotkeys:leaving `n 
+    return
 }
 ;} End Interface section
 ;{ Other Utilities
@@ -608,12 +613,12 @@ findRHome:
 }
 RUpdateWD:
 {
-	RSetWD(NppGetCurrDir(), Func(NppGetCurrDir))
+	RSetWD(NppGetCurrDir(), F_NppGetCurrDir)
     return
 }
 sendSource:
 {
-    RSendSource(NppGetFullPath(), Func(NppGetCurrDir))
+    RSendSource(NppGetFullPath(), F_NppGetCurrDir)
     return
 }
 ;} End Utils 

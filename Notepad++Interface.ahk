@@ -342,18 +342,18 @@ NppGetLineOrSelection:
 	ClipSave()
 	clipboard = 
 	NppCopy()
-    clipwait 0
+    clipwait 0.01
 	if clipboard = 
 	{
-    outputdebug % dstring . "clipboard was empty"  . "`n" ;%
+        outputdebug % dstring . "clipboard was empty"  . "`n" ;%
 		sendevent {end}{home}{home}+{end}+{right}
-    outputdebug % dstring . "post sendevent"  . "`n" ;%
+        outputdebug % dstring . "post sendevent"  . "`n" ;%
 		NppCopy()
-    outputdebug % dstring  . "`n" ;%
-    clipwait 0
-    if errorlevel
-      NTRError(601)
-    outputdebug % dstring  . "`n" ;%
+        outputdebug % dstring  . "`n" ;%
+        clipwait 0.005
+        if errorlevel
+            NTRError(601)
+        outputdebug % dstring  . "`n" ;%
 		sendevent {right}
 	} 
 	else sendevent {right}
@@ -414,6 +414,6 @@ t_size(char_count=1) {
     return A_IsUnicode ? char_count : char_count*2
 }
 ;}
-#include %A_ScriptDir%\GetModuleFileName.ahk
+#include GetModuleFileName.ahk
 #include NTRError.ahk
 #include clip.ahk

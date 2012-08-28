@@ -10,10 +10,10 @@
 ;{ ; R interface functions
 Rpaste(GetCurrDir)
 {
-    outputdebug % dstring . "entering"  . "`n" ;%
+    outputdebug % "NppToR/RInterface.ahk[Rpaste]:entering"  . ".`n" ;%
     WinGet currID, ID, A          ; save current window ID to return here later
     RprocID:=RGetOrStart(GetCurrDir)
-    outputdebug % dstring . "RprocID=" . RprocID  . "`n" ;%
+    outputdebug % "NppToR/RInterface.ahk[Rpaste]:RprocID=" . RprocID  . ".`n" ;%
     if ErrorLevel
     {
         IfWinExist , RGui
@@ -30,38 +30,39 @@ Rpaste(GetCurrDir)
 }
 RGetOrStart(GetCurrDir)
 {
-  outputdebug % dstring . "entering"  . "`n" ;%
+  outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: Entering.`n" ;%
   SetTitleMatchMode, 1
   SetTitleMatchMode, Fast
 	IfWinExist ,R Console
 	{
-    outputdebug % dstring . "found R Console"  . "`n" ;%
+        outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: found R Console.`n" ;%
 		;WinActivate ; ahk_class RGui
 		WinGet RprocID, ID ;,A
-    outputdebug % dstring . "exiting, RprocID=" . RprocID  . "`n" ;%
+        outputdebug % "NppToR/RInterface.ahk[RGetOrStart]:exiting, RprocID=" . RprocID  . ".`n" ;%
 		return RprocID
 	} 
   else IfWinExist ,R Console (64-bit)
 	{
-    outputdebug % dstring . " found R Console (64-bit)"  . "`n" ;%
+    outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: found R Console (64-bit).`n" ;%
 		;WinActivate ; ahk_class RGui
 		WinGet RprocID, ID ;,A
-    outputdebug % dstring . "exiting RprocID=" . RprocID  . "`n" ;%
+    outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: exiting RprocID=" . RprocID  . ".`n" ;%
 		return RprocID
 	} 
-	else
+	else  ; No Compatile R Gui found.
 	{
-        outputdebug % dstring . "R not found"  . "`n" ;%
+        outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: R not found.`n" ;%
 		global Rguiexe
 		global Rcmdparms
         dir := GetCurrDir.()
+        outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: dir='"  . dir . "'`n" ;%
         setworkingdir %dir%
         EnvSet , R_ENVIRON_USER, %scriptdir%
-        outputdebug % dstring . "Starting R(" . Rguiexe . " --sdi " . RcmdParms . "`n" ;%
+        outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: Starting R(" . Rguiexe . " --sdi " . RcmdParms . ").`n" ;%
         run %Rguiexe% --sdi %RcmdParms% --sdi,dir,,RprocID
         winwait ,R Console,, %Rrunwait%
         WinGet RprocID, ID ;,A
-        outputdebug % dstring . "Exiting, RprocID=" . RprocID . "`n" ;%
+        outputdebug % "NppToR/RInterface.ahk[RGetOrStart]:Exiting, RprocID=" . RprocID . "`n" ;%
         return RprocID
 	}
 }
