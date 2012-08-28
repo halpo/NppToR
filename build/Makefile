@@ -1,7 +1,7 @@
 # Makefile for NppToR
 # Copyright 2012 Andrew Redd
 # Use govorned by the MIT licence see license.txt
-VERSION = 2.6.2
+include ../VERSION
 
 ZIP     = 7z
 AHK2EXE = ../buildtools/Ahk2exe.exe

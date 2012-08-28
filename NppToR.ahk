@@ -17,7 +17,7 @@ DetectHiddenWindows Off  ;needs to stay off to allow vista to find the appropria
 SetTitleMatchMode, 1
 SetTitleMatchMode, Fast
 
-version = 2.6.2
+#include %A_ScriptDir%\VERSION
 year = 2012
 
 NppToRHeadingFont = Comic Sans MS
@@ -25,7 +25,7 @@ NppToRTextFont = Georgia
 ;}
 ;{ Begin Initial execution code
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-OutputDebug , NppToR:Starting NppToR version %version% (%year%) `n
+OutputDebug , NppToR:Starting NppToR version %VERSION% (%year%) `n
 
 ; set environment variable for spawned R processes
 EnvSet, R_PROFILE_USER, %A_ScriptDir%\Rprofile
@@ -229,7 +229,7 @@ Gui, 2:Add, Text,,
 (
 by Andrew Redd
 (c)%year%
-version %version%
+version %VERSION%
 use of this program or source files are governed by the MIT license. See License.txt.
 )
 Gui, 2:Add, Text,, 
