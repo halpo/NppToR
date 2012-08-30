@@ -14,7 +14,7 @@ Gui, 4:Add , GroupBox    , x16 y120 w440 h150, Executables and Paths
   Gui, 4:Add, Edit    ,    x146 y170 w300 h20 vguitxtRcmdparms    , 
   Gui, 4:Add, Text    ,    x26  y200 w120 h30                     , Notepad++ Home
   Gui, 4:Add, Edit    ,  x146 y200 w250 h20 vguitxtNppHome        , (Inferred)
-  Gui, 4:Add, Button  ,  x396 y200 w50  h20 gguibtnBrowseNppExe   , Browse
+  Gui, 4:Add, Button  ,  x396 y200 w50  h20 gguibtnBrowseNppHome  , Browse
   Gui, 4:Add, Text    ,    x26  y230 w120 h30                     , Notepad++ Config Directory
   Gui, 4:Add, Edit    ,    x146 y230 w250 h20 vguitxtNppConfig    , `%APPDATA`%\Notepad++
   Gui, 4:Add, Button  ,  x396 y230 w50  h20 gguibtnBrowseNppConfig, Browse
@@ -119,12 +119,12 @@ guibtnBrowseRhome:
     guiControl, 4:, guitxtRhome, %filegetRhome%
   return
 }
-guibtnBrowseNppExe:
+guibtnBrowseNppHome:
 {
-  OutputDebug NppToR:inigui:guibtnBrowseNppExe:entering
-  FileSelectFolder , filegetNppExe, *::{20d04fe0-3aea-1069-a2d8-08002b30309d}, 0, Select the Notepad++ Executable to use.
+  OutputDebug NppToR:inigui:guibtnBrowseNppHome:entering
+  FileSelectFolder , filegetNppHome, *::{20d04fe0-3aea-1069-a2d8-08002b30309d}, 0, Select the Notepad++ install directory to use.
   if NOT ErrorLevel
-    guiControl, 4:, guitxtNppExe, %filegetNppExe%
+    guiControl, 4:, guitxtNppHome, %filegetNppHome%
   return
 }
 guibtnBrowseNppConfig:
