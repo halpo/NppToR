@@ -1,5 +1,17 @@
 NppToR CHANGELOG
-----------------
+================
+
+Version 0.6.2
+-------------
+Fixed Bug #1 browse button now works for Notepad++ home
+Fixed Bug #3 R CMD Parameters are now saved and passed onto R.
+Fixed Bug #2 Reset R working directory now works.
+Optimizations to replicate lazy evaluation of NppGetCurrDir.
+Optimized starting R to retain clipboard at  R startup.
+ 
+
+
+
 12/20/2011 10:13 AM MST
 Version 2.6.0 Finalized and Released
 
