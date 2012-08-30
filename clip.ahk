@@ -8,11 +8,17 @@
 ;
 ;}
 
-ClipCore(save, wait=0)
+ClipCore(save, wait=0, reset=0)
 {
     static oldclipboard =
     static last = 0
     global restoreclipboard
+    if(reset)
+    {
+        last=0
+        oldclipboard=
+        return
+    }
     if(     save AND NOT last AND restoreclipboard )
     {
         oldclipboard := clipboard
@@ -40,3 +46,8 @@ ClipRestore( wait=0)
     return
 }
 
+ClipNoRestore()
+{
+    ClipCore(0, 0, 1)
+    return
+}

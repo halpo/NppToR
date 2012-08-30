@@ -60,6 +60,7 @@ RGetOrStart(GetCurrDir)
         EnvSet , R_ENVIRON_USER, %scriptdir%
         outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: Starting R(" . Rguiexe . " --sdi " . RcmdParms . ").`n" ;%
         run %Rguiexe% --sdi %RcmdParms% --sdi,dir,,RprocID
+        ClipNoRestore()
         winwait ,R Console,, %Rrunwait%
         WinGet RprocID, ID ;,A
         outputdebug % "NppToR/RInterface.ahk[RGetOrStart]:Exiting, RprocID=" . RprocID . "`n" ;%
