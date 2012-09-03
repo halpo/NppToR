@@ -84,7 +84,7 @@ if(Global)
     }
   }
   inifile = %A_AppData%\NppToR\npptor.ini
-  FileInstall , npptor.ini , %inifile% , 0
+  FileInstall , npptor_defaults.ini , %inifile% , 0
 }
 gosub startupini
 ;}

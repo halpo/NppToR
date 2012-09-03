@@ -1,7 +1,7 @@
 NppToR CHANGELOG
 ================
 
-Version 0.6.2
+Version 2.6.2
 -------------
 Fixed Bug #1 browse button now works for Notepad++ home
 Fixed Bug #3 R CMD Parameters are now saved and passed onto R.
