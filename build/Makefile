@@ -6,12 +6,12 @@ include ../VERSION
 ZIP     = 7z
 AHK2EXE = ../buildtools/Ahk2exe.exe
 DEL     = rm -f
-COPY    = cp
+COPY    = copy
 
 ZIP_FLAGS  ?= a -mx9 -tzip -aoa
 SFX_FLAGS  ?= a -sfx7z.sfx -mx9 -aoa
 AHK_BIN    ?= ../buildtools/NppToR-Unicode32.bin
-COPY_FLAGS ?= -f
+COPY_FLAGS ?= 
 
 
 PORTABLE_DIR = ../NppToRPortable
