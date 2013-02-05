@@ -349,10 +349,10 @@ NppGetLineOrSelection:
 		sendevent {end}{home}{home}+{end}+{right}
         outputdebug % dstring . "post sendevent"  . "`n" ;%
 		NppCopy()
-        outputdebug % dstring  . "`n" ;%
-        clipwait 0.005
         if errorlevel
             NTRError(601)
+        outputdebug % dstring  . "`n" ;%
+        clipwait 0.005
         outputdebug % dstring  . "`n" ;%
 		sendevent {right}
 	} 

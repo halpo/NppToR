@@ -1,5 +1,5 @@
 # Makefile for NppToR
-# Copyright 2012 Andrew Redd
+# Copyright 2013 Andrew Redd
 # Use govorned by the MIT licence see license.txt
 include ../VERSION
 

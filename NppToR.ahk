@@ -18,10 +18,20 @@ SetTitleMatchMode, 1
 SetTitleMatchMode, Fast
 
 #include %A_ScriptDir%\VERSION
-year = 2012
+year = 2013
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
+
+if (A_PtrSize = 8)
+    ahk_arch := "64-bit"
+else ; if (A_PtrSize = 4)
+    ahk_arch := "32-bit"
+
+if (A_IsUnicode)
+    ahk_encoding = Unicode
+else
+    ahk_encoding = Ascii
 
 ;{ Global Variables
 F_NppGetCurrDir := Func("NppGetCurrDir") 
@@ -30,7 +40,7 @@ dstring = NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%Er
 ;}
 ;{ Begin Initial execution code
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-OutputDebug , NppToR:Starting NppToR version %VERSION% (%year%) `n
+OutputDebug , NppToR:Starting NppToR version %VERSION% (%year%) running under AHK version %A_AhkVersion% %ahk_encoding% %ahk_arch%`n
 
 ; set environment variable for spawned R processes
 EnvSet, R_PROFILE_USER, %A_ScriptDir%\Rprofile
@@ -123,7 +133,10 @@ runline:
 {
     outputdebug % dstring . "entered`n" ;%
     gosub NppGetLineOrSelection
-    Rpaste(F_NppGetCurrDir)
+    if clipboard <>
+        Rpaste(F_NppGetCurrDir)
+    else
+        ClipRestore(Rpastewait)
     outputdebug % dstring . "exiting`n" ;%
     return
 }
@@ -312,9 +325,7 @@ iniDistill:
   if (ininpphome="ERROR") || (ininpphome="")
   {
     ; regread, nppdir, hkey_local_machine, software\notepad++
-    RegRead, nppdir, HKEY_LOCAL_MACHINE, SOFTWARE\Notepad++
-    if nppdir= 
-      nppdir := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\Notepad++")
+    nppdir := findInReg("SOFTWARE\Notepad++")
   }
   else
     nppdir := replaceEnvVariables(iniNppHome)
@@ -337,16 +348,10 @@ iniDistill:
   ;{ Rhome
   if (iniRhome="ERROR") || (iniRhome="")
   {  
-    RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-    Rhome= %Rdir%
-    if Rdir= 
-      Rdir := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\R-core\R", "InstallPath")
-    Rhome= %Rdir%
+    Rhome := findRhome()
   }
   else 
     Rhome := replaceEnvVariables(iniRhome)
-  if Rhome = 
-    gosub findRHome
   OutputDebug NppToR: iniDistill: Rhome = %Rhome%
   ;} end Rhome
   ;{ Rguiexe
@@ -560,32 +565,45 @@ findInPath(string)
 {
   path := cmdCapture("where " . string)
 }
-findRHome:
+findRHome()
 {
-; 1. check command line
-; 2. check RHOME variable
-; 3. check path
-; 4. check registry
-; 5. check assumed locations 
-  if Rhome = 
-  {
+  if Rhome = ; 1. check RHOME variable
+  { 
     EnvGet , Rhome, RHOME
+    if Rhome <>
+    {
+        OutputDebug NppToR:findRHome: found by RHOME variable
+        return Rhome
+    }
   }
-  if Rhome = 
+  if Rhome = ; 2. check path
   {
     Rscriptexe = findInPath("Rcript.exe")
     if Rscriptexe <>
-      Rhome = cmdCapture(Rscriptexe . " --vanilla -e `"cat(R.home())`"")
+    {
+      cmd = %Rscriptexe% --vanilla -e "cat(R.home())"
+      Rhome := cmdCapture(cmd)
+    }
+    if Rhome <>
+    {
+        OutputDebug NppToR:findRHome: found in path
+        return Rhome
+    }
   }
-  if Rhome = 
+  if Rhome = ; 3. check registry
   {
-    RegRead, Rdir, HKEY_LOCAL_MACHINE, SOFTWARE\R-core\R, InstallPath
-    Rhome= %Rdir%
-    if Rdir= 
-      Rdir := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\R-core\R", "InstallPath")
-    Rhome= %Rdir%
+    Rhome:=findInReg("SOFTWARE\R-core\R", "InstallPath")
+    if Rhome <>
+    {
+        OutputDebug NppToR:findRHome: found in registry
+        return Rhome
+    } else {
+        OutputDebug NppToR:findRHome: not found in registry.  Rdir="%Rdir%", Rhome="%Rhome%", errorlevel=%errorlevel%
+        if errorlevel
+            OutputDebug NppToR:findRHome: last error= %A_LastError%
+    }
   }
-  if Rhome = 
+  if Rhome = ; 4. check assumed locations find most recent.
   {
     curfiletime = 0
     ifExist C:\Program Files (x86)\R
@@ -608,8 +626,13 @@ findRHome:
           Rhome= %A_LoopFileFullPath%
         }
       }
+    if Rhome <>
+    {
+        OutputDebug NppToR:findRHome: found by assumed locations
+        return Rhome
+    }
   }
-  return 
+  return
 }
 RUpdateWD:
 {
@@ -621,6 +644,25 @@ sendSource:
     RSendSource(NppGetFullPath(), F_NppGetCurrDir)
     return
 }
+findInReg(subkey, node="", root="HKEY_LOCAL_MACHINE")
+{
+    OutputDebug NppToR:findInReg: finding %root%\%subkey%\%node%
+    if (A_PtrSize = 4 and A_Is64bitOS)
+      SetRegView 64
+    RegRead, value, %root%, %subkey%, %node%
+    if(value="" and A_Is64bitOS)
+    {
+      OutputDebug NppToR:findInReg: searching with 32-bit registry view
+      SetRegView 32
+      RegRead, value, %root%, %subkey%, %node%
+    }
+    SetRegView default
+    if errorlevel
+        OutputDebug NppToR:findInReg: last error= %A_LastError%
+
+    OutputDebug NppToR:findInReg: found %root%\%subkey%\%node%=%value%
+    return value
+}
 ;} End Utils 
 ;} End Functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;{ Includes
@@ -628,6 +670,6 @@ sendSource:
 #include %A_ScriptDir%\RInterface.ahk
 #include %A_ScriptDir%\counter\counter.ahk
 #include %A_ScriptDir%\iniGUI\inigui.ahk
-#include %A_ScriptDir%\_reg64.ahk
+; #include %A_ScriptDir%\_reg64.ahk
 #include %A_ScriptDir%\QuickKeys.ahk
 ;} End Includes
