@@ -372,7 +372,10 @@ iniDistill:
   OutputDebug NppToR: iniDistill: Rguiexe = %Rguiexe%
   ;} end Rguiexe
   ;{ Rcmdparms
-    Rcmdparms := iniRcmdParms
+    if iniRcmdParms <> ERROR
+        Rcmdparms := iniRcmdParms
+    else
+        Rcmdparms =
     OutputDebug NppToR: iniDistill: Rcmdparms = %Rcmdparms%
   ;}
   return

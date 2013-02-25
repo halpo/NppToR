@@ -1,0 +1,10 @@
+// Edits the AutoHotKey To update the version and icons
+// 
+
+[FILENAMES]
+Exe=%IN%
+SaveAs=%OUT%
+Log =
+
+[COMMANDS]
+-addoverwrite "Version.res" ,,,

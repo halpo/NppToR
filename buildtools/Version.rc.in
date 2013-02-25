@@ -1,0 +1,32 @@
+
+159 ICON "../icons/NppToR.ico"            
+206 ICON "../icons/NppToR-Stop-small.ico" 
+207 ICON "../icons/NppToR-Pause-small.ico"
+208 ICON "../icons/NppToR-Stop-small.ico" 
+228 ICON "../icons/NppToR-small.ico"      
+229 ICON "../icons/NppToR-Stop-small.ico" 
+230 ICON "../icons/NppToR.ico"            
+
+
+1 VERSIONINFO
+FILEVERSION 1,1,9,0
+PRODUCTVERSION 1,1,9,0
+FILEOS 0x4
+FILETYPE 0x1
+{
+BLOCK "StringFileInfo"
+{
+	BLOCK "040904b0"
+	{
+		VALUE "FileDescription", "Utility for Notpad++/R communication."
+		VALUE "FileVersion", ""
+		VALUE "InternalName", "npptor"
+		VALUE "LegalCopyright", "(c)XXXX Andrew Redd"
+		VALUE "OriginalFilename", "NppToR.ahk"
+		VALUE "ProductName", "NppToR"
+		VALUE "ProductVersion", ""
+	}
+}
+
+}
+

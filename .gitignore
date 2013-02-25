@@ -1,3 +1,5 @@
 
 /NppToRPortable/App/NppToR/NppEditR.exe
 /NppToRPortable/App/NppToR/NppToR.exe
+/build/*.bin
+/build/*.txt

@@ -1,0 +1,20 @@
+// Edits the AutoHotKey To update the version and icons
+// 
+
+[FILENAMES]
+Exe=%IN%
+SaveAs=%OUT%
+Log =
+
+[COMMANDS]
+// -extract test.rc,,,
+//  -delete VersionInfo,1,1033
+-addoverwrite "Version.res" ,,,
+// -addoverwrite "..\icons\NppToR.ico"            , ICONGROUP, 159, 1033
+// -addoverwrite "..\icons\NppToR-Stop-small.ico" , ICONGROUP, 206, 1033
+// -addoverwrite "..\icons\NppToR-Pause-small.ico", ICONGROUP, 207, 1033
+// -addoverwrite "..\icons\NppToR-Stop-small.ico" , ICONGROUP, 208, 1033
+// -addoverwrite "..\icons\NppToR-small.ico"      , ICONGROUP, 228, 1033
+// -addoverwrite "..\icons\NppToR-Stop-small.ico" , ICONGROUP, 229, 1033
+// -addoverwrite "..\icons\NppToR.ico"            , ICONGROUP, 230, 1033
+// -delete ICONGROUP, 160, 1033

@@ -43,10 +43,10 @@ RGetOrStart(GetCurrDir)
 	} 
   else IfWinExist ,R Console (64-bit)
 	{
-    outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: found R Console (64-bit).`n" ;%
+        outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: found R Console (64-bit).`n" ;%
 		;WinActivate ; ahk_class RGui
 		WinGet RprocID, ID ;,A
-    outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: exiting RprocID=" . RprocID  . ".`n" ;%
+        outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: exiting RprocID=" . RprocID  . ".`n" ;%
 		return RprocID
 	} 
 	else  ; No Compatile R Gui found.
