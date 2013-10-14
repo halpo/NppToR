@@ -51,7 +51,7 @@ if silent
 	{
 		if A_IsAdmin {
 			InstallDir= %A_ProgramFile%\NppToR\
-      Global=1
+            Global=1
 		} else {
       InstallDir= %A_APPDATA%\NppToR\
     }
@@ -224,94 +224,99 @@ return
 }
 doinstall:
 {
-  OutputDebug NppToR:Install:doinstall: Starting Install.`n
-	;kill any current running copy
-  SB_SetText("Closing any running NppToR Instances.")
-	process, close, NppToR.exe
-	if %errorlevel%
-		winwaitclose ahk_pid %errorlevel%
-	GuiControl,, InstallProgress, +10
-  
-	;install section
-	ifnotexist %INSTALLDIR%
-	{
-    OutputDebug NppToR:Install:Creating install Directory (%INSTALLDIR%)`n
-    SB_SetText("Creating Install Directory")
-		filecreatedir %INSTALLDIR%
-		if %errorlevel%
-		{
-			if silent
-				exitapp
-			msgbox  64 ,Install Error, Could not create %INSTALLDIR%. Aborting
-			exitapp
-		}
-	}
-	else
-	{
-		IfExist %INSTALLDIR%\NppToR.exe
-			FileSetAttrib , -R , %INSTALLDIR%\NppToR.exe	
-	}
-	;executable files
-  OutputDebug NppToR:Install:Installing NppToR.exe `n
-  SB_SetText("Installing NppToR.exe")
-	FILEINSTALL , ..\build\NppToR.exe, %INSTALLDIR%\NppToR.exe, 1
-	if %errorlevel%
-	{
-		if silent
-			exitapp
-		msgbox  64, Install Error, NppToR.exe could not be copied. Aborting
-		exitapp
-	}
-  
-  ;icons
-  OutputDebug NppToR:Install:Installing icons `n
-  SB_SetText("Installing icons")
-  ifnotexist %INSTALLDIR%\Icons
-	{
-		filecreatedir %INSTALLDIR%\Icons
-  }
-  FILEINSTALL , ..\icons\NppToR.png, %INSTALLDIR%\Icons\NppToR.png,1
-  
-	if Global
-	{
-    OutputDebug NppToR:Install:Setting Global Parameters`n
-    SB_SetText("Setting global parameters")
-		iniWrite , %Global%, %INSTALLDIR%\npptor.ini, install, global
-		FileSetAttrib , +R, %INSTALLDIR%\NppToR.exe
-	}
-	else
-  {
-    OutputDebug NppToR:Install:Setting File attributes`n
-    SB_SetText("Setting file attributes")
-		FileSetAttrib , -R, %INSTALLDIR%\NppToR.exe
-	}
-  OutputDebug NppToR:Install:installing NppEditR.exe`n
-  SB_SetText("Installing NppEditR.exe")
-  FILEINSTALL , ..\build\NppEditR.exe, %INSTALLDIR%\NppEditR.exe,1
-  OutputDebug NppToR:Install:Writing URL Shortcut`n
-  SB_SetText("Writing URL Shortcut")
-	IniWrite, http://npptor.sourceforge.net, %INSTALLDIR%\npptor.url, InternetShortcut, URL 
-	
-  OutputDebug NppToR:Install:Copying uninstall.exe`n
-  SB_SetText("Copying uninstall.exe")
-	FILEINSTALL , ..\build\uninstall.exe, %INSTALLDIR%\uninstall.exe, 1
+    OutputDebug NppToR:Install:doinstall: Starting Install.`n
+    ;{ kill any current running copy
+        SB_SetText("Closing any running NppToR Instances.")
+        process, close, NppToR.exe
+        if %errorlevel%
+            winwaitclose ahk_pid %errorlevel%
+        GuiControl,, InstallProgress, +10
+    }
+	; install section
+    ;{ create install Directory
+        ifnotexist %INSTALLDIR%
+        {
+        OutputDebug NppToR:Install:Creating install Directory (%INSTALLDIR%)`n
+        SB_SetText("Creating Install Directory")
+            filecreatedir %INSTALLDIR%
+            if %errorlevel%
+            {
+                if silent
+                    exitapp
+                msgbox  64 ,Install Error, Could not create %INSTALLDIR%. Aborting
+                exitapp
+            }
+        }
+        else
+        {
+            IfExist %INSTALLDIR%\NppToR.exe
+                FileSetAttrib , -R , %INSTALLDIR%\NppToR.exe	
+        }
+    ;}
+	;{ copy main executable
+        OutputDebug NppToR:Install:Installing NppToR.exe `n
+        SB_SetText("Installing NppToR.exe")
+        FILEINSTALL , ..\build\NppToR.exe, %INSTALLDIR%\NppToR.exe, 1
+        if %errorlevel%
+        {
+            if silent
+                exitapp
+            msgbox  64, Install Error, NppToR.exe could not be copied. Aborting
+            exitapp
+        }
+    ;}
+    ;{ icons
+        OutputDebug NppToR:Install:Installing icons `n
+        SB_SetText("Installing icons")
+        ifnotexist %INSTALLDIR%\Icons
+        {
+            filecreatedir %INSTALLDIR%\Icons
+        }
+        FILEINSTALL , ..\icons\NppToR.png, %INSTALLDIR%\Icons\NppToR.png,1
+    ;}
+    ;{ Handle global ini settings
+        if Global
+        {
+            OutputDebug NppToR:Install:Setting Global Parameters`n
+            SB_SetText("Setting global parameters")
+            iniWrite , %Global%, %INSTALLDIR%\npptor.ini, install, global
+            FileSetAttrib , +R, %INSTALLDIR%\NppToR.exe
+        }
+        else
+        {
+            OutputDebug NppToR:Install:Setting File attributes`n
+            SB_SetText("Setting file attributes")
+                FileSetAttrib , -R, %INSTALLDIR%\NppToR.exe
+        }
+    ;}
+    ;{ Other Executables
+        OutputDebug NppToR:Install:installing NppEditR.exe`n
+        SB_SetText("Installing NppEditR.exe")
+        FILEINSTALL , ..\build\NppEditR.exe, %INSTALLDIR%\NppEditR.exe,1
+        OutputDebug NppToR:Install:Writing URL Shortcut`n
+        SB_SetText("Writing URL Shortcut")
+        IniWrite, http://npptor.sourceforge.net, %INSTALLDIR%\npptor.url, InternetShortcut, URL 
 
-	;Documentation files
-  OutputDebug NppToR:Install:Copying documentation`n
-  SB_SetText("Copying documentation")  
-	FILEINSTALL ,..\License.txt,%INSTALLDIR%\License.txt,0
-		
-	;Supporting R scripts
-  OutputDebug NppToR:Install:Copying suport scripts`n
-  SB_SetText("Copying suport scripts")  
-	FILEINSTALL ,..\make_R_xml.r,%INSTALLDIR%\make_R_xml.r,0
-	if !silent
-		GuiControl,, InstallProgress, +10
+        OutputDebug NppToR:Install:Copying uninstall.exe`n
+        SB_SetText("Copying uninstall.exe")
+        FILEINSTALL , ..\build\uninstall.exe, %INSTALLDIR%\uninstall.exe, 1
 
-	;set R options to work with NppToR
-	;do Rprofile
-  OutputDebug NppToR:Install:Writing RProfile`n
-  SB_SetText("Writing RProfile")  
+        ;Documentation files
+        OutputDebug NppToR:Install:Copying documentation`n
+        SB_SetText("Copying documentation")  
+        FILEINSTALL ,..\License.txt,%INSTALLDIR%\License.txt,0
+
+        ;Supporting R scripts
+        OutputDebug NppToR:Install:Copying suport scripts`n
+        SB_SetText("Copying suport scripts")  
+        FILEINSTALL ,..\autocomplete.r,%INSTALLDIR%\autocomplete.r,0
+        if !silent
+            GuiControl,, InstallProgress, +10
+    ;}
+    ; set R options to work with NppToR
+    ;{ do Rprofile
+    OutputDebug NppToR:Install:Writing RProfile`n
+    SB_SetText("Writing RProfile")  
 RprofileText = 
 (
   message("\nThis is a session spawned by NppToR.\n\n")
@@ -320,79 +325,80 @@ RprofileText =
   if(file.exists(path.expand("~/.Rprofile"))) source(path.expand("~/.Rprofile"))
   if(file.exists(path.expand("~/Rprofile.R"))) source(path.expand("~/Rprofile.R"))
 )
-  IfExist %INSTALLDIR%\Rprofile
-    FileDelete %INSTALLDIR%\Rprofile
-  FileAppend , %RprofileText% , %INSTALLDIR%\Rprofile
-  optstring = options(editor="%INSTALLDIR%NppEditR.exe")
-  StringReplace options, optstring, \ , \\ , All
-	FileAppend , `n%options%`n , %INSTALLDIR%\Rprofile
-	
-	if !silent
-		GuiControl,, InstallProgress, +10
+    IfExist %INSTALLDIR%\Rprofile
+        FileDelete %INSTALLDIR%\Rprofile
+    FileAppend , %RprofileText% , %INSTALLDIR%\Rprofile
+    optstring = options(editor="%INSTALLDIR%NppEditR.exe")
+    StringReplace options, optstring, \ , \\ , All
+    FileAppend , `n%options%`n , %INSTALLDIR%\Rprofile
 
-	;start menu entries
-  OutputDebug NppToR:Install:start menu entries
-  SB_SetText("Setting up start menu entries")  
-	SM := (Global)
-		? A_StartMenuCommon
-		: A_StartMenu
-  SM = %SM%\Programs
-	SU := (Global)
-		? A_StartupCommon
-		: A_Startup
-	ifnotexist %SM%\NppToR
-		filecreatedir %SM%\NppToR
-	FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %SM%\NppToR\NpptoR.lnk ,,, Enables passing code from notepad++ to the R interpreter.
-	FileCreateShortcut, %INSTALLDIR%\License.txt, %SM%\NppToR\License.txt.lnk
-	FileCreateShortcut, %INSTALLDIR%\npptor.url, %SM%\NppToR\Website.lnk
-	FileCreateShortcut, %INSTALLDIR%\uninstall.exe, %SM%\NppToR\uninstall.lnk
-	if addStartup
-		FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %SU%\NpptoR.lnk ,, -startup, Enables passing code from notepad++ to the R interpreter.
-	if !silent
-		GuiControl,, InstallProgress, +60
-	
-  ;AutoCompletion
-  gosub addAC
-
-	GuiControl,, InstallProgress, +20
-	;runinstalled NppToR
-	if !silent
-	{
-    OutputDebug NppToR:Install:Registering task
-		SB_SetText("Registering task to run NppToR")
-    npptorstartup = "%INSTALLDIR%\NppToR.exe"
-    RunAsStdUser(npptorstartup, "-startup")
-		SB_SetText("Installation Finished.")
-		if Global
-			msgbox 0, Installation Finished, NppToR has been successfully setup on this computer.,10
-		else
-			msgbox 0, Installation Finished, NppToR has been successfully setup for your user profile.,10
-	}
+    if !silent
+        GuiControl,, InstallProgress, +10
+    ;}
+    ;{ start menu entries
+        OutputDebug NppToR:Install:start menu entries
+        SB_SetText("Setting up start menu entries")  
+        SM := (Global)
+            ? A_StartMenuCommon
+            : A_StartMenu
+        SM = %SM%\Programs
+        SU := (Global)
+            ? A_StartupCommon
+            : A_Startup
+        ifnotexist %SM%\NppToR
+            filecreatedir %SM%\NppToR
+        FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %SM%\NppToR\NpptoR.lnk ,,, Enables passing code from notepad++ to the R interpreter.
+        FileCreateShortcut, %INSTALLDIR%\License.txt, %SM%\NppToR\License.txt.lnk
+        FileCreateShortcut, %INSTALLDIR%\npptor.url, %SM%\NppToR\Website.lnk
+        FileCreateShortcut, %INSTALLDIR%\uninstall.exe, %SM%\NppToR\uninstall.lnk
+        if addStartup
+            FileCreateShortcut, %INSTALLDIR%\NppToR.exe, %SU%\NpptoR.lnk ,, -startup, Enables passing code from notepad++ to the R interpreter.
+        if !silent
+            GuiControl,, InstallProgress, +60
+    ;}
+    ;{ AutoCompletion
+        gosub addAC
+        GuiControl,, InstallProgress, +20
+    ;}
+	;{ runinstalled NppToR
+        if !silent
+        {
+        OutputDebug NppToR:Install:Registering task
+            SB_SetText("Registering task to run NppToR")
+            npptorstartup = "%INSTALLDIR%\NppToR.exe"
+            RunAsStdUser(npptorstartup, "-startup")
+            SB_SetText("Installation Finished.")
+            if Global
+                msgbox 0, Installation Finished, NppToR has been successfully setup on this computer.,10
+            else
+                msgbox 0, Installation Finished, NppToR has been successfully setup for your user profile.,10
+        }
+    ;}
   OutputDebug NppToR:Install:doinstall: Install Finished.`n
 	ExitApp
 	return
 }
 AddAC:
 {
-  OutputDebug NppToR:Install:AddAC:ACCheck=%ACCheck% `n
-  if silent
-    return
+    OutputDebug NppToR:Install:AddAC:ACCheck=%ACCheck% `n
+    if silent
+        return
 	if Global AND ACCheck
 	{
     OutputDebug NppToR:Install:Adding Auto-Completion
     SB_SetText("Adding auto-completion files to Notepad++")
-    outputdebug % dstring . "`n" ;%
+    OutputDebug % dstring . "`n" ;%
 		RUN , %INSTALLDIR%\NppToR.exe -add-auto-complete,,,OutputVarPID
-    outputdebug % dstring . "`n" ;%
+    OutputDebug % dstring . "`n" ;%
 		WinWait ahk_pid %OutputVarPID%
-		winwaitclose ahk_pid %OutputVarPID%
-		FileDelete %INSTALLDIR%\make_r_xml.r.Rout
+		WinWaitClose ahk_pid %OutputVarPID%
+		FileDelete %INSTALLDIR%\autocomplete.r.Rout
 	}
 	else
-  {
-    SB_SetText("")
-    ; msgbox ,0, No Auto-Completion., The auto-completion database has not been generated as that might require administrator privileges.  That can be performed from the NppToR menu., 30
-  }
+    {
+        SB_SetText("")
+        ; msgbox ,0, No Auto-Completion., The auto-completion database has not been generated as that might require administrator privileges.  That can be performed from the NppToR menu., 30
+    }
   return
 }
 WM_MOUSEMOVE()

@@ -405,6 +405,22 @@ NppGetVersion(ByRef major, ByRef minor, ByRef bug, ByRef build)
 }
 ;}
 
+getNppPluginsAPI(NppDir)
+{
+    ifWinExist ahk_class Notepad++
+    {
+      winGet , NppPID, PID
+      CurrNppExePath := GetModuleFileNameEx( NppPID )
+      ;NppGetRunningPath() 
+      StringReplace, NppPluginsAPI, CurrNppExePath, notepad++.exe, plugins\APIs, All
+    }
+    if NppPluginsAPI=
+    {
+        NppPluginsAPI = %NppDir%\plugins\APIs
+    }
+    return NppPluginsAPI
+}
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;{ Unicode Support
 t_char() {

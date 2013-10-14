@@ -9,6 +9,11 @@ include ../VERSION
 #' 
 #' 
 -include ENV.mak
+
+#' R script
+Rscript ?= Rscript
+ROptions ?= --no-restore --no-save
+
 #' Zip file compressor
 ZIP        ?= 7z
 # for compressing to Zip files
@@ -111,7 +116,7 @@ rc: u32.rc u64.rc
 NppToR.exe: $(NPPTOR_SOURCES)
 NppEditR.exe:../NppEditsR/NppEditR.ahk
 installer: install.exe
-install.exe: NppEditR.exe NppToR.exe uninstall.exe
+install.exe: NppEditR.exe NppToR.exe uninstall.exe R.xml
 
 %.exe:%.ahk
 	$(AHK2EXE) /in "$<" /out "$@" /icon "$(ICON)" /bin "$(N2R_BIN)"
@@ -131,18 +136,20 @@ install.exe: NppEditR.exe NppToR.exe uninstall.exe
 	$(PERL) -i.bak -p -e 's/%IN%/"$(AHK_BIN)"/' $@
 	$(PERL) -i.bak -p -e 's/%OUT%/"$(N2R_BIN)"/' $@
 	$(RM) *.rhs.bak
-	
+
 %.res: %.rc
 	$(RC) $< -o $@
-	
 
 $(N2R_BIN): Version.res
 	$(RESHACK) -script Version.rhs
 	$(TOUCH) $<
 
+R.xml: autocomplete.r
+	$(Rscript) $(ROptions) $<
+
 include distro.mak
 include test.mak
 
-.PHONY:clean
+.PHONY: clean
 clean:
 	-$(DEL) *.exe *.zip *.rc *.rhs *.log *.res

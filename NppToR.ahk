@@ -77,26 +77,26 @@ OutputDebug NppToR:CMD:Rhome=%Rhome% `n
 ;} End Read CMD line.
 
 ;{ ini settings
-inifile = %A_ScriptDir%\npptor.ini
-iniRead, Global, %inifile%, install, global, 0 ;0=false
+    inifile = %A_ScriptDir%\npptor.ini
+    iniRead, Global, %inifile%, install, global, 0 ;0=false
 
-OutputDebug NppToR:Init:Global=%global% `n
-if(Global)
-{
-  ifNotExist %A_AppData%\NppToR
-  {
-    OutputDebug NppToR:Init:%A_AppData%\NppToR does not exist, creating `n
-    FileCreateDir %A_AppData%\NppToR
-    if ErrorLevel
+    OutputDebug NppToR:Init:Global=%global% `n
+    if(Global)
     {
-      NTRMsg(501)
-      ;ExitApp
+      ifNotExist %A_AppData%\NppToR
+      {
+        OutputDebug NppToR:Init:%A_AppData%\NppToR does not exist, creating `n
+        FileCreateDir %A_AppData%\NppToR
+        if ErrorLevel
+        {
+          NTRMsg(501)
+          ;ExitApp
+        }
+      }
+      inifile = %A_AppData%\NppToR\npptor.ini
+      FileInstall , npptor_defaults.ini , %inifile% , 0
     }
-  }
-  inifile = %A_AppData%\NppToR\npptor.ini
-  FileInstall , npptor_defaults.ini , %inifile% , 0
-}
-gosub startupini
+    gosub startupini
 ;}
 
 if doAAC
@@ -126,8 +126,6 @@ return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;} End Executable potion
 ;{ Begin function declarations
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;{ run functions
 runline:
 {
@@ -305,6 +303,8 @@ IniGet:
   IniRead ,restoreclipboard, %inifile%, controls,    restoreclipboard , 1
   IniRead ,appendnewline,    %inifile%, controls,    appendnewline    , 1
   IniRead ,pref32,           %inifile%, controls,    pref32           , 0
+  ; Runtime control
+  IniRead ,ignoreaac,        %inifile%, controls,    ignoreaac        , 0
   debug=
   ;no return continues by design.
 }
@@ -510,7 +510,7 @@ undoHotkeys:
 }
 ;} End Interface section
 ;{ Other Utilities
-generateRxml:
+generateRxml: ; do auto-complete
 {
   OutputDebug NppToR:generateRxml:entering `n
   Rscript := RGetRscript() 
@@ -520,29 +520,28 @@ generateRxml:
     {
       winGet , NppPID, PID
       CurrNppExePath := GetModuleFileNameEx( NppPID )
-      ;NppGetRunningPath() 
-      StringReplace, NppPlugins, CurrNppExePath, notepad++.exe, plugins\APIs, All
+      StringReplace, NppPluginsAPI, CurrNppExePath, notepad++.exe, plugins\APIs, All
       msgbox ,4,Continue?, To update the auto-completion database Notepad++ must be closed.  It will be restarted. Auto-completion must also be turned on from within Notepad++ (Setting > Preferences > Backup/Auto-Completion). Save your work now, now before continuing. Continue?
       ifmsgbox Yes
         winkill
       ifmsgbox No
         return
     }
-    if NppPlugins=
+    if NppPluginsAPI=
     {
-      NppPlugins = %NppDir%\plugins\APIs
+        NppPluginsAPI = %NppDir%\plugins\APIs
     }
-    params  = /C %Rscript% "%A_ScriptDir%\make_R_xml.r"
+    params  = /C %Rscript% "%A_ScriptDir%\autocomplete.r"
     command = CMD 
     OutputDebug NppToR:generateRxml:command="%command%" `n
     OutputDebug NppToR:generateRxml:params="%params%" `n
     DllCall("shell32\ShellExecuteA"
-      ,uint, 0 ;hwnd a handle to the owner window (null implies not associated with a window)
-      ,str, "RunAs"  ;operation
-      ,str, command ;File
-      ,str, params ;Parameters
-      ,str, NppPlugins ;lpDirectory
-      ,int, 1)  ; Last parameter: SW_SHOWNORMAL = 1
+        ,uint, 0 ;hwnd a handle to the owner window (null implies not associated with a window)
+        ,str, "RunAs"  ;operation
+        ,str, command ;File
+        ,str, params ;Parameters
+        ,str, NppPluginsAPI ;lpDirectory
+        ,int, 1)  ; Last parameter: SW_SHOWNORMAL = 1
     winwait, %command%,,1
     winwaitclose, %command%,,500
     OutputDebug NppToR:generateRxml:Restarting Notepad++ `n
@@ -651,13 +650,13 @@ findInReg(subkey, node="", root="HKEY_LOCAL_MACHINE")
 {
     OutputDebug NppToR:findInReg: finding %root%\%subkey%\%node%
     if (A_PtrSize = 4 and A_Is64bitOS)
-      SetRegView 64
+        SetRegView 64
     RegRead, value, %root%, %subkey%, %node%
     if(value="" and A_Is64bitOS)
     {
-      OutputDebug NppToR:findInReg: searching with 32-bit registry view
-      SetRegView 32
-      RegRead, value, %root%, %subkey%, %node%
+        OutputDebug NppToR:findInReg: searching with 32-bit registry view
+        SetRegView 32
+        RegRead, value, %root%, %subkey%, %node%
     }
     SetRegView default
     if errorlevel
@@ -668,11 +667,69 @@ findInReg(subkey, node="", root="HKEY_LOCAL_MACHINE")
 }
 ;} End Utils 
 ;} End Functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;{ Self Install
+selfinstall:
+{
+    INSTALLDIR = %A_ScriptDir%
+    ;{ Icons
+        OutputDebug NppToR:SelfInstall: Icons`n
+        ifnotexist %INSTALLDIR%\Icons
+            filecreatedir %INSTALLDIR%\Icons
+        FILEINSTALL , icons\NppToR.png, %INSTALLDIR%\Icons\NppToR.png, 1
+    ;}
+    ;{ Other Executables
+        OutputDebug NppToR:SelfInstall:OtherExecutables`n
+        FILEINSTALL, build\NppEditR.exe , %INSTALLDIR%\NppEditR.exe  , 1
+        FILEINSTALL, build\uninstall.exe, %INSTALLDIR%\uninstall.exe , 1
+        FILEINSTALL, License.txt        , %INSTALLDIR%\License.txt   , 0
+        FILEINSTALL, autocomplete.r     , %INSTALLDIR%\autocomplete.r, 0
+        IniWrite, http://npptor.sourceforge.net, %INSTALLDIR%\npptor.url, InternetShortcut, URL
+    ;}
+    ;{ ini settings
+        if %InstallDir% <> %A_AppData%\NppToR
+            iniWrite , %Global%, %INSTALLDIR%\npptor.ini, install, global
+    ;}
+    ;{ do Rprofile
+        OutputDebug NppToR:Install:Writing RProfile`n
+        RprofileText = ;{
+(
+  message("\nThis is a session spawned by NppToR.\n\n")
+  if(file.exists(".Rprofile"))source(".Rprofile")  else 
+  if(file.exists(path.expand("~/Rprofile"))) source(path.expand("~/Rprofile"))
+  if(file.exists(path.expand("~/.Rprofile"))) source(path.expand("~/.Rprofile"))
+  if(file.exists(path.expand("~/Rprofile.R"))) source(path.expand("~/Rprofile.R"))
+)  ;}
+        IfExist %INSTALLDIR%\Rprofile
+            FileDelete %INSTALLDIR%\Rprofile
+        FileAppend , %RprofileText% , %INSTALLDIR%\Rprofile
+        optstring = options(editor="%INSTALLDIR%NppEditR.exe")
+        StringReplace options, optstring, \ , \\ , All
+        FileAppend , `n%options%`n , %INSTALLDIR%\Rprofile
+    ;}
+    gosub ACSimple
+    ;{ Set to Run
+        npptorstartup = "%INSTALLDIR%\NppToR.exe"
+        RunAsStdUser(npptorstartup, "-startup")
+        ExitApp
+    ;}
+    return
+}
+ACSimple: ; Depends on NppToR Config Directory, and assumes admin if needed.
+{
+    if NppDir<>
+    {            
+        if NppPluginsAPI=
+            NppPluginsAPI = %NppDir%\plugins\APIs
+        FILEINSTALL, build\R.xml , %NppPluginsAPI%\R.xml, 0
+    }
+    return
+}    
+;} end self install
 ;{ Includes
 #include %A_ScriptDir%\Notepad++Interface.ahk
 #include %A_ScriptDir%\RInterface.ahk
 #include %A_ScriptDir%\counter\counter.ahk
 #include %A_ScriptDir%\iniGUI\inigui.ahk
-; #include %A_ScriptDir%\_reg64.ahk
 #include %A_ScriptDir%\QuickKeys.ahk
+#include %A_ScriptDir%\Installer\scheduler.ahk
 ;} End Includes

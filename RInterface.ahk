@@ -31,12 +31,12 @@ Rpaste(GetCurrDir)
 RGetOrStart(GetCurrDir)
 {
   outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: Entering.`n" ;%
-  SetTitleMatchMode, 1
+  SetTitleMatchMode, RegEx
   SetTitleMatchMode, Fast
-	IfWinExist ,R Console
+	IfWinExist ,ahk_class Rgui,,(Graphics),
 	{
         outputdebug % "NppToR/RInterface.ahk[RGetOrStart]: found R Console.`n" ;%
-		;WinActivate ; ahk_class RGui
+		;WinActivate ; 
 		WinGet RprocID, ID ;,A
         outputdebug % "NppToR/RInterface.ahk[RGetOrStart]:exiting, RprocID=" . RprocID  . ".`n" ;%
 		return RprocID
