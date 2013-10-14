@@ -81,13 +81,13 @@ stringreplace start_menu,start_menu_base, `%USERPROFILE`%, %USERPROFILE%
 stringreplace HOME,personalfolder, `%USERPROFILE`%, %USERPROFILE%
 
 ; Tooltip  declarations
-InstallDir_TT := "Where to install?"
-addStartup_TT := "A link will be put in the startup folder of the start menu."
-Global_TT := "settings will be maintained for each user individually."
-ACCheck_TT := "Autocompletion files can be installed later from the system tray icon.  Notepad++ will need to be closed if open."
-Install_TT := "Yes press it! Install me!"
-Cancel_TT := "You really want to press the button to your left instead of me."
-
+_TT := { "InstallDir": "Where to install?"}
+_TT["addStartup"] := "A link will be put in the startup folder of the start menu."
+_TT["Global"] :=     "settings will be maintained for each user individually."
+_TT["Install"]:=    "Yes press it! Install me!"
+_TT["Cancel"] :=     "You really want to press the button to your left instead of me."
+_TT[""] :=     ""
+TT_Keys = InstallDir,addStartup,Global,Install,Cancel,
 CreateGui:
 {
 ;Gui Creation
@@ -125,20 +125,12 @@ if A_IsAdmin
 	GuiControl,, Global, 1
 else 
 	GuiControl,, Global, 0
-GUI	,ADD, CHECKBOX, xs w450 vACCheck gdoACCheck,Install Autocompletion file.
 GUI ,ADD, PROGRESS, wp h20 cBlue vInstallProgress
 GUI ,ADD, BUTTON,section X+-155 Y+5 w75 gSubmit default vInstall,&Install
 GUI ,ADD, BUTTON,gDoCancel xp+80 w75 vCancel, &Cancel
 GUI ,ADD, StatusBar
 OnMessage(0x200, "WM_MOUSEMOVE")
 
-if Global {
-  GUICONTROL , ENABLE, ACCheck
-  if NOT noAC
-    guiControl ,, ACCheck, 1
-} else {
-  GUICONTROL , DISABLE, ACCheck
-}
 GUI SHOW
 return
 }
@@ -155,22 +147,13 @@ doGlobalCheck:
 	{
 		if InstallDir = %A_APPDATA%\NppToR\
 			GUICONTROL ,,InstallDir, %A_ProgramFiles%\NppToR\
-    GUICONTROL , ENABLE, ACCheck
-    GUICONTROL , , ACCheck, 1
 	}
 	else
 	{
 		if InstallDir = %A_ProgramFiles%\NppToR\
 			GUICONTROL ,,InstallDir, %A_APPDATA%\NppToR\
-    GUICONTROL , DISABLE, ACCheck
-    GUICONTROL , , ACCheck, 0
 	}
 	return
-}
-doACCheck:
-{
-  outputdebug NppToR:Install:doACCcheck:ACCheck=%ACCheck%`n
-  return
 }
 doBrowse:
 {
@@ -193,7 +176,6 @@ Submit:
 	GUICONTROL ,Disable, Install
 	GUICONTROL ,Disable, Cancel
 	GUICONTROL ,Disable, Browse
-	GUICONTROL ,Disable, ACCheck
 	if Global
 	{
 		if not A_IsAdmin
@@ -202,17 +184,7 @@ Submit:
       params = -go -global
 			if !addStartup
 				params = %params% -no-startup
-			if !ACCheck
-				params = %params% -no-ac
 			params = %params% "%InstallDir%\"
-			; DllCall("shell32\ShellExecuteA"
-				; , uint, 0
-				; , str, "RunAs"
-				; , str, A_ScriptFullPath
-				; , str, params
-				; , str, A_WorkingDir
-				; , int, 1)  ; Last parameter: SW_SHOWNORMAL = 1
-			; ExitApp
       gosub RunAsAdministrator  
     }
 		else 
@@ -231,7 +203,7 @@ doinstall:
         if %errorlevel%
             winwaitclose ahk_pid %errorlevel%
         GuiControl,, InstallProgress, +10
-    }
+    ;}
 	; install section
     ;{ create install Directory
         ifnotexist %INSTALLDIR%
@@ -374,58 +346,54 @@ RprofileText =
                 msgbox 0, Installation Finished, NppToR has been successfully setup for your user profile.,10
         }
     ;}
-  OutputDebug NppToR:Install:doinstall: Install Finished.`n
+    OutputDebug NppToR:Install:doinstall: Install Finished.`n
 	ExitApp
 	return
 }
 AddAC:
 {
-    OutputDebug NppToR:Install:AddAC:ACCheck=%ACCheck% `n
+    FILEINSTALL , ..\build\R.xml, %INSTALLDIR%\R.xml, 1
     if silent
         return
-	if Global AND ACCheck
-	{
     OutputDebug NppToR:Install:Adding Auto-Completion
-    SB_SetText("Adding auto-completion files to Notepad++")
-    OutputDebug % dstring . "`n" ;%
-		RUN , %INSTALLDIR%\NppToR.exe -add-auto-complete,,,OutputVarPID
-    OutputDebug % dstring . "`n" ;%
-		WinWait ahk_pid %OutputVarPID%
-		WinWaitClose ahk_pid %OutputVarPID%
-		FileDelete %INSTALLDIR%\autocomplete.r.Rout
-	}
-	else
-    {
-        SB_SetText("")
-        ; msgbox ,0, No Auto-Completion., The auto-completion database has not been generated as that might require administrator privileges.  That can be performed from the NppToR menu., 30
-    }
+    SB_SetText("Adding basic auto-completion files to Notepad++")
   return
 }
 WM_MOUSEMOVE()
 {
     static CurrControl, PrevControl, _TT  ; _TT is kept blank for use by the ToolTip command below.
     CurrControl := A_GuiControl
-    ;outputdebug NppToR:Install:Current Control is %CurrControl%.`n
     If (CurrControl <> PrevControl and not InStr(CurrControl, " ") and not InStr(CurrControl, "+"))
     {
-        ToolTip  ; Turn off any previous tooltip.
-        SetTimer, DisplayToolTip, 1000
-        PrevControl := CurrControl
+        GUIControlGet , Is_Enabled, Enabled, Install
+        outputdebug NppToR:Install:Is_Enabled = %Is_Enabled%
+        If(Is_Enabled)
+        {
+            outputdebug NppToR:Install:Current Control is '%CurrControl%'.`n
+            gosub DisplayToolTip
+            PrevControl := CurrControl
+        }
     }
     return
-
-    DisplayToolTip:
-    SetTimer, DisplayToolTip, Off
-    OutputDebug Tooltip names is:%CurrControl%_TT `n
-    OutputDebug % "Tooltip is:" . %CurrControl%_TT . "`n" ;%
-    ToolTip % %CurrControl%_TT  ;% The leading percent sign tell it to use an expression.
-    SetTimer, RemoveToolTip, 7000
-    return
-
-    RemoveToolTip:
-    SetTimer, RemoveToolTip, Off
-    ToolTip
+}
+DisplayToolTip:
+{
+    CurrControl := A_GuiControl
+    OutputDebug NppToR:Install:DisplayToolTip: Entering
+    OutputDebug NppToR:Install:DisplayToolTip: TT_Keys = %TT_Keys%
+    OutputDebug NppToR:Install:DisplayToolTip: CurrControl = %CurrControl%
+    if CurrControl in %TT_Keys%
+    {
+        helptext := _TT[CurrControl]  ;% The leading percent sign tell it to use an expression.
+        OutputDebug NppToR:Install:DisplayToolTip `helptext` is, "%helptext%"
+        SB_SetText(helptext)
+    }
+    else
+    {
+        SB_SetText("")
+    }
     return
 }
+
 
 #include %A_ScriptDir%\scheduler.ahk
