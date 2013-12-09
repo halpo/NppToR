@@ -49,7 +49,7 @@ DllCall("ReadProcessMemory"
 if ErrorLevel
 {
   bread2:=NumGet(bread)
-  outputdebug % dstring . "bread=" . bread2  . "`n" ;%
+  outputdebug NppToR/Notepad++Interface.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%): bread= %bread2% `n
 }
 DllCall("VirtualFreeEx"
     , "Uint", hProc
@@ -112,7 +112,7 @@ DllCall("ReadProcessMemory"
 if ErrorLevel
 {
   bread2:=NumGet(bread)
-  outputdebug % dstring . "bread=" . bread2 . "`n" ;%
+  outputdebug NppToR/Notepad++Interface.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%): bread= %bread2% `n
 }
 DllCall("VirtualFreeEx"
     , "Uint", hProc
@@ -171,7 +171,7 @@ DllCall("ReadProcessMemory"
 bread2:=NumGet(bread)
 if ErrorLevel
 {
-  outputdebug % dstring . "bread=" . bread2  . "`n" ;%
+  outputdebug NppToR/Notepad++Interface.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%): bread=%bread2% `n
 }
 DllCall("VirtualFreeEx"
     , "Uint", hProc
@@ -254,14 +254,14 @@ NppMenuCmd(menuID)
 ;}
   WinGet , pidNpp, PID, ahk_class Notepad++
   SendMessage 0x818, 0, %menuID%,, ahk_pid %pidNpp%
-  outputdebug % dstring . "exiting"  . "`n" ;%
+  outputdebug NppToR/Notepad++Interface.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%): exiting`n
   errorlevel:=0
   return
 }
 NppCopy()
 {
   NppMenuCmd(42002)
-  outputdebug % dstring . "exiting"  . "`n" ;%
+  outputdebug NppToR/Notepad++Interface.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%): exiting`n
   return
 }
 NppSelectAll()
@@ -338,26 +338,26 @@ SendMessage %SCI_GETSELTEXT%, 0, 0, Scintilla1, ahk_pid %pidNpp%
 }
 NppGetLineOrSelection:
 {
-    outputdebug % dstring . "entering"  . "`n" ;%
+    outputdebug NppToR/Notepad++Interface.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%):entering`n
 	ClipSave()
 	clipboard = 
 	NppCopy()
     clipwait 0.01
 	if clipboard = 
 	{
-        outputdebug % dstring . "clipboard was empty"  . "`n" ;%
+        outputdebug NppToR/Notepad++Interface.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%):clipboard was empty`n
 		sendevent {end}{home}{home}+{end}+{right}
-        outputdebug % dstring . "post sendevent"  . "`n" ;%
+        outputdebug NppToR/Notepad++Interface.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%):post sendevent`n
 		NppCopy()
         if errorlevel
             NTRError(601)
-        outputdebug % dstring  . "`n" ;%
+        outputdebug NppToR/Notepad++Interface.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%):`n
         clipwait 0.005
-        outputdebug % dstring  . "`n" ;%
+        outputdebug NppToR/Notepad++Interface.ahk[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%):`n
 		sendevent {right}
 	} 
 	else sendevent {right}
-    outputdebug % dstring . "exiting" . "`n" ;%
+    outputdebug % "NppToR/Notepad++Interface.ahk[" . A_ThisLabel . A_ThisFunc . "]:" . A_LineNumber . " . (EL=" . ErrorLevel . "):exiting(clipboard = `" . substr(clipboard, 1, 25) . ")`n " ;%
 	return
 }
 NppRun:

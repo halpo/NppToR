@@ -129,25 +129,25 @@ return
 ;{ run functions
 runline:
 {
-    outputdebug % dstring . "entered`n" ;%
+    outputdebug NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%) Entering.`n
     gosub NppGetLineOrSelection
     if clipboard <>
         Rpaste(F_NppGetCurrDir)
     else
         ClipRestore(Rpastewait)
-    outputdebug % dstring . "exiting`n" ;%
+    outputdebug NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%) Exiting`n
     return
 }
 runall:
 {
-    outputdebug % dstring . "entered`n" ;%
+    outputdebug NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%) Entered`n
     gosub NppGetAll
     Rpaste(F_NppGetCurrDir)
     return
 }
 runSilent:
 {
-  outputdebug % dstring . "entered`n" ;%
+  outputdebug NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%) Entered`n
   RGetOrStart(F_NppGetCurrDir)
   gosub NppGetLineOrSelection
   gosub sendSilent
@@ -161,7 +161,7 @@ runtocursor:
 }
 runbatch:
 {
-  outputdebug % dstring . "entered`n" ;%
+  outputdebug NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%) Entered`n
   DetectHiddenWindows On
   NppSave()
   dir := NppGetCurrDir()
@@ -185,7 +185,7 @@ return
 }
 getRhelp:
 {
-    outputdebug % dstring . "entered`n" ;%
+    outputdebug NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%) entered`n
     ClipSave()
     gosub NppGetLineOrSelection
     found := regexmatch(clipboard, "^[\w.]+\b", match)
@@ -235,7 +235,7 @@ puttyRunAll:
 ;{ About
 MakeAboutDialog:
 {
-outputdebug % dstring . "entered`n" ;%
+outputdebug NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%) entered`n
 ;Gui, -AlwaysOnTop -SysMenu +Owner ; +Owner avoids a taskbar button.
 Gui, 2:Add, Picture, x6 y10 w70 h70 , %A_ScriptDir%\icons\NppToR.png
 Gui, 2:Font, S14 CDefault, %NppToRHeadingFont%
@@ -278,7 +278,7 @@ return ;}
 ;{ INI file parameters
 IniGet:
 {
-  OutputDebug NppToR:ini:IniGet:entering `n
+  OutputDebug NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%): entering `n
   ;executables
   IniRead ,iniRhome,         %inifile%, executables, R                ,
   IniRead ,iniRcmdparms,     %inifile%, executables, Rcmdparms        ,
@@ -310,7 +310,7 @@ IniGet:
 }
 iniDistill:
 { ; continues from IniGet
-  OutputDebug NppToR:ini:iniDistill:entering `n
+  OutputDebug NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%): entering `n
   ;{ checks: restoreclipboard, appendnewline, enablesilent, activateputty
   if restoreclipboard = false
     restoreclipboard = 0

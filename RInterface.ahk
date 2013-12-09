@@ -10,7 +10,7 @@
 ;{ ; R interface functions
 Rpaste(GetCurrDir)
 {
-    outputdebug % "NppToR/RInterface.ahk[Rpaste]:entering"  . ".`n" ;%
+    outputdebug % "NppToR/RInterface.ahk[Rpaste]:entering(clip = " . substr(clipboard, 1, 25) . ".`n" ;%
     WinGet currID, ID, A          ; save current window ID to return here later
     RprocID:=RGetOrStart(GetCurrDir)
     outputdebug % "NppToR/RInterface.ahk[Rpaste]:RprocID=" . RprocID  . ".`n" ;%
@@ -132,6 +132,7 @@ return
 }
 CheckForNewLine:
 {
+    outputdebug % "NppToR/RInterface.ahk[CheckForNewLine]:entering(clip tail = " . substr(clipboard, 1, 25) . ".`n" ;%
 	;Transform, var, Unicode
     var := clipboard
 	if var <>
@@ -140,9 +141,11 @@ CheckForNewLine:
 		found := regexmatch( right, "[`r`n]")
 		if !found
 		{
-            clipboard = %var%`r`n
+            outputdebug % "NppToR/RInterface.ahk[CheckForNewLine]: not found`n" ;%
+            clipboard :=  var . "`r`n"
 		}
     }
+    outputdebug % "NppToR/RInterface.ahk[CheckForNewLine]:Leaving(clip tail = " . substr(clipboard, 1, 25) . ".`n" ;%
     return
 }
 ;} ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
