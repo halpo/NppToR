@@ -148,6 +148,26 @@ CheckForNewLine:
     outputdebug % "NppToR/RInterface.ahk[CheckForNewLine]:Leaving(clip tail = " . substr(clipboard, 1, 25) . ".`n" ;%
     return
 }
+RSendEsc(GetCurrDir)
+{   
+    ; TODO
+    outputdebug % "NppToR/RInterface.ahk[RSendEsc]"
+    WinGet currID, ID, A          ; save current window ID to return here later
+    RprocID:=RGetOrStart(GetCurrDir)
+    outputdebug % "NppToR/RInterface.ahk[RSendEsc]:RprocID=" . RprocID  . ".`n" ;%
+    if ErrorLevel
+    {
+        IfWinExist , RGui
+            NTRError(701)
+        else
+            NTRError(702)
+        return
+    }
+    WinActivate ahk_id %RProcID%    ; go back to the original window if moved
+    SendInput {Esc}
+    WinActivate ahk_id %currID%    ; go back to the original window if moved
+	return    
+}
 ;} ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;{ Includes
 #include %A_ScriptDir%\COM\com4NppToR.ahk

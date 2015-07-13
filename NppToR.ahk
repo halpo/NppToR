@@ -183,6 +183,11 @@ runbatch:
   DetectHiddenWindows Off
 return
 }
+sendEsc:
+{
+    RSendEsc(F_NppGetCurrDir)
+    return
+}
 getRhelp:
 {
     outputdebug NppToR/%A_ScriptName%[%A_ThisLabel%%A_ThisFunc%]:%A_LineNumber%(EL=%ErrorLevel%) entered`n
@@ -290,6 +295,7 @@ IniGet:
   IniRead ,passtopointkey,   %inifile%, hotkeys,     evaltocursor     , +F8
   IniRead ,batchrunkey,      %inifile%, hotkeys,     batchrun         , ^!F8
   IniRead ,bysourcekey,      %inifile%, hotkeys,     bysource         , ^+F8
+  IniRead ,enableesc,        %inifile%, hotkeys,     enableesc        , 1
   ;silent                                                             
   IniRead ,enablesilent,     %inifile%, silent,      enablesilent     , 0
   IniRead ,silentkey,        %inifile%, silent,      silentkey        , !F8
@@ -492,6 +498,12 @@ makeHotkeys:
         gosub startCOM
         hotkey , %silentkey% , runSilent, On
     }
+    if enableesc
+    {
+        OutputDebug NppToR:makeHoteys:enableEsc `n
+        hotkey , Esc, SendEsc, On
+    }
+
     OutputDebug NppToR:makeHotkeys:leaving `n
     return
 }
