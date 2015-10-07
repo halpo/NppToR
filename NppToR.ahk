@@ -1,6 +1,6 @@
 ; NppToR: R in Notepad++
 ; by Andrew Redd 2011 <halpo@users.sourceforge.net>
-; use govorned by the MIT license http://www.opensource.org/licenses/mit-license.php
+; use governed by the MIT license http://www.opensource.org/licenses/mit-license.php
 ;{ Header Declarations
 #NOENV
 #SINGLEINSTANCE force ;ignore
@@ -18,7 +18,7 @@ SetTitleMatchMode, 1
 SetTitleMatchMode, Fast
 
 #include %A_ScriptDir%\VERSION
-year = 2013
+year = 2015
 
 NppToRHeadingFont = Comic Sans MS
 NppToRTextFont = Georgia
@@ -71,8 +71,10 @@ Loop, %0%  ; For each parameter:
     donppexe = 1 
   else if param = -config
     donppconfig = 1
+  else if param = -setdir
+    dosetdir = 1
 }
-OutputDebug NppToR:CMD:startup=%startup% doAAC=%doAAC% `n
+OutputDebug NppToR:CMD:startup=%startup% doAAC=%doAAC% doAAC=%doAAC% `n
 OutputDebug NppToR:CMD:Rhome=%Rhome% `n
 ;} End Read CMD line.
 
@@ -116,11 +118,19 @@ gosub MakeAboutDialog
 gosub makeIniGui
 ;}
 
+if dosetdir
+{
+  OutputDebug NppToR:Init:Resetting WD `n
+  gosub RUpdateWD
+  startup=1
+}
+
 if  not startup
 {
   OutputDebug NppToR:Init:Running Notepad++ `n
   run %nppexe%
 }
+
 OutputDebug NppToR:Init: Finished`n
 return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

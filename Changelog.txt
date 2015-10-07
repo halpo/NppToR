@@ -1,6 +1,20 @@
 NppToR CHANGELOG
 ================
 
+Version 2.7
+-----------
+* Added -setdir option.  Closes issue #7.
+
+Version 2.6.4
+-------------
+* Removed Self-Install
+* Added pass Escape key to R functionality and option in settings.
+
+Version 2.6.3
+-------------
+* Adds Self-Installer
+* Improvements to finding R Home directory.
+
 Version 2.6.2
 -------------
 Fixed Bug #1 browse button now works for Notepad++ home
