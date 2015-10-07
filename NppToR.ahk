@@ -306,6 +306,7 @@ IniGet:
   IniRead ,batchrunkey,      %inifile%, hotkeys,     batchrun         , ^!F8
   IniRead ,bysourcekey,      %inifile%, hotkeys,     bysource         , ^+F8
   IniRead ,enableesc,        %inifile%, hotkeys,     enableesc        , 1
+  IniRead ,hotkeyesc,        %inifile%, hotkeys,     hotkeyesc        , Esc
   ;silent                                                             
   IniRead ,enablesilent,     %inifile%, silent,      enablesilent     , 0
   IniRead ,silentkey,        %inifile%, silent,      silentkey        , !F8
@@ -511,7 +512,7 @@ makeHotkeys:
     if enableesc
     {
         OutputDebug NppToR:makeHoteys:enableEsc `n
-        hotkey , Esc, SendEsc, On
+        hotkey , %hotkeyesc%, SendEsc, On
     }
 
     OutputDebug NppToR:makeHotkeys:leaving `n
@@ -527,6 +528,7 @@ undoHotkeys:
     hotkey, %puttylinekey%   , puttyLineOrSelection , Off
     hotkey, %puttyfilekey%   , puttyRunAll          , Off
     hotkey, %silentkey%      , runSilent            , Off
+    hotkey, %hotkeyesc%      , SendEsc              , Off
     OutputDebug NppToR:undoHotkeys:leaving `n 
     return
 }

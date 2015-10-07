@@ -4,6 +4,7 @@ NppToR CHANGELOG
 Version 2.7
 -----------
 * Added -setdir option.  Closes issue #7.
+* Added Hotkey setting for passing Escape to R. Closes issue #5.
 
 Version 2.6.4
 -------------

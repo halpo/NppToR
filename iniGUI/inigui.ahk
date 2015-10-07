@@ -31,14 +31,16 @@ Gui  , 4:Add, GroupBox,     x16  y280 w210 h170                   , Hotkeys
   Gui, 4:Add, Edit,   x156 y420 w60 h20  Vguitxtbysource  , 
 Gui, 4:Add, GroupBox,   x236 y280 w220 h170 , Extra setting
   Gui, 4:Add, CheckBox, x246 y300 w190 h20 vguichkactivateputty, Enable Putty HotKeys
-  Gui, 4:Add, Text    , x246 y320 w140 h20                     , Pass line
+  Gui, 4:Add, Text    , x246 y320 w135 h20 Right               , Pass line
   Gui, 4:Add, Edit    , x386 y320 w60  h20 Vguitxtputtyline    , putty line
-  Gui, 4:Add, Text    , x246 y350 w140 h20                     , Pass entire file at once
-  Gui, 4:Add, Edit    , x386 y350 w60  h20 Vguitxtputtyfile    , putty file
+  Gui, 4:Add, Text    , x246 y345 w135 h20 Right               , Pass entire file
+  Gui, 4:Add, Edit    , x386 y345 w60  h20 Vguitxtputtyfile    , putty file
   Gui, 4:Add, CheckBox, x246 y375 w200 h20 Vguichkenablesilent , Enable Silent Transfer
-  Gui, 4:Add, Text    , x246 y395 w140 h20                     , Silent Transfer Hotkey
+  Gui, 4:Add, Text    , x246 y395 w135 h20 Right               , Hotkey
   Gui, 4:Add, Edit    , x386 y395 w60  h20 Vguitxtsilentkey    , 
   Gui, 4:Add, CheckBox, x246 y415 w200 h20 Vguichkenableesc    , Pass Escape to R?
+  Gui, 4:Add, Text    , x246 y435 w135 h20 Right               , Hotkey
+  Gui, 4:Add, Edit    , x386 y435 w60  h20 Vguitxthotkeyesc    , 
   ;Gui, 4:Add, Text,   x246 y420 w130 h30                 , R help
   ;Gui, 4:Add, Edit,   x386 y420 w60 h20  Vguitxtrhelp   , 
 Gui, 4:Add, GroupBox,    x16  y460 w440 h153 , Performance Settings
@@ -81,7 +83,8 @@ if enableesc
   guiControl,4:, guichkenableesc, 1
 else 
   guiControl,4:, guichkenableesc, 0
-    
+guiControl,4:, guitxthotkeyesc, %hotkeyesc%
+
 guiControl,4:, guitxtsilentkey, %silentkey%
 if restoreclipboard
   guiControl,4:, guichkrestoreclipboard, 1
@@ -163,6 +166,7 @@ guiControlGet , appendnewline   , 4:, guichkappendnewline
 guiControlGet , pref32          , 4:, guichkpref32
 guiControlGet , enablesilent    , 4:, guichkenablesilent
 guiControlGet , enableesc       , 4:, guichkenableesc
+guiControlGet , hotkeyesc       , 4:, guitxthotkeyesc
 guiControlGet , iniRhome        , 4:, guitxtRhome
 if(iniRhome = "(Inferred)")
   iniRhome=
@@ -197,6 +201,7 @@ iniWrite , %passtopointkey%, %inifile%, hotkeys    , evaltocursor
 iniWrite , %batchrunkey%   , %inifile%, hotkeys    , batchrun
 iniWrite , %bysourcekey%   , %inifile%, hotkeys    , bysource
 iniWrite , %enableesc%     , %inifile%, hotkeys    , enableesc
+iniWrite , %hotkeyesc%     , %inifile%, hotkeys    , hotkeyesc
 ;iniWrite ,%rhelpkey%,    %inifile%, hotkeys, rhelp
 ;putty
 iniWrite , %activateputty%, %inifile% , putty, activateputty
